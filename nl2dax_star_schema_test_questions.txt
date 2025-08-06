@@ -1,0 +1,37 @@
+# NL2DAX Star Schema Test Questions
+
+
+## Easy
+1. What is the total principal balance for each customer?
+2. List all loan products and their original amounts.
+3. Show the number of loans by country.
+4. List all customers and their risk rating descriptions.
+5. Show the average interest rate for all loans.
+6. List all investors and their participation percentage.
+7. What is the total exposure USD by industry sector?
+8. List all currencies and their exchange rates to USD.
+
+
+## Medium
+4. What is the average interest rate by industry sector?
+5. Show total exposure USD by risk rating category.
+6. List top 10 counterparties by total exposure USD.
+7. Show the utilization percentage by country of risk.
+8. List the average balance per customer by currency.
+9. Show the number of non-performing loans by business unit.
+10. List the total recovery amount for defaulted loans by industry.
+11. Show the average days past due for NPLs by region.
+12. List the top 5 customers by total credit limit.
+
+
+## Hard
+7. What is the year-over-year change in total loan balance for each business unit?
+8. Show the NPL ratio percentage by region and risk rating impact.
+9. List customers with loans in more than three different countries.
+10. What is the total recovery amount for defaulted loans by investor type?
+11. Show the concentration risk for top counterparties by industry and country.
+12. List all loans with maturity within the next 90 days and their risk concentration.
+13. Show the expected loss rate by risk rating and business unit.
+14. List all customers with more than $10M in total exposure across all products.
+15. Show the portfolio percentage of loans with political risk flagged as high.
+16. List all facilities with a utilization percentage above 90% and their owners.

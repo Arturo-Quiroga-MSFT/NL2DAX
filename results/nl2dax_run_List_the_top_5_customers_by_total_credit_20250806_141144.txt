@@ -1,0 +1,98 @@
+NL Query: List the top 5 customers by total credit limit.
+Generated DAX:
+Here’s a self-contained DAX query that will return the top 5 customers ranked by their total credit limit (using the ORIGINAL_LIMIT_AMOUNT from the FIS_CA_DETAIL_FACT table).  Adjust the fact column to CURRENT_LIMIT_AMOUNT if you’d rather rank by the current limit instead.
+
+```
+EVALUATE
+TOPN(
+    5,
+    SUMMARIZE(
+        'FIS_Customer_Dimension',
+        'FIS_Customer_Dimension'[Customer_Key],
+        'FIS_Customer_Dimension'[Customer_Name],
+        "TotalCreditLimit", 
+            SUM( 'FIS_CA_Detail_Fact'[ORIGINAL_LIMIT_AMOUNT] )
+    ),
+    [TotalCreditLimit], DESC
+)
+ORDER BY [TotalCreditLimit] DESC
+```
+
+Explanation:
+
+• SUMMARIZE builds a table of each customer (key + name) along with a calculated column  
+    "TotalCreditLimit" = the sum of ORIGINAL_LIMIT_AMOUNT for that customer.  
+• TOPN(5, …, [TotalCreditLimit], DESC) picks the five rows with the highest limit.  
+• ORDER BY ensures your result set is sorted descending by that same measure.
+Formatted DAX:
+Here’s a self-contained DAX query that will return the top 5 customers ranked by their total credit limit (using the ORIGINAL_LIMIT_AMOUNT from the FIS_CA_DETAIL_FACT table).  Adjust the fact column to CURRENT_LIMIT_AMOUNT if you’d rather rank by the current limit instead.
+
+```
+EVALUATE
+TOPN(
+    5,
+    SUMMARIZE(
+        'FIS_Customer_Dimension',
+        'FIS_Customer_Dimension'[Customer_Key],
+        'FIS_Customer_Dimension'[Customer_Name],
+        "TotalCreditLimit", 
+            SUM( 'FIS_CA_Detail_Fact'[ORIGINAL_LIMIT_AMOUNT] )
+    ),
+    [TotalCreditLimit], DESC
+)
+ORDER BY [TotalCreditLimit] DESC
+```
+
+Explanation:
+
+• SUMMARIZE builds a table of each customer (key + name) along with a calculated column  
+    "TotalCreditLimit" = the sum of ORIGINAL_LIMIT_AMOUNT for that customer.  
+• TOPN(5, …, [TotalCreditLimit], DESC) picks the five rows with the highest limit.  
+• ORDER BY ensures your result set is sorted descending by that same measure.
+Generated SQL:
+Here’s one way to pull the top 5 customers by total credit-limit (summing the LIMIT_AMOUNT in your CA-detail fact and joining back to the customer dimension for the name). If you only want the very latest snapshot, you can uncomment / adjust the `WHERE` clause on `AS_OF_DATE`.
+
+```sql
+SELECT TOP(5)
+    c.CUSTOMER_KEY,
+    c.CUSTOMER_NAME,
+    SUM(f.LIMIT_AMOUNT) AS TOTAL_CREDIT_LIMIT
+FROM dbo.FIS_CA_DETAIL_FACT AS f
+INNER JOIN dbo.FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+-- Optional: restrict to the latest as_of_date
+-- WHERE f.AS_OF_DATE = (
+--     SELECT MAX(AS_OF_DATE) 
+--     FROM dbo.FIS_CA_DETAIL_FACT
+-- )
+GROUP BY
+    c.CUSTOMER_KEY,
+    c.CUSTOMER_NAME
+ORDER BY
+    TOTAL_CREDIT_LIMIT DESC;
+```
+Sanitized SQL (for execution):
+SELECT TOP(5)
+    c.CUSTOMER_KEY,
+    c.CUSTOMER_NAME,
+    SUM(f.LIMIT_AMOUNT) AS TOTAL_CREDIT_LIMIT
+FROM dbo.FIS_CA_DETAIL_FACT AS f
+INNER JOIN dbo.FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+-- Optional: restrict to the latest as_of_date
+-- WHERE f.AS_OF_DATE = (
+--     SELECT MAX(AS_OF_DATE) 
+--     FROM dbo.FIS_CA_DETAIL_FACT
+-- )
+GROUP BY
+    c.CUSTOMER_KEY,
+    c.CUSTOMER_NAME
+ORDER BY
+    TOTAL_CREDIT_LIMIT DESC;
+SQL Query Results (table):
+CUSTOMER_KEY | CUSTOMER_NAME             | TOTAL_CREDIT_LIMIT
+-------------+---------------------------+-------------------
+1            | Desert Manufacturing LLC  | 5000000.00        
+3            | Southwest Energy Partners | 3500000.00        
+2            | Palm Investors Inc.       | 2500000.00        
+Run duration: 49.35 seconds

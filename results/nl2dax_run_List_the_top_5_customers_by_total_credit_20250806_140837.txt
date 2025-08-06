@@ -1,0 +1,130 @@
+NL Query: List the top 5 customers by total credit limit.
+Generated DAX:
+Here’s a stand-alone DAX query that will return the top 5 customers by their total credit‐limit (USD) from the FIS_TOP_COUNTERPARTIES_ANALYSIS table, sorted descending:
+
+EVALUATE  
+VAR SummaryTable =  
+    SUMMARIZE(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[Customer_Name],  
+        "TotalCreditLimit",  
+            SUM( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_CREDIT_LIMIT_USD] )  
+    )  
+RETURN  
+TOPN(  
+    5,  
+    SummaryTable,  
+    [TotalCreditLimit], DESC  
+)  
+
+If you need to restrict this to the very latest analysis date, you can wrap the SUMMARIZE in a FILTER on ANALYSIS_DATE = MAX(ANALYSIS_DATE), for example:
+
+EVALUATE  
+VAR LatestDate =  
+    CALCULATE(  
+        MAX( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[ANALYSIS_DATE] ),  
+        ALL( 'FIS_TOP_COUNTERPARTIES_ANALYSIS' )  
+    )  
+VAR Filtered =  
+    FILTER(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[ANALYSIS_DATE] = LatestDate  
+    )  
+VAR SummaryTable =  
+    SUMMARIZE(  
+        Filtered,  
+        Filtered[Customer_Name],  
+        "TotalCreditLimit", SUM( Filtered[TOTAL_CREDIT_LIMIT_USD] )  
+    )  
+RETURN  
+TOPN(  
+    5,  
+    SummaryTable,  
+    [TotalCreditLimit], DESC  
+)  
+
+Both of these will give you the top 5 customers sorted by descending total credit limit.
+Formatted DAX:
+Here’s a stand-alone DAX query that will return the top 5 customers by their total credit‐limit (USD) from the FIS_TOP_COUNTERPARTIES_ANALYSIS table, sorted descending:
+
+EVALUATE  
+VAR SummaryTable =  
+    SUMMARIZE(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[Customer_Name],  
+        "TotalCreditLimit",  
+            SUM( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_CREDIT_LIMIT_USD] )  
+    )  
+RETURN  
+TOPN(  
+    5,  
+    SummaryTable,  
+    [TotalCreditLimit], DESC  
+)  
+
+If you need to restrict this to the very latest analysis date, you can wrap the SUMMARIZE in a FILTER on ANALYSIS_DATE = MAX(ANALYSIS_DATE), for example:
+
+EVALUATE  
+VAR LatestDate =  
+    CALCULATE(  
+        MAX( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[ANALYSIS_DATE] ),  
+        ALL( 'FIS_TOP_COUNTERPARTIES_ANALYSIS' )  
+    )  
+VAR Filtered =  
+    FILTER(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[ANALYSIS_DATE] = LatestDate  
+    )  
+VAR SummaryTable =  
+    SUMMARIZE(  
+        Filtered,  
+        Filtered[Customer_Name],  
+        "TotalCreditLimit", SUM( Filtered[TOTAL_CREDIT_LIMIT_USD] )  
+    )  
+RETURN  
+TOPN(  
+    5,  
+    SummaryTable,  
+    [TotalCreditLimit], DESC  
+)  
+
+Both of these will give you the top 5 customers sorted by descending total credit limit.
+Generated SQL:
+Here’s a simple T-SQL that pulls the top 5 customers by total credit limit (descending) from your analysis table.  It assumes you want to restrict to rows where ENTITY_TYPE = 'customer':
+
+```
+SELECT TOP (5)
+     CUSTOMER_NAME,
+     TOTAL_EXPOSURE_USD,
+     TOTAL_CREDIT_LIMIT_USD
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+WHERE ENTITY_TYPE = 'customer'
+ORDER BY TOTAL_CREDIT_LIMIT_USD DESC;
+```
+
+If you need to tie this back to your Customer Dimension for additional attributes (e.g. CUSTOMER_ID, COUNTRY, RISK_RATING_DESCRIPTION, etc.), you can join to FIS_CUSTOMER_DIMENSION.  For example:
+
+```
+SELECT TOP (5)
+     t.CUSTOMER_NAME,
+     c.CUSTOMER_ID,
+     c.COUNTRY_DESCRIPTION,
+     t.TOTAL_EXPOSURE_USD,
+     t.TOTAL_CREDIT_LIMIT_USD
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS AS t
+JOIN FIS_CUSTOMER_DIMENSION    AS c
+  ON t.CUSTOMER_NAME = c.CUSTOMER_NAME
+WHERE t.ENTITY_TYPE = 'customer'
+ORDER BY t.TOTAL_CREDIT_LIMIT_USD DESC;
+```
+Sanitized SQL (for execution):
+SELECT TOP (5)
+     CUSTOMER_NAME,
+     TOTAL_EXPOSURE_USD,
+     TOTAL_CREDIT_LIMIT_USD
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+WHERE ENTITY_TYPE = 'customer'
+ORDER BY TOTAL_CREDIT_LIMIT_USD DESC;
+[ERROR] Failed to execute DAX query: XMLA_CONNECTION_STRING is not set in environment
+SQL Query Results: No results returned.
+Run duration: 83.61 seconds

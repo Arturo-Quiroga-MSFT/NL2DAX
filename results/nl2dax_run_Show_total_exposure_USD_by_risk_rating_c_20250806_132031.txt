@@ -1,0 +1,71 @@
+NL Query: Show total exposure USD by risk rating category.
+Generated DAX:
+Here’s one way to return the sum of TOTAL_EXPOSURE_USD grouped by your “risk‐rating category” (RISK_CATEGORY) using a straight DAX query against the FIS_LOAN_EXPOSURE_BY_RISK_RATING table:
+
+```
+EVALUATE
+SUMMARIZE(
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING',
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY],
+    "TotalExposureUSD", 
+        SUM( 'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[TOTAL_EXPOSURE_USD] )
+)
+ORDER BY
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY]
+```
+
+Explanation:
+
+• SUMMARIZE builds a table with one row per RISK_CATEGORY  
+• The third argument ("TotalExposureUSD", …) computes the SUM of TOTAL_EXPOSURE_USD for that category  
+• ORDER BY just sorts the output by the category  
+
+If you’d prefer the newer SUMMARIZECOLUMNS syntax, it would be: 
+
+```
+EVALUATE
+SUMMARIZECOLUMNS(
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY],
+    "TotalExposureUSD", 
+        SUM( 'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[TOTAL_EXPOSURE_USD] )
+)
+ORDER BY
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY]
+)
+```
+Formatted DAX:
+Here’s one way to return the sum of TOTAL_EXPOSURE_USD grouped by your “risk‐rating category” (RISK_CATEGORY) using a straight DAX query against the FIS_LOAN_EXPOSURE_BY_RISK_RATING table:
+
+```
+EVALUATE
+SUMMARIZE(
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING',
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY],
+    "TotalExposureUSD", 
+        SUM( 'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[TOTAL_EXPOSURE_USD] )
+)
+ORDER BY
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY]
+```
+
+Explanation:
+
+• SUMMARIZE builds a table with one row per RISK_CATEGORY  
+• The third argument ("TotalExposureUSD", …) computes the SUM of TOTAL_EXPOSURE_USD for that category  
+• ORDER BY just sorts the output by the category  
+
+If you’d prefer the newer SUMMARIZECOLUMNS syntax, it would be: 
+
+```
+EVALUATE
+SUMMARIZECOLUMNS(
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY],
+    "TotalExposureUSD", 
+        SUM( 'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[TOTAL_EXPOSURE_USD] )
+)
+ORDER BY
+    'FIS_LOAN_EXPOSURE_BY_RISK_RATING'[RISK_CATEGORY]
+)
+```
+DAX Syntax Errors:
+DAX Formatter API error: HTTP 404 - 

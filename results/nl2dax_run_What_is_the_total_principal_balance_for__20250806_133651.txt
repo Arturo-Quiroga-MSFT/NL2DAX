@@ -1,0 +1,71 @@
+NL Query: What is the total principal balance for each customer?
+Generated DAX:
+Here’s a simple DAX table‐returning query that sums the principal balance by customer name. It assumes you have the standard relationship between FIS_CL_DETAIL_FACT[Customer_Key] → FIS_CUSTOMER_DIMENSION[Customer_Key] in your model:
+
+EVALUATE  
+SUMMARIZECOLUMNS(  
+    'FIS_CUSTOMER_DIMENSION'[Customer_Name],  
+    "Total Principal Balance",  
+        SUM( 'FIS_CL_DETAIL_FACT'[Principal_Balance] )  
+)  
+ORDER BY  
+    [Total Principal Balance] DESC  
+
+If you prefer to group by Customer_ID instead of Customer_Name, just replace the first argument with  
+  'FIS_CUSTOMER_DIMENSION'[Customer_ID]  
+(or include both as separate columns in SUMMARIZECOLUMNS).
+Formatted DAX:
+Here’s a simple DAX table‐returning query that sums the principal balance by customer name. It assumes you have the standard relationship between FIS_CL_DETAIL_FACT[Customer_Key] → FIS_CUSTOMER_DIMENSION[Customer_Key] in your model:
+
+EVALUATE  
+SUMMARIZECOLUMNS(  
+    'FIS_CUSTOMER_DIMENSION'[Customer_Name],  
+    "Total Principal Balance",  
+        SUM( 'FIS_CL_DETAIL_FACT'[Principal_Balance] )  
+)  
+ORDER BY  
+    [Total Principal Balance] DESC  
+
+If you prefer to group by Customer_ID instead of Customer_Name, just replace the first argument with  
+  'FIS_CUSTOMER_DIMENSION'[Customer_ID]  
+(or include both as separate columns in SUMMARIZECOLUMNS).
+Generated SQL:
+Here’s a simple T-SQL that sums up the current principal balance by customer name. It joins the fact table to the customer dimension, groups by the customer, and returns the total principal balance per customer:
+
+```sql
+SELECT 
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    SUM(f.PRINCIPAL_BALANCE) AS TOTAL_PRINCIPAL_BALANCE
+FROM 
+    FIS_CL_DETAIL_FACT AS f
+    INNER JOIN FIS_CUSTOMER_DIMENSION AS c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME
+ORDER BY
+    TOTAL_PRINCIPAL_BALANCE DESC;
+```
+Sanitized SQL (for execution):
+Here's a simple T-SQL that sums up the current principal balance by customer name. It joins the fact table to the customer dimension, groups by the customer, and returns the total principal balance per customer:
+
+```sql
+SELECT 
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    SUM(f.PRINCIPAL_BALANCE) AS TOTAL_PRINCIPAL_BALANCE
+FROM 
+    FIS_CL_DETAIL_FACT AS f
+    INNER JOIN FIS_CUSTOMER_DIMENSION AS c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME
+ORDER BY
+    TOTAL_PRINCIPAL_BALANCE DESC;
+```
+DAX Syntax Errors:
+DAX Formatter API error: HTTP 404 - 
+[ERROR] Failed to execute SQL query: ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Unclosed quotation mark after the character string 's a simple T-SQL that sums up the current principal balance by customer name. It joins the fact table to the customer dimension, groups by the customer, and returns the total principal balance per customer:\n\n```sql\nSELECT \n    c.CUSTOMER_ID,\n    c.CUSTOMER_NAME,\n    SUM(f.PRINCIPAL_BALANCE) AS TOTAL_PRINCIPAL_BALANCE\nFROM \n    FIS_CL_DETAIL_FACT AS f\n    INNER JOIN FIS_CUSTOMER_DIMENSION AS c\n        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY\nGROUP BY\n    c.CUSTOMER_ID,\n    c.CUSTOMER_NAME\nORDER BY\n    TOTAL_PRINCIPAL_BALANCE DESC;\n```'. (105) (SQLExecDirectW)")
+Run duration: 28.72 seconds

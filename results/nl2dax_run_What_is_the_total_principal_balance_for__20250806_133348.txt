@@ -1,0 +1,60 @@
+NL Query: What is the total principal balance for each customer?
+Generated DAX:
+Here’s a plain‐DAX table‐expression that will give you, for each customer, the sum of PRINCIPAL_BALANCE. It assumes you have the one‐to‐many relationship between  
+FIS_CUSTOMER_DIMENSION[Customer_Key] → FIS_CL_DETAIL_FACT[Customer_Key] in your model.
+
+EVALUATE  
+SUMMARIZECOLUMNS(  
+    'FIS_Customer_Dimension'[Customer_ID],  
+    'FIS_Customer_Dimension'[Customer_Name],  
+    "Total Principal Balance",  
+        SUM( 'FIS_CL_Detail_Fact'[Principal_Balance] )  
+)  
+
+ORDER BY  
+    'FIS_Customer_Dimension'[Customer_Name]  
+
+Explanation:  
+• SUMMARIZECOLUMNS groups by the two customer columns.  
+• The SUM(…) call computes the principal balance per customer.  
+• EVALUATE / ORDER BY lets you run this as a DAX query in SSMS or DAX Studio.
+Formatted DAX:
+Here’s a plain‐DAX table‐expression that will give you, for each customer, the sum of PRINCIPAL_BALANCE. It assumes you have the one‐to‐many relationship between  
+FIS_CUSTOMER_DIMENSION[Customer_Key] → FIS_CL_DETAIL_FACT[Customer_Key] in your model.
+
+EVALUATE  
+SUMMARIZECOLUMNS(  
+    'FIS_Customer_Dimension'[Customer_ID],  
+    'FIS_Customer_Dimension'[Customer_Name],  
+    "Total Principal Balance",  
+        SUM( 'FIS_CL_Detail_Fact'[Principal_Balance] )  
+)  
+
+ORDER BY  
+    'FIS_Customer_Dimension'[Customer_Name]  
+
+Explanation:  
+• SUMMARIZECOLUMNS groups by the two customer columns.  
+• The SUM(…) call computes the principal balance per customer.  
+• EVALUATE / ORDER BY lets you run this as a DAX query in SSMS or DAX Studio.
+Generated SQL:
+Here’s a straightforward T-SQL that sums up the principal balance by customer, using the customer’s business‐key and name from your customer dimension:
+
+```sql
+SELECT 
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    SUM(f.PRINCIPAL_BALANCE) AS TotalPrincipalBalance
+FROM dbo.FIS_CL_DETAIL_FACT   AS f
+JOIN dbo.FIS_CUSTOMER_DIMENSION AS c
+  ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME
+ORDER BY
+    TotalPrincipalBalance DESC;
+```
+DAX Syntax Errors:
+DAX Formatter API error: HTTP 404 - 
+[ERROR] Failed to execute SQL query: ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Incorrect syntax near '’'. (102) (SQLExecDirectW)")
+Run duration: 27.05 seconds

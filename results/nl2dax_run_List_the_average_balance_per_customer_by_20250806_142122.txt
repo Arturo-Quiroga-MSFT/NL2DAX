@@ -1,0 +1,134 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+List the average balance per customer by currency.
+
+========== GENERATED DAX ==========
+Here’s a self‐contained DAX query that takes the average of the TOTAL_BALANCE from your fact table and groups it by Customer name (from FIS_CUSTOMER_DIMENSION) and Currency code (from FIS_CURRENCY_DIMENSION).  It assumes you have the relationships
+
+- FIS_CL_DETAIL_FACT[Customer_Key] → FIS_CUSTOMER_DIMENSION[Customer_Key]  
+- FIS_CL_DETAIL_FACT[Currency_Key] → FIS_CURRENCY_DIMENSION[Currency_Key]  
+
+in your model:
+
+```
+DEFINE
+    // 1) Define a measure for average balance
+    MEASURE
+        'FIS_CL_DETAIL_FACT'[Average Balance] =
+            AVERAGE ( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] )
+
+EVALUATE
+    // 2) Summarize by customer and currency
+    SUMMARIZECOLUMNS(
+        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+        'FIS_CURRENCY_DIMENSION'[TO_CURRENCY_CODE],
+        "Average Balance", [Average Balance]
+    )
+ORDER BY
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    'FIS_CURRENCY_DIMENSION'[TO_CURRENCY_CODE]
+```
+
+Explanation:
+
+1. We first DEFINE a measure called `[Average Balance]` that simply does  
+   `AVERAGE ( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] )`.  
+2. We then EVALUATE a SUMMARIZECOLUMNS, pulling in the two dimension attributes  
+   (`CUSTOMER_NAME` and `TO_CURRENCY_CODE`) and the newly defined measure.  
+3. Finally, we ORDER the result set by Customer and Currency code.
+
+========== FORMATTED DAX ==========
+Here’s a self‐contained DAX query that takes the average of the TOTAL_BALANCE from your fact table and groups it by Customer name (from FIS_CUSTOMER_DIMENSION) and Currency code (from FIS_CURRENCY_DIMENSION).  It assumes you have the relationships
+
+- FIS_CL_DETAIL_FACT[Customer_Key] → FIS_CUSTOMER_DIMENSION[Customer_Key]  
+- FIS_CL_DETAIL_FACT[Currency_Key] → FIS_CURRENCY_DIMENSION[Currency_Key]  
+
+in your model:
+
+```
+DEFINE
+    // 1) Define a measure for average balance
+    MEASURE
+        'FIS_CL_DETAIL_FACT'[Average Balance] =
+            AVERAGE ( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] )
+
+EVALUATE
+    // 2) Summarize by customer and currency
+    SUMMARIZECOLUMNS(
+        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+        'FIS_CURRENCY_DIMENSION'[TO_CURRENCY_CODE],
+        "Average Balance", [Average Balance]
+    )
+ORDER BY
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    'FIS_CURRENCY_DIMENSION'[TO_CURRENCY_CODE]
+```
+
+Explanation:
+
+1. We first DEFINE a measure called `[Average Balance]` that simply does  
+   `AVERAGE ( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] )`.  
+2. We then EVALUATE a SUMMARIZECOLUMNS, pulling in the two dimension attributes  
+   (`CUSTOMER_NAME` and `TO_CURRENCY_CODE`) and the newly defined measure.  
+3. Finally, we ORDER the result set by Customer and Currency code.
+
+========== GENERATED SQL ==========
+Here’s an example T-SQL that will return the average TOTAL_BALANCE from the core fact (FIS_CL_DETAIL_FACT), broken out by customer and currency.  It joins your fact to the customer and currency dimensions, computes the average balance, and orders the result by that average:
+
+```
+SELECT
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    cur.FROM_CURRENCY_CODE    AS CurrencyCode,
+    AVG(f.TOTAL_BALANCE)      AS AvgBalance
+FROM
+    dbo.FIS_CL_DETAIL_FACT AS f
+    INNER JOIN dbo.FIS_CUSTOMER_DIMENSION AS c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+    INNER JOIN dbo.FIS_CURRENCY_DIMENSION AS cur
+        ON f.CURRENCY_KEY = cur.CURRENCY_KEY
+GROUP BY
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    cur.FROM_CURRENCY_CODE
+ORDER BY
+    AvgBalance DESC;
+```
+
+Explanation of key parts:
+
+• We’re pulling the “balance” metric from f.TOTAL_BALANCE  
+• We join to FIS_CUSTOMER_DIMENSION on CUSTOMER_KEY to get the customer dimension  
+• We join to FIS_CURRENCY_DIMENSION on CURRENCY_KEY to get the currency dimension  
+• We AVG() the TOTAL_BALANCE, grouping by customer and currency  
+• Finally, we order by the average balance in descending order.
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+SELECT
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    cur.FROM_CURRENCY_CODE    AS CurrencyCode,
+    AVG(f.TOTAL_BALANCE)      AS AvgBalance
+FROM
+    dbo.FIS_CL_DETAIL_FACT AS f
+    INNER JOIN dbo.FIS_CUSTOMER_DIMENSION AS c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+    INNER JOIN dbo.FIS_CURRENCY_DIMENSION AS cur
+        ON f.CURRENCY_KEY = cur.CURRENCY_KEY
+GROUP BY
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    cur.FROM_CURRENCY_CODE
+ORDER BY
+    AvgBalance DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CUSTOMER_ID | CUSTOMER_NAME                | CurrencyCode | AvgBalance    
+------------+------------------------------+--------------+---------------
+CUST001     | Desert Manufacturing LLC     | USD          | 3780000.000000
+CUST003     | Southwest Energy Partners    | USD          | 2649000.000000
+CUST002     | Palm Investors Inc.          | USD          | 1892000.000000
+CUST004     | Pacific Technology Solutions | USD          | 817000.000000 
+
+========== RUN DURATION ==========
+Run duration: 64.86 seconds

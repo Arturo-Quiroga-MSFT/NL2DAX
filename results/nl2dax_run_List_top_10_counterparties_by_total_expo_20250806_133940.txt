@@ -1,0 +1,107 @@
+NL Query: List top 10 counterparties by total exposure USD.
+Generated DAX:
+Here’s a self-contained DAX “table” expression (you can paste it into a New Table in Power BI or wrap it in EVALUATE for a DAX query) that will return the top 10 counterparties by summed USD exposure in descending order:
+
+TopCounterpartiesByExposure =  
+TOPN(  
+    10,  
+    SUMMARIZE(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],  
+        "TotalExposureUSD",  
+            SUM( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE_USD] )  
+    ),  
+    [TotalExposureUSD],  
+    DESC  
+)
+
+If you prefer to run it as a DAX query (for example in DAX Studio), you can write:
+
+EVALUATE
+TOPN(
+    10,
+    SUMMARIZE(
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],
+        "TotalExposureUSD", SUM('FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE_USD])
+    ),
+    [TotalExposureUSD], DESC
+)
+ORDER BY [TotalExposureUSD] DESC
+Formatted DAX:
+Here’s a self-contained DAX “table” expression (you can paste it into a New Table in Power BI or wrap it in EVALUATE for a DAX query) that will return the top 10 counterparties by summed USD exposure in descending order:
+
+TopCounterpartiesByExposure =  
+TOPN(  
+    10,  
+    SUMMARIZE(  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',  
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],  
+        "TotalExposureUSD",  
+            SUM( 'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE_USD] )  
+    ),  
+    [TotalExposureUSD],  
+    DESC  
+)
+
+If you prefer to run it as a DAX query (for example in DAX Studio), you can write:
+
+EVALUATE
+TOPN(
+    10,
+    SUMMARIZE(
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],
+        "TotalExposureUSD", SUM('FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE_USD])
+    ),
+    [TotalExposureUSD], DESC
+)
+ORDER BY [TotalExposureUSD] DESC
+Generated SQL:
+Here’s a simple T-SQL that pulls the top 10 counterparties by total USD‐exposure (using the most recent analysis date in the FIS_TOP_COUNTERPARTIES_ANALYSIS table):
+
+```
+-- 1) find the latest analysis date
+;WITH Latest AS (
+    SELECT MAX(ANALYSIS_DATE) AS MaxDate
+    FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+)
+-- 2) pick the top 10 counterparties by TOTAL_EXPOSURE_USD on that date
+SELECT TOP (10)
+    t.CUSTOMER_NAME   AS Counterparty,
+    t.TOTAL_EXPOSURE_USD AS ExposureUSD
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS AS t
+INNER JOIN Latest AS l
+    ON t.ANALYSIS_DATE = l.MaxDate
+ORDER BY
+    t.TOTAL_EXPOSURE_USD DESC;
+```
+
+Explanation:  
+- We first CTE‐scan the table to get the most recent ANALYSIS_DATE.  
+- Then we filter the main table to that date and simply ORDER BY the pre-computed TOTAL_EXPOSURE_USD, taking the top 10.
+Sanitized SQL (for execution):
+-- 1) find the latest analysis date
+;WITH Latest AS (
+    SELECT MAX(ANALYSIS_DATE) AS MaxDate
+    FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+)
+-- 2) pick the top 10 counterparties by TOTAL_EXPOSURE_USD on that date
+SELECT TOP (10)
+    t.CUSTOMER_NAME   AS Counterparty,
+    t.TOTAL_EXPOSURE_USD AS ExposureUSD
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS AS t
+INNER JOIN Latest AS l
+    ON t.ANALYSIS_DATE = l.MaxDate
+ORDER BY
+    t.TOTAL_EXPOSURE_USD DESC;
+DAX Syntax Errors:
+DAX Formatter API error: HTTP 404 - 
+SQL Query Results (table):
+Counterparty                 | ExposureUSD
+-----------------------------+------------
+Desert Manufacturing LLC     | 3750000.00 
+Southwest Energy Partners    | 2625000.00 
+Palm Investors Inc.          | 1875000.00 
+Pacific Technology Solutions | 800000.00  
+Run duration: 47.20 seconds

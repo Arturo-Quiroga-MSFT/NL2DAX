@@ -1,0 +1,53 @@
+NL Query: List top 10 counterparties by total exposure USD.
+Generated DAX:
+Here’s a straight‐forward DAX query that returns the top 10 counterparties by total exposure in USD (descending):  
+
+EVALUATE  
+TOPN(  
+    10,  
+    SUMMARIZE(  
+        FIS_TOP_COUNTERPARTIES_ANALYSIS,  
+        FIS_TOP_COUNTERPARTIES_ANALYSIS[COUNTERPARTY_NAME],  
+        "TotalExposureUSD",  
+            SUM( FIS_TOP_COUNTERPARTIES_ANALYSIS[TOTAL_EXPOSURE_USD] )  
+    ),  
+    [TotalExposureUSD],  
+    DESC  
+)  
+ORDER BY  
+    [TotalExposureUSD] DESC  
+
+—  
+Explanation of the pieces:  
+• SUMMARIZE builds a two-column table:  
+  – COUNTERPARTY_NAME  
+  – TotalExposureUSD (the SUM of TOTAL_EXPOSURE_USD per counterparty)  
+• TOPN(10, …, [TotalExposureUSD], DESC) takes the top 10 rows by that summed exposure.  
+• ORDER BY [TotalExposureUSD] DESC explicitly sorts the final result.
+Formatted DAX:
+Here’s a straight‐forward DAX query that returns the top 10 counterparties by total exposure in USD (descending):  
+
+EVALUATE  
+TOPN(  
+    10,  
+    SUMMARIZE(  
+        FIS_TOP_COUNTERPARTIES_ANALYSIS,  
+        FIS_TOP_COUNTERPARTIES_ANALYSIS[COUNTERPARTY_NAME],  
+        "TotalExposureUSD",  
+            SUM( FIS_TOP_COUNTERPARTIES_ANALYSIS[TOTAL_EXPOSURE_USD] )  
+    ),  
+    [TotalExposureUSD],  
+    DESC  
+)  
+ORDER BY  
+    [TotalExposureUSD] DESC  
+
+—  
+Explanation of the pieces:  
+• SUMMARIZE builds a two-column table:  
+  – COUNTERPARTY_NAME  
+  – TotalExposureUSD (the SUM of TOTAL_EXPOSURE_USD per counterparty)  
+• TOPN(10, …, [TotalExposureUSD], DESC) takes the top 10 rows by that summed exposure.  
+• ORDER BY [TotalExposureUSD] DESC explicitly sorts the final result.
+DAX Syntax Errors:
+DAX Formatter API error: HTTP 404 - 
