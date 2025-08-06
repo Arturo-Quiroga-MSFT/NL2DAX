@@ -1,7 +1,48 @@
 
 # NL2DAX & NL2SQL for Azure SQL DB
 
+
 This project translates natural language queries into DAX or SQL for Azure SQL DB using LangChain and Azure OpenAI. It features schema awareness, robust error handling, and clear output formatting.
+
+## Repository Structure
+
+```
+NL2DAX/
+├── .github/
+│   └── copilot-instructions.md
+├── .vscode/
+│   └── settings.json
+├── CODE/
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── dax_formatter.py
+│   ├── dax_generator.py
+│   ├── db_connection_check.py
+│   ├── main.py
+│   ├── query_executor.py
+│   ├── requirements.txt
+│   ├── schema_cache.json
+│   ├── schema_reader.py
+│   └── sql_executor.py
+├── RESULTS/
+│   ├── nl2dax_run_List_the_average_balance_per_customer_by_20250806_142122.txt
+│   ├── nl2dax_run_List_the_average_balance_per_customer_by_20250806_143722.txt
+│   ├── nl2dax_run_List_the_top_5_customers_by_total_credit_20250806_140837.txt
+│   ├── nl2dax_run_List_the_top_5_customers_by_total_credit_20250806_141144.txt
+│   ├── nl2dax_run_List_top_10_counterparties_by_total_expo_20250806_132203.txt
+│   ├── nl2dax_run_List_top_10_counterparties_by_total_expo_20250806_133940.txt
+│   ├── nl2dax_run_Show_the_NPL_ratio_percentage_by_region__20250806_131708.txt
+│   ├── nl2dax_run_Show_the_NPL_ratio_percentage_by_region__20250806_132806.txt
+│   ├── nl2dax_run_Show_total_exposure_USD_by_risk_rating_c_20250806_132031.txt
+│   ├── nl2dax_run_What_is_the_total_principal_balance_for__20250806_133348.txt
+│   └── nl2dax_run_What_is_the_total_principal_balance_for__20250806_133651.txt
+├── TEST QUESTIONS/
+│   └── nl2dax_star_schema_test_questions.txt
+├── __pycache__/
+│   └── *.pyc
+├── README.md
+```
 
 
 ## Setup
