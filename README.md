@@ -131,21 +131,21 @@ The goal is to let users ask business questions in plain English while the syste
 
 ```mermaid
 flowchart LR
-		U[User NL question] --> P[NL Parser<br/>LangChain + Azure OpenAI]
-		S[Schema Metadata<br/>cache + live] --> P
-		P -->|Intent + Entities| G1[DAX Generator]
-		P -->|Intent + Entities| G2[SQL Generator]
-		G1 --> FMT[DAX Format/Validate (optional)]
-		G2 --> SAN[SQL Sanitize/Extract Code]
-		FMT --> OUT[Output + RESULTS/*.txt]
-		SAN --> SQLX[SQL Executor<br/>Azure SQL ODBC]
-		SQLX --> OUT
-		G1 -->|DAX (optional)| DAXX[DAX Executor via XMLA]
-		DAXX --> OUT
-		subgraph Storage
-			CSH[schema_cache.json]
-		end
-		CSH --> S
+	U[User NL question] --> P[NL Parser<br/>LangChain + Azure OpenAI]
+	S[Schema Metadata<br/>cache + live] --> P
+	P -->|Intent + Entities| G1[DAX Generator]
+	P -->|Intent + Entities| G2[SQL Generator]
+	G1 --> FMT[DAX Format/Validate (optional)]
+	G2 --> SAN[SQL Sanitize/Extract Code]
+	FMT --> OUT[Output + RESULTS (txt)]
+	SAN --> SQLX[SQL Executor<br/>Azure SQL ODBC]
+	SQLX --> OUT
+	G1 -->|DAX (optional)| DAXX[DAX Executor via XMLA]
+	DAXX --> OUT
+	subgraph Storage
+		CSH[schema_cache.json]
+	end
+	CSH --> S
 ```
 
 Notes:
