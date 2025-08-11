@@ -1,0 +1,69 @@
+
+Here’s a concise comparison so you can pick the right path for your setup.
+
+What they are
+
+HTTP/XMLA: You call the XMLA endpoint directly over HTTPS with a SOAP payload and an Azure AD bearer token (msal + requests). Pure HTTP, no native drivers.
+ADOMD.NET (pyadomd) “XMLA”: You still hit the XMLA endpoint, but via the MSOLAP/ADOMD.NET provider, which handles XMLA, auth, and parsing for you.
+OS support
+
+HTTP/XMLA: Cross‑platform (macOS/Linux/Windows).
+ADOMD.NET: Windows-only in practice; Mono/pythonnet workarounds on macOS/Linux are brittle and require the AdomdClient.dll (not officially provided for macOS).
+Auth and prerequisites
+
+HTTP/XMLA: Azure AD app (service principal or user token) with scope https://analysis.windows.net/powerbi/api/.default; Premium or PPU workspace; Build permission on the dataset.
+ADOMD.NET: Requires MSOLAP/AdomdClient installed and available to Python; XMLA endpoint enabled (Premium/PPU for Power BI); AAD/SSO via provider.
+Setup complexity
+
+HTTP/XMLA: Lightweight (msal + requests). You build SOAP, parse XML yourself (or with helper code).
+ADOMD.NET: Heavier (AdomdClient.dll, pythonnet, possibly Mono). Provider handles protocol and shape, less manual XML.
+Capabilities and performance
+
+Both: Full DAX/MDX support against Power BI Premium or Azure Analysis Services XMLA endpoints; similar performance (same engine). Differences are mostly in client ergonomics and platform support.
+Error handling
+
+HTTP/XMLA: SOAP faults + HTTP status codes (you parse and surface).
+ADOMD.NET: Provider raises .NET exceptions; less manual parsing.
+When to use which
+
+macOS/Linux or containerized: HTTP/XMLA.
+Windows with MSOLAP available and you prefer provider ergonomics: ADOMD.NET/pyadomd.
+Power BI (Premium/PPU) or Azure Analysis Services: both work; ensure dataset/workspace permissions and the correct endpoint (powerbi://… or asazure://…).
+In your repo, the USE_XMLA_HTTP=true path is designed for macOS and avoids AdomdClient.dll entirely.
+
+
+
+
+Task: Confirm whether both NL2DAX approaches (HTTP/XMLA and ADOMD.NET/pyadomd) work with Power BI Embedded and what’s required.
+
+Checklist
+
+Clarify compatibility for Power BI Embedded
+Note auth model differences
+Call out prerequisites and limits
+Advise which to use on macOS
+Answer
+
+Compatibility
+
+HTTP/XMLA: Works with Power BI Embedded (Gen2) when the workspace is on Embedded capacity and XMLA endpoint is enabled (Read or Read/Write). This is ideal for macOS/Linux/containers.
+ADOMD.NET/pyadomd: Also works with Power BI Embedded, but needs the MSOLAP/AdomdClient provider (Windows-only in practice). Not suitable for macOS without brittle workarounds.
+Auth differences
+
+HTTP/XMLA: Use Azure AD app (service principal) or user token with scope https://analysis.windows.net/powerbi/api/.default. Do not use embed tokens for XMLA; use AAD tokens.
+ADOMD.NET: Auth handled by the provider (AAD/SSO), but still needs a valid AAD principal with access.
+Required settings for Embedded
+
+Workspace must be assigned to an Embedded capacity (A SKUs, Gen2).
+XMLA endpoint enabled for the workspace (at least Read for queries).
+Service principal (or user) added to the workspace with Build (and Contributor/Member if needed).
+Tenant settings allow service principals to use Power BI APIs and read XMLA endpoints.
+Use the workspace’s XMLA endpoint URL (powerbi://api.powerbi.com/v1.0/myorg/<workspace>).
+Limits/caveats
+
+NL2DAX needs only XMLA Read; no write needed. XMLA Write availability depends on capacity settings; not required for query execution.
+Embed tokens are for rendering; they don’t work for XMLA. Use AAD app credentials.
+For macOS, prefer HTTP/XMLA; ADOMD.NET is Windows-centric.
+Recommendation
+
+For your macOS workflow, use the HTTP/XMLA path you enabled (USE_XMLA_HTTP=true) with your Embedded workspace’s XMLA endpoint and a service principal with Build access.
