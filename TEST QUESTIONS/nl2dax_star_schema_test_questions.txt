@@ -35,3 +35,25 @@
 14. List all customers with more than $10M in total exposure across all products.
 15. Show the portfolio percentage of loans with political risk flagged as high.
 16. List all facilities with a utilization percentage above 90% and their owners.
+
+
+Here are example questions you can ask Gaian Insights about the Azure SQL database content, grouped by difficulty:
+
+Easy
+What are the names of all customers in the database?
+Which customers are located in the United States?
+What is the industry description for customer CUST001?
+Who is the relationship manager for Palm Investors Inc.?
+What is the risk rating of Pacific Technology Solutions?
+Medium
+List all customers with an "Active" status and a credit rating of "A-" or higher.
+Which customers were established after 2018?
+Show all customers in the "Technology Services" industry.
+Which customers are managed by Sarah Johnson?
+Find all customers in California with a "Good Credit Quality" rating.
+Complex
+Which industries have the highest number of active customers with a risk rating of "B+" or higher?
+What is the distribution of customer types (Corporation, LLC, etc.) by state?
+For each relationship manager, what is the average risk rating of their customers?
+Which cities have the most customers with "Strong Credit Quality"?
+How does the credit quality of customers vary by industry and state?

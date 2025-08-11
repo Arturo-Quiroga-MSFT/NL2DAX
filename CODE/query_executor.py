@@ -1,7 +1,23 @@
 import os
 
+USE_XMLA_HTTP = os.getenv("USE_XMLA_HTTP", "false").lower() in ("1", "true", "yes")
+
+
 def execute_dax_query(dax_query):
-    """Execute a DAX query against a Tabular model via XMLA endpoint."""
+    """Execute a DAX query against a Tabular model via XMLA endpoint.
+
+    If USE_XMLA_HTTP=true, use HTTP/XMLA via AAD (cross-platform). Otherwise attempt pyadomd.
+    """
+    if USE_XMLA_HTTP:
+        try:
+            from xmla_http_executor import execute_dax_via_http
+            return execute_dax_via_http(dax_query)
+        except Exception as e:
+            raise RuntimeError(
+                "DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. "
+                f"Root error: {e}"
+            )
+
     # Delay import to avoid crashing on module load if Mono/pythonnet missing
     try:
         from pyadomd import Pyadomd
@@ -20,6 +36,7 @@ def execute_dax_query(dax_query):
             rows = cur.fetchall()
             results = [dict(zip(columns, row)) for row in rows]
     return results
+
 
 if __name__ == '__main__':
     import json
