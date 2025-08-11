@@ -1,12 +1,12 @@
 flowchart LR
-  U[User NL question] --> P[NL Parser<br/>LangChain + Azure OpenAI]
-  S[Schema Metadata<br/>cache + live] --> P
+  U[User NL question] --> P[NL Parser: LangChain + Azure OpenAI]
+  S[Schema Metadata: cache + live] --> P
   P --> G1[DAX Generator]
   P --> G2[SQL Generator]
   G1 --> FMT[DAX Format/Validate]
   G2 --> SAN[SQL Sanitize/Extract Code]
-  FMT --> OUT[Output + RESULTS]
-  SAN --> SQLX[SQL Executor<br/>Azure SQL ODBC]
+  FMT --> OUT[Output + Results]
+  SAN --> SQLX[SQL Executor: Azure SQL ODBC]
   SQLX --> OUT
   G1 --> DAXX[DAX Executor via XMLA]
   DAXX --> OUT
