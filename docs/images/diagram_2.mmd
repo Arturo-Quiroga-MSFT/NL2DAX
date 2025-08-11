@@ -1,0 +1,29 @@
+sequenceDiagram
+	actor User
+	participant Main as main.py
+	participant LLM as Azure OpenAI (LangChain)
+	participant Schema as schema_reader/cache
+	participant GenSQL as SQL Generator
+	participant SQLExec as SQL Executor (ODBC)
+	participant GenDAX as DAX Generator
+	participant DAXFmt as DAX Formatter (optional)
+	participant DAXExec as DAX Executor (XMLA)
+	participant FS as RESULTS/*.txt
+
+	User->>Main: Enter NL question
+	Main->>Schema: Load schema (cache/live)
+	Main->>LLM: Parse intent/entities (with schema context)
+	LLM-->>Main: Intent + entities
+	Main->>GenSQL: Generate SQL with context
+	GenSQL-->>Main: SQL (raw, may include prose/fences)
+	Main->>Main: Extract + sanitize SQL
+	Main->>SQLExec: Execute SQL
+	SQLExec-->>Main: Tabular results
+	Main->>GenDAX: Generate DAX with context
+	GenDAX-->>Main: DAX query/measure
+	Main->>DAXFmt: Format/validate (optional)
+	DAXFmt-->>Main: Formatted DAX
+	Main->>DAXExec: Execute DAX (optional)
+	DAXExec-->>Main: DAX results
+	Main->>FS: Write output file with banners
+	Main-->>User: Print results with banners
