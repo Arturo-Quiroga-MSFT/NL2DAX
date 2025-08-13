@@ -1,0 +1,78 @@
+# Environment files and secrets
+.env
+.env.*
+*.env
+azure.env
+.venv/
+venv/
+env/
+
+# Python cache and build files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Azure and Power BI related secrets
+azure-credentials.json
+pbi-credentials.json
+service-principal.json
+*.pem
+*.key
+*.crt
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Results and exports that might contain sensitive data
+RESULTS/
+EXPORTS/
+**/exports/
+**/results/
+
+# Backup files
+*_backup_*/
+*.backup
+*.bak

@@ -1,0 +1,38 @@
+-- CORRECTED DAX QUERY FOR: Which customers are located in the United States?
+-- 
+-- ISSUE: The original query had a single value determination error
+-- FIX: Use proper table expression with SELECTCOLUMNS and ensure all columns are properly aliased
+
+EVALUATE  
+SELECTCOLUMNS(  
+    FILTER(  
+        'FIS_CUSTOMER_DIMENSION',  
+        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION] = "United States"  
+    ),  
+    "CustomerKey", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],  
+    "CustomerID", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],  
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],  
+    "Country", 'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]  
+)  
+
+-- Alternative approach using SUMMARIZE (if you want to ensure uniqueness):
+-- EVALUATE  
+-- SUMMARIZE(  
+--     FILTER(  
+--         'FIS_CUSTOMER_DIMENSION',  
+--         'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION] = "United States"  
+--     ),
+--     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+--     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID], 
+--     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+--     'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]
+-- )
+
+-- Minimal working version for testing:
+-- EVALUATE
+-- DISTINCT(
+--     SELECTCOLUMNS(
+--         FILTER('FIS_CUSTOMER_DIMENSION', 'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION] = "United States"),
+--         "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+--     )
+-- )

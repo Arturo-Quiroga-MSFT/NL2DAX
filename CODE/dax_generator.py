@@ -44,10 +44,30 @@ def get_schema_context():
 dax_prompt = ChatPromptTemplate.from_template(
     """
     You are an expert in DAX and Power BI. Given the following database schema and the intent/entities, generate a valid DAX expression for querying a database.
+    
+    IMPORTANT DAX RULES:
+    1. Always use EVALUATE for table expressions
+    2. When filtering and selecting columns from a table, use SELECTCOLUMNS with FILTER
+    3. Column references must use single quotes around table names: 'TableName'[ColumnName]
+    4. String values in filters must use double quotes: "value"
+    5. For detailed row data, use table functions like FILTER, SELECTCOLUMNS, ADDCOLUMNS
+    6. Always specify explicit column names in SELECTCOLUMNS
+    7. Use VALUES() function when you need distinct values from a column
+    8. For simple row listings, this pattern works well:
+       EVALUATE 
+       SELECTCOLUMNS(
+           FILTER('TableName', condition),
+           "Column1Alias", 'TableName'[Column1],
+           "Column2Alias", 'TableName'[Column2]
+       )
+    
     Schema:
     {schema}
+    
     Intent and Entities:
     {intent_entities}
+    
+    Generate a DAX query that follows these rules and returns the requested data.
     """
 )
 
