@@ -1,0 +1,329 @@
+Microsoft Fabric
+Users can create Fabric items
+    Enabled for the entire organization
+Users can create Healthcare Cohort items (preview)
+    Disabled for the entire organization
+User data functions (preview)
+    Disabled for the entire organization
+SQL database (preview)​
+    Enabled for the entire organization
+Digital Twin Builder (preview)​
+    Disabled for the entire organization
+Users can discover and create org apps (preview)​
+    Disabled for the entire organization
+Product Feedback
+    Enabled for the entire organization
+Users can create and share Data agent item types (preview)
+    Enabled for the entire organization
+Users can discover and use metrics (preview)
+    Disabled for the entire organization
+Users can create variable libraries (preview)
+    Disabled for the entire organization
+Users can be informed of upcoming conferences featuring Microsoft Fabric when they are logged in to Fabric
+    Enabled for the entire organization
+ML models can serve real-time predictions from API endpoints (preview)New
+    Disabled for the entire organization
+Cosmos DB NoSQL (Preview)
+    Disabled for the entire organization
+Help and support settings
+Publish "Get Help" information
+    Disabled for the entire organization
+Receive email notifications for service outages or incidents
+    Disabled for the entire organization
+Users can try Microsoft Fabric paid features
+    Enabled for the entire organization
+Show a custom message before publishing reports
+    Disabled for the entire organization
+Domain management settings
+Allow tenant and domain admins to override workspace assignments (preview)
+    Enabled for the entire organization
+Workspace settings
+Create workspaces
+    Enabled for the entire organization
+Use semantic models across workspaces
+    Enabled for the entire organization
+Block users from reassigning personal workspaces (My Workspace)
+    Disabled for the entire organization
+Define workspace retention period
+    Enabled for the entire organization
+Information protection
+Allow users to apply sensitivity labels for content
+    Disabled for the entire organization
+Apply sensitivity labels from data sources to their data in Power BI
+    Disabled for the entire organization
+Automatically apply sensitivity labels to downstream content
+    Disabled for the entire organization
+Allow workspace admins to override automatically applied sensitivity labels
+    Disabled for the entire organization
+Restrict content with protected labels from being shared via link with everyone in your organization
+    Disabled for the entire organization
+Domain admins can set default sensitivity labels for their domains (preview)
+    Disabled for the entire organization
+Allow Microsoft Purview to secure AI interactionsNew
+    Enabled for the entire organization
+Export and sharing settings
+External data sharing
+    Disabled for the entire organization
+Users can accept external data shares
+    Disabled for the entire organization
+Guest users can access Microsoft Fabric
+    Enabled for the entire organization
+Users can invite guest users to collaborate through item sharing and permissions
+    Enabled for the entire organization
+Guest users can browse and access Fabric content
+    Disabled for the entire organization
+Users can see guest users in lists of suggested people
+    Enabled for the entire organization
+Publish to web
+    Enabled for the entire organization
+Copy and paste visuals
+    Enabled for the entire organization
+Export to Excel
+    Enabled for the entire organization
+Export to .csv
+    Enabled for the entire organization
+Download reports
+    Enabled for the entire organization
+Users can work with semantic models in Excel using a live connection
+    Enabled for the entire organization
+Export reports as PowerPoint presentations or PDF documents
+    Enabled for the entire organization
+Export reports as MHTML documents
+    Enabled for the entire organization
+Export reports as Word documents
+    Enabled for the entire organization
+Export reports as XML documents
+    Enabled for the entire organization
+Export reports as image files
+    Disabled for the entire organization
+Print dashboards and reports
+    Enabled for the entire organization
+Certification
+    Disabled for the entire organization
+Endorse master data
+    Disabled for the entire organization
+Users can set up email subscriptions
+    Enabled for the entire organization
+B2B guest users can set up and be subscribed to email subscriptions
+    Enabled for the entire organization
+Users can send email subscriptions to external users
+    Enabled for the entire organization
+Featured content
+    Enabled for the entire organization
+Allow connections to featured tables
+    Enabled for the entire organization
+Allow shareable links to grant access to everyone in your organization
+    Enabled for the entire organization
+Enable Microsoft Teams integration
+    Enabled for the entire organization
+Install Power BI app for Microsoft Teams automatically
+    Enabled for the entire organization
+Enable Power BI add-in for PowerPoint
+    Enabled for the entire organization
+Allow DirectQuery connections to Power BI semantic models
+    Enabled for the entire organization
+Guest users can work with shared semantic models in their own tenants
+    Disabled for the entire organization
+Allow specific users to turn on external data sharing
+    Enabled for the entire organization
+Discovery settings
+Make promoted content discoverable
+    Enabled for the entire organization
+Make certified content discoverable
+    Enabled for the entire organization
+Discover content
+    Enabled for the entire organization
+App settings
+Create template organizational apps
+    Disabled for the entire organization
+Push apps to end users
+    Enabled for the entire organization
+Publish apps to the entire organization
+    Enabled for the entire organization
+Integration settings
+Allow XMLA endpoints and Analyze in Excel with on-premises semantic models
+    Enabled for the entire organization
+Semantic Model Execute Queries REST API
+    Enabled for the entire organization
+Use ArcGIS Maps for Power BI
+    Enabled for the entire organization
+Use global search for Power BI
+    Enabled for the entire organization
+Users can use the Azure Maps visualNew
+    Enabled for the entire organization
+Data sent to Azure Maps can be processed outside your tenant's geographic region, compliance boundary, or national cloud instanceNew
+    Disabled for the entire organization
+Data sent to Azure Maps can be processed by Microsoft Online Services Subprocessors New
+    Disabled for the entire organization
+Map and filled map visuals
+    Disabled for the entire organization
+Integration with SharePoint and Microsoft Lists
+    Enabled for the entire organization
+Dremio SSO
+    Disabled for the entire organization
+Snowflake SSO
+    Disabled for the entire organization
+Redshift SSO
+    Disabled for the entire organization
+Google BigQuery SSO
+    Disabled for the entire organization
+Microsoft Entra single sign-on for data gateway
+    Disabled for the entire organization
+Users can view Power BI files saved in OneDrive and SharePoint (preview)
+    Enabled for the entire organization
+Users can share links to Power BI files stored in OneDrive and SharePoint through Power BI Desktop (preview)
+    Enabled for the entire organization
+Enable granular access control for all data connections
+    Disabled for the entire organization
+Semantic models can export data to OneLake
+    Enabled for the entire organization
+Semantic model owners can choose to automatically update semantic models from files imported from OneDrive or SharePoint
+    Enabled for the entire organization
+ArcGIS GeoAnalytics in Fabric Runtime (preview)
+    Disabled for the entire organization
+Allow non-Entra ID auth in Eventstream
+    Enabled for the entire organization
+Users can create "Direct Lake on OneLake semantic models" (preview)
+    Enabled for the entire organization
+Power BI visuals
+Allow visuals created using the Power BI SDK
+    Enabled for the entire organization
+Add and use certified visuals only (block uncertified)
+    Disabled for the entire organization
+Allow downloads from custom visuals
+    Disabled for the entire organization
+AppSource Custom Visuals SSO
+    Disabled for the entire organization
+Allow access to the browser's local storage
+    Enabled for the entire organization
+R and Python visuals settings
+Interact with and share R and Python visuals
+    Enabled for the entire organization
+Audit and usage settings
+Usage metrics for content creators
+    Enabled for the entire organization
+Per-user data in usage metrics for content creators
+    Enabled for the entire organization
+Show user data in the Fabric Capacity Metrics app and reports
+    Enabled for the entire organization
+Azure Log Analytics connections for workspace administrators
+    Disabled for the entire organization
+Workspace admins can turn on monitoring for their workspaces (preview)
+    Enabled for the entire organization
+Microsoft can store query text to aid in support investigations
+    Enabled for the entire organization
+Dashboard settings
+Web content on dashboard tiles
+    Disabled for the entire organization
+Developer settings
+Embed content in apps
+    Enabled for the entire organization
+Service principals can create workspaces, connections, and deployment pipelines
+    Enabled for the entire organization
+Service principals can call Fabric public APIs
+    Enabled for the entire organization
+Allow service principals to create and use profiles
+    Disabled for the entire organization
+Block ResourceKey Authentication
+    Disabled for the entire organization
+Admin API settings
+Service principals can access read-only admin APIs
+    Disabled for the entire organization
+Service principals can access admin APIs used for updates
+    Disabled for the entire organization
+Enhance admin APIs responses with detailed metadata
+    Disabled for the entire organization
+Enhance admin APIs responses with DAX and mashup expressions
+    Disabled for the entire organization
+Gen1 dataflow settings
+Create and use Gen1 dataflows
+    Enabled for the entire organization
+Template app settings
+Publish template apps
+    Enabled for the entire organization
+Install template apps
+    Enabled for the entire organization
+Install template apps not listed in AppSource
+    Disabled for the entire organization
+Q&A settings
+Review questions
+    Enabled for the entire organization
+Synonym sharing
+    Enabled for the entire organization
+Explore settings (preview)
+Users with view permission can launch ExploreNew
+    Enabled for the entire organization
+Semantic Model Security
+Block republish and disable package refresh
+    Disabled for the entire organization
+Advanced networking
+Tenant-level Private Link
+    Disabled for the entire organization
+Block Public Internet Access
+    Disabled for the entire organization
+Encryption
+Apply customer-managed keys (preview)
+    Enabled for the entire organization
+Metrics settings
+Create and use Metrics
+    Enabled for the entire organization
+User experience experiments
+Help Power BI optimize your experience
+    Enabled for the entire organization
+Share data with your Microsoft 365 services
+Share Fabric data with your Microsoft 365 services
+    Enabled for the entire organization
+Insights settings
+Receive notifications for top insights (preview)
+    Enabled for the entire organization
+Show entry points for insights (preview)
+    Enabled for the entire organization
+Datamart settings
+Create Datamarts (preview)
+    Enabled for the entire organization
+Data model settings
+Users can edit data models in the Power BI service (preview)
+    Enabled for the entire organization
+Scale-out settings
+Scale out queries for large semantic models
+    Enabled for the entire organization
+OneLake settings
+Users can access data stored in OneLake with apps external to Fabric
+    Enabled for the entire organization
+Use short-lived user-delegated SAS tokens (preview)
+    Enabled for the entire organization
+Authenticate with OneLake user-delegated SAS tokens (preview)
+    Disabled for the entire organization
+Users can sync data in OneLake with the OneLake File Explorer app
+    Enabled for the entire organization
+Enable Delta Lake to Apache Iceberg table format virtualization (preview)
+    Disabled for the entire organization
+Git integration
+Users can synchronize workspace items with their Git repositories
+    Enabled for the entire organization
+Users can export items to Git repositories in other geographical locations
+    Disabled for the entire organization
+Users can export workspace items with applied sensitivity labels to Git repositories
+    Enabled for the entire organization
+Users can sync workspace items with GitHub repositories
+    Disabled for the entire organization
+Copilot and Azure OpenAI Service​
+Users can use Copilot and other features powered by Azure OpenAI
+    Enabled for the entire organization
+Users can access a standalone, cross-item Power BI Copilot experience (preview)
+    Disabled for the entire organization
+Data sent to Azure OpenAI can be processed outside your capacity's geographic region, compliance boundary, or national cloud instance
+    Disabled for the entire organization
+Capacities can be designated as Fabric Copilot capacities
+    Disabled for the entire organization
+Data sent to Azure OpenAI can be stored outside your capacity's geographic region, compliance boundary, or national cloud instance
+    Disabled for the entire organization
+Only show AI-prepped items in the standalone Copilot in Power BI experience (preview)
+    Disabled for the entire organization
+Additional workloads
+Capacity admins and contributors can add and remove additional workloads
+    Enabled for the entire organization
+Workspace admins can develop partner workloads
+    Disabled for the entire organization
+Users can see and work with additional workloads not validated by Microsoft
+    Disabled for the entire organization

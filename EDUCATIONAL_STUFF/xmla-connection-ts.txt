@@ -1,0 +1,68 @@
+
+Summarized conversation history
+
+Based on the Microsoft documentation I retrieved, here's the refined, authoritative guidance for configuring your Power BI service principal permissions:
+
+Service Principal Configuration for Power BI DAX Execution
+1. Tenant-Level Settings (Power BI Admin Portal)
+Required Admin Actions:
+
+Navigate to Power BI Admin Portal:
+
+Go to https://app.powerbi.com/
+Select Settings > Admin portal
+Enable Service Principal API Access:
+
+Go to Tenant settings > Developer settings
+Find "Allow service principals to use Power BI APIs"
+Enable this setting
+Add your service principal's Application ID: 20c5495d-b98c-410b-aa7b-9ea13dd70f61
+Enable XMLA Endpoint (for your capacity type):
+
+For Premium Capacity:
+
+Go to Capacity settings > Power BI Premium > your capacity name
+Expand Workloads
+Set XMLA Endpoint to "Read Write"
+For Premium Per User:
+
+Go to Premium Per User
+Expand Semantic model workload settings
+Set XMLA Endpoint to "Read Write"
+Enable Integration Settings:
+
+Go to Tenant settings > Integration settings
+Enable "Allow XMLA endpoints and Analyze in Excel with on-premises semantic models"
+Add your service principal to the allowed list
+2. Workspace-Level Permissions
+Add Service Principal to FIS Workspace:
+
+Navigate to your FIS workspace in Power BI
+Click Settings (gear icon) > Manage access
+Click Add people or groups
+Enter your service principal's Application ID: 20c5495d-b98c-410b-aa7b-9ea13dd70f61
+Assign role: Admin, Member, or Contributor (required for write operations)
+Click Add
+3. Dataset-Level Permissions
+Grant Build Permission on FIS-SEMANTIC-MODEL:
+
+In the FIS workspace, locate the FIS-SEMANTIC-MODEL dataset
+Click the More options (...) menu next to the dataset
+Select Manage permissions
+Click Add user
+Enter your service principal's Application ID: 20c5495d-b98c-410b-aa7b-9ea13dd70f61
+Grant Build permission (minimum required for DAX execution)
+Click Add
+4. Authentication Format for Service Principal
+Your current .env configuration should work with this format:
+
+5. Connection String Format (if using XMLA)
+According to Microsoft docs, the XMLA connection string should be:
+
+6. Permission Requirements Summary
+From Microsoft documentation, your service principal needs:
+
+✅ Tenant-level: Service principal API access enabled
+✅ Tenant-level: XMLA endpoint enabled (Read/Write)
+✅ Workspace-level: Admin/Member/Contributor role in FIS workspace
+✅ Dataset-level: Build permission on FIS-SEMANTIC-MODEL dataset

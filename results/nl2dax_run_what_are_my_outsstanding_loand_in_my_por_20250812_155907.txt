@@ -1,0 +1,178 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+what are my outsstanding loand in my portfolio, and describe the customers for me
+
+========== GENERATED SQL ==========
+Below is one way to pull back every outstanding loan owned by “you” along with the key customer‐level attributes.  It assumes that your user‐name is stored in OWNER_NAME on the Owner‐dimension; if not, just hard‐code or pass in whatever string represents “me.”
+
+```sql
+-- Replace this with your actual “me” value or pass in as a parameter
+DECLARE @OwnerName    NVARCHAR(100) = SUSER_SNAME();  
+
+SELECT
+    d.LOAN_ID,
+    d.FACILITY_ID,
+    d.AS_OF_DATE,
+    d.CURRENT_PRINCIPAL_BALANCE,
+    d.INTEREST_BALANCE,
+    d.TOTAL_BALANCE,
+    d.LOAN_STATUS,
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    c.INDUSTRY_DESCRIPTION,
+    c.COUNTRY_DESCRIPTION,
+    c.RISK_RATING_DESCRIPTION,
+    c.RELATIONSHIP_MANAGER
+FROM
+    FIS_CL_DETAIL_FACT    AS d
+    INNER JOIN FIS_OWNER_DIMENSION    AS o
+        ON d.OWNER_KEY = o.OWNER_KEY
+    INNER JOIN FIS_CUSTOMER_DIMENSION AS c
+        ON d.CUSTOMER_KEY = c.CUSTOMER_KEY
+WHERE
+    d.LOAN_STATUS = 'outstanding'      -- only outstanding loans
+    AND o.OWNER_NAME = @OwnerName      -- only loans in “your” portfolio
+ORDER BY
+    c.CUSTOMER_NAME,
+    d.AS_OF_DATE;
+```
+
+Explanation of joins and filters:  
+• We start in the fact table (FIS_CL_DETAIL_FACT) where all loan‐level balances live.  
+• We join to FIS_OWNER_DIMENSION to restrict to your portfolio (OWNER_NAME = ‘me’).  
+• We then join to FIS_CUSTOMER_DIMENSION to pull back customer details (name, industry, country, risk rating, relationship manager).  
+• Finally we filter on LOAN_STATUS = 'outstanding' to get only active/outstanding loans.
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+-- Replace this with your actual "me" value or pass in as a parameter
+DECLARE @OwnerName    NVARCHAR(100) = SUSER_SNAME();  
+
+SELECT
+    d.LOAN_ID,
+    d.FACILITY_ID,
+    d.AS_OF_DATE,
+    d.CURRENT_PRINCIPAL_BALANCE,
+    d.INTEREST_BALANCE,
+    d.TOTAL_BALANCE,
+    d.LOAN_STATUS,
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    c.INDUSTRY_DESCRIPTION,
+    c.COUNTRY_DESCRIPTION,
+    c.RISK_RATING_DESCRIPTION,
+    c.RELATIONSHIP_MANAGER
+FROM
+    FIS_CL_DETAIL_FACT    AS d
+    INNER JOIN FIS_OWNER_DIMENSION    AS o
+        ON d.OWNER_KEY = o.OWNER_KEY
+    INNER JOIN FIS_CUSTOMER_DIMENSION AS c
+        ON d.CUSTOMER_KEY = c.CUSTOMER_KEY
+WHERE
+    d.LOAN_STATUS = 'outstanding'      -- only outstanding loans
+    AND o.OWNER_NAME = @OwnerName      -- only loans in "your" portfolio
+ORDER BY
+    c.CUSTOMER_NAME,
+    d.AS_OF_DATE;
+
+========== SQL QUERY RESULTS ==========
+No results returned.
+
+========== GENERATED DAX ==========
+Here’s one way to build a DAX _query_ that:
+
+ 1. Filters your loan‐detail fact to only the “outstanding” loans  
+ 2. Filters again to only those loans whose Owner in FIS_OWNER_DIMENSION matches the current user (“me”)  
+ 3. Summarizes by customer, returning a count of outstanding loans plus the total outstanding principal per customer  
+ 4. Shows basic customer attributes (name, country) alongside those measures  
+
+```DAX
+EVALUATE
+VAR _CurrentOwner = USERPRINCIPALNAME()
+RETURN
+SUMMARIZECOLUMNS(
+    -- Customer attributes you want to show
+    FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],
+    FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],
+    FIS_CUSTOMER_DIMENSION[COUNTRY_DESCRIPTION],
+
+    -- Measure 1: number of distinct outstanding loans
+    "OutstandingLoanCount",
+        CALCULATE(
+            DISTINCTCOUNT( FIS_CL_DETAIL_FACT[LOAN_ID] ),
+            FIS_CL_DETAIL_FACT[LOAN_STATUS] = "outstanding",
+            -- link back to Owner dimension and filter to current user
+            TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] )
+        ),
+
+    -- Measure 2: total current principal balance on those loans
+    "OutstandingPrincipalBalance",
+        CALCULATE(
+            SUM( FIS_CL_DETAIL_FACT[CURRENT_PRINCIPAL_BALANCE] ),
+            FIS_CL_DETAIL_FACT[LOAN_STATUS] = "outstanding",
+            TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] )
+        )
+)
+ORDER BY
+    [OutstandingPrincipalBalance] DESC
+```
+
+Explanation of key pieces:
+
+• USERPRINCIPALNAME() captures the “me” logic in your portfolio_owner entity  
+• TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] ) applies that owner‐filter into the fact table via the model’s relationships  
+• SUMMARIZECOLUMNS is used to project the set of customers plus two calculated measures  
+
+You can add or remove customer columns, swap COUNTRY_DESCRIPTION for any other attribute, or switch to USERNAME() if that better matches how your security is wired.
+
+========== FORMATTED DAX ==========
+Here’s one way to build a DAX _query_ that:
+
+ 1. Filters your loan‐detail fact to only the “outstanding” loans  
+ 2. Filters again to only those loans whose Owner in FIS_OWNER_DIMENSION matches the current user (“me”)  
+ 3. Summarizes by customer, returning a count of outstanding loans plus the total outstanding principal per customer  
+ 4. Shows basic customer attributes (name, country) alongside those measures  
+
+```DAX
+EVALUATE
+VAR _CurrentOwner = USERPRINCIPALNAME()
+RETURN
+SUMMARIZECOLUMNS(
+    -- Customer attributes you want to show
+    FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],
+    FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],
+    FIS_CUSTOMER_DIMENSION[COUNTRY_DESCRIPTION],
+
+    -- Measure 1: number of distinct outstanding loans
+    "OutstandingLoanCount",
+        CALCULATE(
+            DISTINCTCOUNT( FIS_CL_DETAIL_FACT[LOAN_ID] ),
+            FIS_CL_DETAIL_FACT[LOAN_STATUS] = "outstanding",
+            -- link back to Owner dimension and filter to current user
+            TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] )
+        ),
+
+    -- Measure 2: total current principal balance on those loans
+    "OutstandingPrincipalBalance",
+        CALCULATE(
+            SUM( FIS_CL_DETAIL_FACT[CURRENT_PRINCIPAL_BALANCE] ),
+            FIS_CL_DETAIL_FACT[LOAN_STATUS] = "outstanding",
+            TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] )
+        )
+)
+ORDER BY
+    [OutstandingPrincipalBalance] DESC
+```
+
+Explanation of key pieces:
+
+• USERPRINCIPALNAME() captures the “me” logic in your portfolio_owner entity  
+• TREATAS( { _CurrentOwner }, FIS_OWNER_DIMENSION[OWNER_NAME] ) applies that owner‐filter into the fact table via the model’s relationships  
+• SUMMARIZECOLUMNS is used to project the set of customers plus two calculated measures  
+
+You can add or remove customer columns, swap COUNTRY_DESCRIPTION for any other attribute, or switch to USERNAME() if that better matches how your security is wired.
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: HTTPSConnectionPool(host='login.microsoftonline.com', port=443): Max retries exceeded with url: /a172a259-b1c7-4944-b2e1-6d551f954711/v2.0/.well-known/openid-configuration (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)')))
+
+========== RUN DURATION ==========
+Run duration: 92.40 seconds
