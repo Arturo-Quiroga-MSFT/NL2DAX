@@ -1,84 +1,101 @@
 
-# NL2DAX & NL2SQL for Azure SQL DB
+# NL2DAX - Natural Language to DAX/SQL Translation
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Power BI](https://img.shields.io/badge/Power%20BI-XMLA-orange.svg)](https://docs.microsoft.com/en-us/power-bi/developer/embedded/xmla-endpoint)
 
-This project translates natural language queries into DAX or SQL for Azure SQL DB using LangChain and Azure OpenAI. It features schema awareness, robust error handling, and clear output formatting.
+A comprehensive solution for translating natural language queries into DAX and SQL for Azure SQL Database and Power BI datasets. Built with LangChain, Azure OpenAI, and featuring schema awareness, robust error handling, and automated Power BI service principal setup.
 
-## Repository Structure
+## 🚀 Features
+
+- **🗣️ Natural Language Processing**: Convert English questions to executable DAX and SQL queries
+- **🧠 Schema Awareness**: Automatically reads database schema, relationships, and primary keys
+- **🔄 Dual Output**: Generate both DAX (for Power BI) and SQL (for Azure SQL) from the same query
+- **🛠️ Service Principal Management**: Automated setup for Power BI XMLA endpoint access
+- **📊 Query Execution**: Execute SQL queries directly and display results
+- **✨ DAX Formatting**: Integration with DAX Formatter API for clean, readable DAX
+- **🔍 Comprehensive Diagnostics**: Tools to verify and troubleshoot Power BI connectivity
+- **📝 Result Logging**: Automatic timestamped result files for audit and review
+
+## 📁 Repository Structure
 
 ```
 NL2DAX/
-├── .github/
-│   └── copilot-instructions.md
-├── .vscode/
-│   └── settings.json
-├── CODE/
-│   ├── .env
-│   ├── .env.example
-│   ├── .gitignore
-│   ├── dax_formatter.py
-│   ├── dax_generator.py
-│   ├── db_connection_check.py
-│   ├── main.py
-│   ├── query_executor.py
-│   ├── requirements.txt
-│   ├── schema_cache.json
-│   ├── schema_reader.py
-│   └── sql_executor.py
-├── RESULTS/
-│   ├── nl2dax_run_List_the_average_balance_per_customer_by_20250806_142122.txt
-│   ├── nl2dax_run_List_the_average_balance_per_customer_by_20250806_143722.txt
-│   ├── nl2dax_run_List_the_top_5_customers_by_total_credit_20250806_140837.txt
-│   ├── nl2dax_run_List_the_top_5_customers_by_total_credit_20250806_141144.txt
-│   ├── nl2dax_run_List_top_10_counterparties_by_total_expo_20250806_132203.txt
-│   ├── nl2dax_run_List_top_10_counterparties_by_total_expo_20250806_133940.txt
-│   ├── nl2dax_run_Show_the_NPL_ratio_percentage_by_region__20250806_131708.txt
-│   ├── nl2dax_run_Show_the_NPL_ratio_percentage_by_region__20250806_132806.txt
-│   ├── nl2dax_run_Show_total_exposure_USD_by_risk_rating_c_20250806_132031.txt
-│   ├── nl2dax_run_What_is_the_total_principal_balance_for__20250806_133348.txt
-│   └── nl2dax_run_What_is_the_total_principal_balance_for__20250806_133651.txt
-├── TEST QUESTIONS/
-│   └── nl2dax_star_schema_test_questions.txt
-├── __pycache__/
-│   └── *.pyc
-├── README.md
+├── 📂 CODE/                    # Core application code and diagnostic tools
+├── 📂 NOTEBOOKS/               # Jupyter notebooks for Power BI REST API examples
+├── 📂 RESULTS/                 # Generated query results and logs
+├── 📂 TEST QUESTIONS/          # Sample questions for testing
+├── 📂 docs/                    # Documentation and diagrams
+├── 📂 scripts/                 # Setup and troubleshooting scripts
+├── 📂 EDUCATIONAL_STUFF/       # Learning materials and comparisons
+├── 📂 From Jason/              # External documentation and setup guides
+├── 🔧 .env.template           # Environment variables template
+├── 📋 requirements.txt        # Python dependencies
+└── 📖 README.md               # This file
 ```
 
+## 🏗️ Architecture
 
-## Setup
-- Configure your Azure OpenAI credentials and Azure SQL DB connection in `.env`.
-- Install dependencies: `pip install -r requirements.txt`
+The system follows a modular architecture with clear separation of concerns:
 
+```mermaid
+flowchart TD
+    A[Natural Language Query] --> B[LangChain + Azure OpenAI]
+    C[Schema Cache] --> B
+    D[Live Schema Reader] --> C
+    B --> E[DAX Generator]
+    B --> F[SQL Generator]
+    E --> G[DAX Formatter API]
+    G --> H[Power BI XMLA Executor]
+    F --> I[SQL Sanitizer]
+    I --> J[Azure SQL Executor]
+    H --> K[Results & Logging]
+    J --> K
+```
 
-## Features
-- **NL2DAX**: Generate DAX queries from natural language.
-- **NL2SQL**: Generate SQL queries from natural language.
-- **SQL Execution**: Run generated SQL queries and display results as tables.
-- **Schema Awareness**: Reads schema, relationships, and primary keys for accurate query generation.
-- **Clear Output**: Results and sections are separated by ASCII banners for readability.
-- **DAX Formatting**: Uses the public DAX Formatter API (no API key required).
-- **Error Handling**: Robust error and exception handling throughout the pipeline.
+## 🔧 Quick Start
 
+### Prerequisites
 
-## Usage
+- Python 3.8 or higher
+- Azure OpenAI service access
+- Azure SQL Database
+- Power BI Premium workspace (for DAX execution)
 
-1. **Run the main pipeline:**
-	 ```bash
-	 python main.py
-	 ```
-	 - Input a natural language question. The system will generate DAX and SQL, execute SQL, and print results with clear banners.
+### Installation
 
-2. **View schema summary:**
-	 ```bash
-	 python schema_reader.py
-	 ```
-	 - Prints a detailed summary of tables, columns, primary keys, and relationships.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Arturo-Quiroga-MSFT/NL2DAX.git
+   cd NL2DAX
+   ```
 
-3. **Update schema cache:**
-	 ```bash
-	 python schema_reader.py --cache
-	 ```
-	 - Refreshes the local schema cache from the database.
+2. **Create virtual environment**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment**
+   ```bash
+   cp .env.template .env
+   # Edit .env with your credentials (see Configuration section)
+   ```
+
+5. **Test the setup**
+   ```bash
+   # Test basic functionality
+   python CODE/main.py
+   
+   # Test Power BI connectivity (if configured)
+   python CODE/smoke_test_xmla.py
+   ```
 
 ## DAX Formatter API
 
@@ -192,118 +209,313 @@ erDiagram
 	}
 ```
 
-Rendered image:
-![Architecture](docs/images/diagram_0.png)
 
-## Pipeline flow (detailed)
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file in the `CODE/` directory with the following variables:
+
+```bash
+# Azure OpenAI Configuration
+AZURE_OPENAI_ENDPOINT=https://your-openai-resource.openai.azure.com/
+AZURE_OPENAI_API_KEY=your-openai-api-key
+AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o-mini
+AZURE_OPENAI_API_VERSION=2023-05-15
+
+# Azure SQL Database Configuration
+SQL_SERVER=your-server.database.windows.net
+SQL_DATABASE=your-database-name
+SQL_USERNAME=your-username
+SQL_PASSWORD=your-password
+ODBC_DRIVER=ODBC Driver 18 for SQL Server
+
+# Power BI Configuration (for DAX execution)
+POWER_BI_CLIENT_ID=your-service-principal-client-id
+POWER_BI_CLIENT_SECRET=your-service-principal-secret
+POWER_BI_TENANT_ID=your-azure-tenant-id
+POWER_BI_WORKSPACE_ID=your-powerbi-workspace-id
+POWER_BI_DATASET_ID=your-powerbi-dataset-id
+XMLA_CONNECTION_STRING=Provider=MSOLAP;Data Source=powerbi://api.powerbi.com/v1.0/myorg/YourWorkspace;...
+
+# Optional Configuration
+DAX_FORMATTER_SERVER=https://www.daxformatter.com
+LOG_LEVEL=INFO
+```
+
+### Power BI Service Principal Setup
+
+For Power BI connectivity, you'll need to set up a service principal:
+
+1. **Create the service principal** (use our automated script):
+   ```bash
+   # Run the PowerShell setup script
+   ./scripts/create_service_principal.ps1
+   ```
+
+2. **Enable XMLA endpoints** (admin required):
+   ```bash
+   # Enable XMLA in Power BI admin portal
+   ./scripts/enable_xmla_endpoints.ps1
+   ```
+
+3. **Verify permissions**:
+   ```bash
+   # Test service principal connectivity
+   python CODE/diagnose_permissions.py
+   ```
+
+## 📖 Usage Guide
+
+### Basic Query Execution
+
+```bash
+cd CODE
+python main.py
+```
+
+**Example session:**
+```
+=== 🤖 Welcome to NL2DAX ===
+Enter your question (or 'exit' to quit): What are the top 5 customers by balance?
+
+=== Generated DAX Query ===
+EVALUATE
+TOPN(
+    5,
+    SUMMARIZE(
+        FIS_CUSTOMER_DIMENSION,
+        FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],
+        "TotalBalance", SUM(FIS_CL_DETAIL_FACT[TOTAL_BALANCE])
+    ),
+    [TotalBalance],
+    DESC
+)
+
+=== Generated SQL Query ===
+SELECT TOP 5
+    c.CUSTOMER_NAME,
+    SUM(f.TOTAL_BALANCE) as TotalBalance
+FROM FIS_CUSTOMER_DIMENSION c
+INNER JOIN FIS_CL_DETAIL_FACT f ON c.CUSTOMER_KEY = f.CUSTOMER_KEY
+GROUP BY c.CUSTOMER_NAME
+ORDER BY TotalBalance DESC;
+
+=== SQL Execution Results ===
+[Query results displayed in table format]
+```
+
+### Schema Exploration
+
+```bash
+# View complete schema
+python CODE/schema_reader.py
+
+# Update schema cache
+python CODE/schema_reader.py --cache
+
+# Test database connectivity
+python CODE/db_connection_check.py
+```
+
+### Power BI Diagnostics
+
+```bash
+# Comprehensive permission check
+python CODE/diagnose_permissions.py
+
+# Quick XMLA status check
+python CODE/xmla_status_check.py
+
+# Simple smoke test
+python CODE/smoke_test_xmla.py
+```
+
+### Advanced Usage
+
+```bash
+# Individual module testing
+python CODE/dax_generator.py
+python CODE/sql_executor.py
+python CODE/query_executor.py
+
+# DAX formatting
+python CODE/dax_formatter.py
+```
+
+### Jupyter Notebooks
+
+Explore the interactive examples in the `NOTEBOOKS/` directory:
+
+- `PowerBI_RESTAPI_DAX_Query_Example.ipynb`: REST API examples
+- `PowerBI_RESTAPI_DAX_Query_Example2.ipynb`: Advanced scenarios
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **Authentication Errors**
+   ```bash
+   # Verify service principal permissions
+   python CODE/diagnose_permissions.py
+   ```
+
+2. **XMLA Connection Issues**
+   ```bash
+   # Check XMLA endpoint status
+   python CODE/xmla_status_check.py
+   ```
+
+3. **SQL Connection Problems**
+   ```bash
+   # Test database connectivity
+   python CODE/db_connection_check.py
+   ```
+
+### Error Messages
+
+| Error | Solution |
+|-------|----------|
+| `401 Unauthorized` | Check service principal credentials and permissions |
+| `XMLA endpoint not found` | Verify XMLA endpoints are enabled in Power BI admin portal |
+| `Database connection failed` | Check SQL server credentials and firewall settings |
+| `Schema cache empty` | Run `schema_reader.py --cache` to rebuild cache |
+| `DAX Formatter HTTP 404` | Check internet connection and service availability |
+
+### DAX Formatter API Notes
+
+- The DAX Formatter API requires no API key
+- If you receive HTTP 404 errors, the service may be temporarily unavailable
+- Check https://www.daxformatter.com/api/daxformatter/ in your browser to verify availability
+
+## 🏗️ Architecture Deep Dive
+
+### High-Level Flow
 
 ```mermaid
 sequenceDiagram
-	actor User
-	participant Main as main.py
-	participant LLM as Azure OpenAI (LangChain)
-	participant Schema as schema_reader/cache
-	participant GenSQL as SQL Generator
-	participant SQLExec as SQL Executor (ODBC)
-	participant GenDAX as DAX Generator
-	participant DAXFmt as DAX Formatter (optional)
-	participant DAXExec as DAX Executor (XMLA)
-	participant FS as RESULTS/*.txt
+    actor User
+    participant Main as main.py
+    participant LLM as Azure OpenAI
+    participant Schema as schema_reader/cache
+    participant GenSQL as SQL Generator
+    participant SQLExec as SQL Executor
+    participant GenDAX as DAX Generator
+    participant DAXFmt as DAX Formatter
+    participant FS as RESULTS/*.txt
 
-	User->>Main: Enter NL question
-	Main->>Schema: Load schema (cache/live)
-	Main->>LLM: Parse intent/entities (with schema context)
-	LLM-->>Main: Intent + entities
-	Main->>GenSQL: Generate SQL with context
-	GenSQL-->>Main: SQL (raw, may include prose/fences)
-	Main->>Main: Extract + sanitize SQL
-	Main->>SQLExec: Execute SQL
-	SQLExec-->>Main: Tabular results
-	Main->>GenDAX: Generate DAX with context
-	GenDAX-->>Main: DAX query/measure
-	Main->>DAXFmt: Format/validate (optional)
-	DAXFmt-->>Main: Formatted DAX
-	Main->>DAXExec: Execute DAX (optional)
-	DAXExec-->>Main: DAX results
-	Main->>FS: Write output file with banners
-	Main-->>User: Print results with banners
+    User->>Main: Enter NL question
+    Main->>Schema: Load schema (cache/live)
+    Main->>LLM: Parse intent with schema context
+    LLM-->>Main: Intent + entities
+    Main->>GenSQL: Generate SQL
+    GenSQL-->>Main: SQL query
+    Main->>SQLExec: Execute SQL
+    SQLExec-->>Main: Results
+    Main->>GenDAX: Generate DAX
+    GenDAX-->>Main: DAX query
+    Main->>DAXFmt: Format DAX
+    DAXFmt-->>Main: Formatted DAX
+    Main->>FS: Write timestamped results
+    Main-->>User: Display results with banners
 ```
 
-## Tips for accurate NL2DAX/NL2SQL
+### Star Schema Example
 
-- Be explicit: include metric, aggregation, grain, filters, and time window
-- Name entities in business terms that map to dimensions/measures
-- Align with model grain: measures aggregate facts; visuals slice by dimensions
-- Validate incrementally: start with a single dimension and add more
-- Cross-check: compare DAX and SQL outputs for the same logic when possible
+```mermaid
+erDiagram
+    FIS_CL_DETAIL_FACT }o--|| FIS_CUSTOMER_DIMENSION : CUSTOMER_KEY
+    FIS_CL_DETAIL_FACT }o--|| FIS_CURRENCY_DIMENSION : CURRENCY_KEY
+    FIS_CL_DETAIL_FACT }o--|| FIS_MONTH_DIMENSION : MONTH_ID
+    FIS_CL_DETAIL_FACT }o--|| FIS_INVESTOR_DIMENSION : INVESTOR_KEY
+    
+    FIS_CL_DETAIL_FACT {
+        int CUSTOMER_KEY
+        int CURRENCY_KEY
+        int MONTH_ID
+        int INVESTOR_KEY
+        numeric TOTAL_BALANCE
+        numeric LIMIT_AMOUNT
+        bool IS_NON_PERFORMING
+    }
+    
+    FIS_CUSTOMER_DIMENSION {
+        int CUSTOMER_KEY PK
+        string CUSTOMER_ID
+        string CUSTOMER_NAME
+        string COUNTRY_DESCRIPTION
+        string RISK_RATING_DESCRIPTION
+    }
+```
 
-## Adding images (optional)
+## 🎯 Best Practices
 
-To include screenshots or exported diagrams:
-- Create a folder `docs/images/` and add PNG/SVG files.
-- Reference them in the README:
-  - `![Pipeline](docs/images/pipeline.png)`
-  - `![Schema](docs/images/schema.png)`
+### Writing Effective Natural Language Queries
 
-GitHub renders Mermaid diagrams natively; no extra setup required.
+- **Be explicit**: Include metric, aggregation, grain, filters, and time window
+- **Use business terms**: Align with dimension and measure names in your model
+- **Start simple**: Begin with single dimensions, add complexity incrementally
+- **Cross-validate**: Compare DAX and SQL outputs for consistency
 
-## Quickstart
+**Good examples:**
+- "Top 10 customers by total balance"
+- "NPL ratio percentage by country and risk rating"
+- "Average balance per customer for Q4 2023"
+
+**Avoid vague queries:**
+- "Show me data"
+- "What's the performance?"
+
+## 📁 Directory Structure
+
+| Directory | Purpose | Key Files |
+|-----------|---------|-----------|
+| `CODE/` | Core application code | `main.py`, `dax_generator.py`, `sql_executor.py` |
+| `NOTEBOOKS/` | Jupyter examples | Power BI REST API demonstrations |
+| `RESULTS/` | Query outputs | Timestamped result files |
+| `scripts/` | Setup & troubleshooting | PowerShell automation scripts |
+| `docs/` | Documentation | Architecture diagrams, images |
+| `TEST QUESTIONS/` | Sample queries | Pre-built test cases |
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Setup
 
 ```bash
-# 1) Create and activate a virtual environment (optional but recommended)
+# Clone and setup development environment
+git clone https://github.com/Arturo-Quiroga-MSFT/NL2DAX.git
+cd NL2DAX
 python -m venv .venv
 source .venv/bin/activate
-
-# 2) Install dependencies
-pip install -r CODE/requirements.txt
-
-# 3) Configure environment
-cp CODE/.env.example CODE/.env
-# Edit CODE/.env with your Azure OpenAI and Azure SQL settings
-
-# 4) Run the pipeline
-python CODE/main.py
-
-# 5) Optional: View schema summary
-python CODE/schema_reader.py
+pip install -r requirements.txt -r CODE/requirements.txt
 ```
 
-Rendered image:
-![Schema](docs/images/diagram_1.png)
+## 📄 License
 
-## Configuration
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-| Variable | Description | Example |
-|---|---|---|
-| AZURE_OPENAI_API_KEY | Azure OpenAI API key | sk-... |
-| AZURE_OPENAI_ENDPOINT | Azure OpenAI endpoint URL | https://your-openai-resource.openai.azure.com/ |
-| AZURE_OPENAI_DEPLOYMENT_NAME | Chat model deployment name | gpt-4o-mini |
-| SQL_SERVER | Azure SQL server hostname | yourserver.database.windows.net |
-| SQL_DATABASE | Database name | yourdb |
-| SQL_USERNAME | SQL auth username (or use AAD) | sqluser |
-| SQL_PASSWORD | SQL auth password | secret |
-| ODBC_DRIVER | ODBC driver name | ODBC Driver 18 for SQL Server |
-| XMLA_CONNECTION_STRING | Tabular XMLA connection (optional for DAX) | Provider=MSOLAP;Data Source=... |
+## 🙏 Acknowledgments
 
-All variables live in `CODE/.env`.
+- Microsoft Power BI team for XMLA endpoint support
+- DAX Formatter API for query beautification
+- Azure OpenAI for natural language processing capabilities
+- LangChain community for NLP framework support
 
-## Exporting diagrams to images (optional)
+## 📞 Support
 
-To generate PNG/SVG from the Mermaid diagrams in this README:
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Arturo-Quiroga-MSFT/NL2DAX/issues)
+- 📖 **Documentation**: [Wiki](https://github.com/Arturo-Quiroga-MSFT/NL2DAX/wiki)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Arturo-Quiroga-MSFT/NL2DAX/discussions)
 
-```bash
-npm install -g @mermaid-js/mermaid-cli
-chmod +x docs/export-diagrams.sh
-./docs/export-diagrams.sh
-```
+---
 
-Images will be written to `docs/images/` and can be referenced as:
-
-```markdown
-![Architecture](docs/images/diagram_0.png)
-![Schema](docs/images/diagram_1.png)
-![Pipeline](docs/images/diagram_2.png)
-```
-
-Rendered image:
-![Pipeline](docs/images/diagram_2.png)
+<div align="center">
+Made with ❤️ by <a href="https://github.com/Arturo-Quiroga-MSFT">Arturo Quiroga</a>
+</div>
