@@ -1,0 +1,79 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me all customers in the database
+
+========== GENERATED SQL ==========
+SELECT
+    c.CUSTOMER_KEY,
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME,
+    c.CUSTOMER_SHORT_NAME,
+    c.CUSTOMER_TYPE_CODE,
+    c.CUSTOMER_TYPE_DESCRIPTION,
+    c.RISK_RATING_CODE,
+    c.RISK_RATING_DESCRIPTION,
+    c.COUNTRY_CODE,
+    c.COUNTRY_DESCRIPTION,
+    c.STATE,
+    c.CITY,
+    c.INDUSTRY_CODE,
+    c.INDUSTRY_DESCRIPTION,
+    c.PRIMARY_INDUSTRY_CODE,
+    c.PRIMARY_INDUSTRY_DESC,
+    c.ADDRESS_LINE_1,
+    c.POSTAL_ZIP_CD,
+    c.PHONE_NUMBER,
+    c.EMAIL_ADDRESS
+FROM FIS_CUSTOMER_DIMENSION AS c
+ORDER BY c.CUSTOMER_NAME;
+
+========== SQL QUERY ERROR ==========
+[ERROR] Failed to execute SQL query: ('42S22', "[42S22] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Invalid column name 'STATE'. (207) (SQLExecDirectW)")
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE
+    ),
+    "CustomerKey",               'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerID",                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CustomerName",              'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerShortName",         'FIS_CUSTOMER_DIMENSION'[CUSTOMER_SHORT_NAME],
+    "CustomerTypeCode",          'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_CODE],
+    "CustomerTypeDescription",   'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "CountryCode",               'FIS_CUSTOMER_DIMENSION'[COUNTRY_CODE],
+    "CountryDescription",        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE
+    ),
+    "CustomerKey",               'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerID",                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CustomerName",              'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerShortName",         'FIS_CUSTOMER_DIMENSION'[CUSTOMER_SHORT_NAME],
+    "CustomerTypeCode",          'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_CODE],
+    "CustomerTypeDescription",   'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "CountryCode",               'FIS_CUSTOMER_DIMENSION'[COUNTRY_CODE],
+    "CountryDescription",        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerKey] | [CustomerID] | [CustomerName]                    | [CustomerShortName] | [CustomerTypeCode] | [CustomerTypeDescription] | [CountryCode] | [CountryDescription]
+--------------+--------------+-----------------------------------+---------------------+--------------------+---------------------------+---------------+---------------------
+1             | CUST001      | Desert Manufacturing LLC          | Desert Mfg          | CORP               | Corporation               | US            | United States       
+2             | CUST002      | Palm Investors Inc.               | Palm Invest         | CORP               | Corporation               | US            | United States       
+3             | CUST003      | Southwest Energy Partners         | SW Energy           | LLC                | Limited Liability Company | US            | United States       
+4             | CUST004      | Pacific Technology Solutions      | Pac Tech            | CORP               | Corporation               | US            | United States       
+1002          | CUST005      | Atlantic Biomedical Corporation   | Atlantic Bio        | CORP               | Corporation               | US            | United States       
+1003          | CUST006      | Mountain Capital Advisors LLC     | Mountain Cap        | LLC                | Limited Liability Company | US            | United States       
+1004          | CUST007      | Northwest Retail Enterprises Inc. | NW Retail           | CORP               | Corporation               | US            | United States       
+
+========== RUN DURATION ==========
+Run duration: 134.59 seconds

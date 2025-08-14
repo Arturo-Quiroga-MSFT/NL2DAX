@@ -1,0 +1,44 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me the total limit amount by customer type
+
+========== GENERATED SQL ==========
+SELECT
+    c.CUSTOMER_TYPE_DESCRIPTION AS CustomerType,
+    SUM(f.LIMIT_AMOUNT) AS TotalLimitAmount
+FROM FIS_CA_DETAIL_FACT f
+INNER JOIN FIS_CUSTOMER_DIMENSION c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+    c.CUSTOMER_TYPE_DESCRIPTION
+ORDER BY
+    c.CUSTOMER_TYPE_DESCRIPTION;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CustomerType              | TotalLimitAmount
+--------------------------+-----------------
+Corporation               | 7500000.00      
+Limited Liability Company | 3500000.00      
+
+========== GENERATED DAX ==========
+EVALUATE
+SUMMARIZECOLUMNS(
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "Total Limit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SUMMARIZECOLUMNS(
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "Total Limit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+FIS_CUSTOMER_DIMENSION[CUSTOMER_TYPE_DESCRIPTION] | [Total Limit Amount]
+--------------------------------------------------+---------------------
+Limited Liability Company                         | 11000000.0          
+Corporation                                       | 11000000.0          
+
+========== RUN DURATION ==========
+Run duration: 37.35 seconds

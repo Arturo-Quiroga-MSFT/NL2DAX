@@ -1,0 +1,115 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+test parallel query baseline
+
+========== GENERATED SQL ==========
+SELECT
+    cd.CUSTOMER_TYPE_DESCRIPTION,
+    md.YEAR,
+    md.MONTH,
+    COUNT(DISTINCT cl.LOAN_ID) AS LoanCount,
+    SUM(cl.CURRENT_PRINCIPAL_BALANCE) AS TotalLoanPrincipalBalance,
+    SUM(cl.OUTSTANDING_BALANCE) AS TotalLoanOutstandingBalance,
+    COUNT(DISTINCT ca.ACCOUNT_ID) AS AccountCount,
+    SUM(ca.CURRENT_BALANCE) AS TotalAccountBalance,
+    SUM(ca.AVAILABLE_BALANCE) AS TotalAvailableBalance
+FROM FIS_CUSTOMER_DIMENSION cd
+INNER JOIN FIS_CL_DETAIL_FACT cl
+    ON cd.CUSTOMER_KEY = cl.CUSTOMER_KEY
+INNER JOIN FIS_CA_DETAIL_FACT ca
+    ON cd.CUSTOMER_KEY = ca.CUSTOMER_KEY
+   AND cl.MONTH_ID = ca.MONTH_ID
+INNER JOIN FIS_MONTH_DIMENSION md
+    ON cl.MONTH_ID = md.MONTH_ID
+WHERE md.YEAR >= YEAR(GETDATE()) - 1
+GROUP BY
+    cd.CUSTOMER_TYPE_DESCRIPTION,
+    md.YEAR,
+    md.MONTH
+ORDER BY
+    md.YEAR,
+    md.MONTH,
+    cd.CUSTOMER_TYPE_DESCRIPTION
+
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+SELECT
+    cd.CUSTOMER_TYPE_DESCRIPTION,
+    md.YEAR,
+    md.MONTH,
+    COUNT(DISTINCT cl.LOAN_ID) AS LoanCount,
+    SUM(cl.CURRENT_PRINCIPAL_BALANCE) AS TotalLoanPrincipalBalance,
+    SUM(cl.OUTSTANDING_BALANCE) AS TotalLoanOutstandingBalance,
+    COUNT(DISTINCT ca.ACCOUNT_ID) AS AccountCount,
+    SUM(ca.CURRENT_BALANCE) AS TotalAccountBalance,
+    SUM(ca.AVAILABLE_BALANCE) AS TotalAvailableBalance
+FROM FIS_CUSTOMER_DIMENSION cd
+INNER JOIN FIS_CL_DETAIL_FACT cl
+    ON cd.CUSTOMER_KEY = cl.CUSTOMER_KEY
+INNER JOIN FIS_CA_DETAIL_FACT ca
+    ON cd.CUSTOMER_KEY = ca.CUSTOMER_KEY
+   AND cl.MONTH_ID = ca.MONTH_ID
+INNER JOIN FIS_MONTH_DIMENSION md
+    ON cl.MONTH_ID = md.MONTH_ID
+WHERE md.YEAR >= YEAR(GETDATE()) - 1
+GROUP BY
+    cd.CUSTOMER_TYPE_DESCRIPTION,
+    md.YEAR,
+    md.MONTH
+ORDER BY
+    md.YEAR,
+    md.MONTH,
+    cd.CUSTOMER_TYPE_DESCRIPTION
+
+========== SQL QUERY ERROR ==========
+[ERROR] Failed to execute SQL query: ('42S22', "[42S22] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Invalid column name 'YEAR'. (207) (SQLExecDirectW)")
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        NATURALINNERJOIN(
+            NATURALINNERJOIN(
+                'FIS_CL_DETAIL_FACT',
+                'FIS_CA_DETAIL_FACT'
+            ),
+            'FIS_MONTH_DIMENSION'
+        ),
+        'FIS_MONTH_DIMENSION'[YEAR] = 2023
+    ),
+    "CustomerKey",           'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY],
+    "LoanID",                'FIS_CL_DETAIL_FACT'[LOAN_ID],
+    "AccountID",             'FIS_CA_DETAIL_FACT'[ACCOUNT_ID],
+    "Year",                  'FIS_MONTH_DIMENSION'[YEAR],
+    "Month",                 'FIS_MONTH_DIMENSION'[MONTH],
+    "CurrentPrincipal",      'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE],
+    "CurrentAccountBalance", 'FIS_CA_DETAIL_FACT'[CURRENT_BALANCE]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        NATURALINNERJOIN(
+            NATURALINNERJOIN(
+                'FIS_CL_DETAIL_FACT',
+                'FIS_CA_DETAIL_FACT'
+            ),
+            'FIS_MONTH_DIMENSION'
+        ),
+        'FIS_MONTH_DIMENSION'[YEAR] = 2023
+    ),
+    "CustomerKey",           'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY],
+    "LoanID",                'FIS_CL_DETAIL_FACT'[LOAN_ID],
+    "AccountID",             'FIS_CA_DETAIL_FACT'[ACCOUNT_ID],
+    "Year",                  'FIS_MONTH_DIMENSION'[YEAR],
+    "Month",                 'FIS_MONTH_DIMENSION'[MONTH],
+    "CurrentPrincipal",      'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE],
+    "CurrentAccountBalance", 'FIS_CA_DETAIL_FACT'[CURRENT_BALANCE]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (7, 17) No common join columns detected. The join function 'NATURALINNERJOIN' requires at-least one common join column."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241804006"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 114.40 seconds

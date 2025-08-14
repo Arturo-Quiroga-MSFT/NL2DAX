@@ -1,0 +1,48 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me the first row from the current account table
+
+========== GENERATED SQL ==========
+SELECT TOP 1 *
+FROM FIS_CA_DETAIL_FACT;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CA_DETAIL_KEY | CUSTOMER_KEY | CA_PRODUCT_KEY | LIMIT_KEY | INVESTOR_KEY | OWNER_KEY | MONTH_ID | CA_CURRENCY_CODE | FACILITY_ID | AS_OF_DATE | LIMIT_AMOUNT | LIMIT_WITHHELD | LIMIT_USED | LIMIT_AVAILABLE | PRINCIPAL_AMOUNT_DUE | NUMBER_OF_LIMIT_EXPOSURE | LIMIT_VALUE_OF_COLLATERAL | FEES_CHARGED_MTD | FEES_CHARGED_QTD | FEES_CHARGED_YTD | FEES_CHARGED_ITD | FEES_EARNED_MTD | FEES_EARNED_QTD | FEES_EARNED_YTD | FEES_EARNED_ITD | FEES_PAID_MTD | FEES_PAID_QTD | FEES_PAID_YTD | FEES_PAID_ITD | COMMITMENT_FEE_RATE | UTILIZATION_FEE_RATE | CONTRACTUAL_OWNERSHIP_PCT | ORIGINAL_LIMIT_AMOUNT | FINANCIAL_FX_RATE | PORTFOLIO_ID | LIMIT_STATUS_CODE | LIMIT_STATUS_DESCRIPTION | LIMIT_STATUS_DATE | PROBABILITY_OF_DEFAULT | LOSS_GIVEN_DEFAULT | EXPOSURE_AT_DEFAULT | RISK_WEIGHT_PERCENTAGE | REGULATORY_CAPITAL
+--------------+--------------+----------------+-----------+--------------+-----------+----------+------------------+-------------+------------+--------------+----------------+------------+-----------------+----------------------+--------------------------+---------------------------+------------------+------------------+------------------+------------------+-----------------+-----------------+-----------------+-----------------+---------------+---------------+---------------+---------------+---------------------+----------------------+---------------------------+-----------------------+-------------------+--------------+-------------------+--------------------------+-------------------+------------------------+--------------------+---------------------+------------------------+-------------------
+1             | 1            | 1              | 1         | 1            | 1         | 202407   | USD              | FCL-001     | 2025-07-31 | 5000000.00   | 0.00           | 1500000.00 | 3500000.00      | 0.00                 | 3                        | 7500000.00                | 12500.00         | 37500.00         | 87500.00         | 125000.00        | 12500.00        | 37500.00        | 87500.00        | 125000.00       | 12000.00      | 36000.00      | 84000.00      | 120000.00     | 0.002500            | 0.005000             | 1.0000                    | 5000000.00            | 1.00000000        | CL           | A                 | Active                   | 2025-07-31        | 0.020000               | 0.250000           | 3750000.00          | 100.00                 | 300000.00         
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_CA_DETAIL_FACT',
+        'FIS_CA_DETAIL_FACT'[AS_OF_DATE], ASC
+    ),
+    "ACCOUNT_ID",  'FIS_CA_DETAIL_FACT'[ACCOUNT_ID],
+    "CUSTOMER_KEY",'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY],
+    "MONTH_ID",    'FIS_CA_DETAIL_FACT'[MONTH_ID],
+    "AS_OF_DATE",  'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+    "BALANCE",     'FIS_CA_DETAIL_FACT'[BALANCE]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_CA_DETAIL_FACT',
+        'FIS_CA_DETAIL_FACT'[AS_OF_DATE], ASC
+    ),
+    "ACCOUNT_ID",  'FIS_CA_DETAIL_FACT'[ACCOUNT_ID],
+    "CUSTOMER_KEY",'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY],
+    "MONTH_ID",    'FIS_CA_DETAIL_FACT'[MONTH_ID],
+    "AS_OF_DATE",  'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+    "BALANCE",     'FIS_CA_DETAIL_FACT'[BALANCE]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (12, 20) Column '<oii>BALANCE</oii>' in table '<oii>FIS_CA_DETAIL_FACT</oii>' cannot be found or may not be used in this expression."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803780"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 70.09 seconds

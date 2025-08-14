@@ -160,7 +160,31 @@ dax_prompt = ChatPromptTemplate.from_template(
     5. For detailed row data, use table functions like FILTER, SELECTCOLUMNS, ADDCOLUMNS
     6. Always specify explicit column names in SELECTCOLUMNS
     7. Use VALUES() function when you need distinct values from a column
-    8. For simple row listings, this pattern works well:
+    8. For aggregation queries with grouping, avoid RELATED() as relationships may not exist.
+       Use ADDCOLUMNS to create calculated columns with LOOKUPVALUE, then group:
+       EVALUATE
+       SUMMARIZE(
+           ADDCOLUMNS(
+               'FactTable',
+               "GroupByColumn",
+               LOOKUPVALUE('DimensionTable'[GroupByColumn], 'DimensionTable'[PrimaryKey], 'FactTable'[ForeignKey])
+           ),
+           [GroupByColumn],
+           "AggregateAlias", SUM('FactTable'[MeasureColumn])
+       )
+       Example for customer types:
+       EVALUATE
+       SUMMARIZE(
+           ADDCOLUMNS(
+               'FIS_CA_DETAIL_FACT',
+               "CustomerType",
+               LOOKUPVALUE('FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION], 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY], 'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY])
+           ),
+           [CustomerType],
+           "Total Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
+       )
+    9. When using CALCULATE with grouping, ensure proper filter context is maintained
+    10. For simple row listings, this pattern works well:
        EVALUATE 
        SELECTCOLUMNS(
            FILTER('TableName', condition),
@@ -174,7 +198,7 @@ dax_prompt = ChatPromptTemplate.from_template(
     Intent and Entities:
     {intent_entities}
     
-    Generate a DAX query that follows these rules and returns the requested data.
+    Generate a DAX query that follows these rules and returns the requested data. For aggregation queries, ensure proper filter context is applied to get accurate results per group.
     """
 )
 
@@ -245,6 +269,15 @@ def generate_dax(intent_entities):
         - Gracefully handles Azure OpenAI API errors and timeouts
         - Provides meaningful error messages for debugging
     """
+    # Try to get cached DAX response first  
+    from query_cache import get_cache
+    cache = get_cache()
+    
+    cached_response = cache.get(intent_entities, "dax")
+    if cached_response:
+        return cached_response
+    
+    # If not cached, generate DAX with LLM
     # Get Power BI specific schema context for schema-aware DAX generation
     schema = get_powerbi_schema_context()
     
@@ -256,81 +289,160 @@ def generate_dax(intent_entities):
     # The LLM uses both the database schema and query intent to create valid DAX
     result = chain.invoke({"schema": schema, "intent_entities": intent_entities})
     
+    # Cache the DAX response
+    cache.set(intent_entities, result.content, "dax")
+    
     # Return the generated DAX content from the LLM response
     return result.content
 
 
 def get_powerbi_schema_context():
     """
-    Get Power BI specific schema context for DAX generation.
+    Generate Power BI semantic model schema context for DAX query generation.
     
-    This function provides a curated schema that only includes tables and columns
-    that actually exist in the Power BI semantic model, ensuring that generated
-    DAX queries will execute successfully.
+    This function provides comprehensive schema information about the Power BI semantic model
+    including table definitions, column listings, and relationship mappings. The schema
+    is specifically curated to match the approved tables available in both SQL and Power BI.
+    Schema information sourced directly from database metadata to ensure accuracy.
     
     Returns:
-        str: Formatted schema description for Power BI semantic model tables
+        str: Formatted schema context optimized for DAX query generation prompts
     """
-    # Power BI Semantic Model Schema - only tables confirmed to exist
-    powerbi_schema = {
-        "tables": {
-            "FIS_CUSTOMER_DIMENSION": {
-                "description": "Customer information and demographics",
-                "columns": [
-                    "CUSTOMER_KEY", "CUSTOMER_ID", "CUSTOMER_NAME", "CUSTOMER_SHORT_NAME",
-                    "CUSTOMER_TYPE_CODE", "CUSTOMER_TYPE_DESCRIPTION", 
-                    "INDUSTRY_CODE", "INDUSTRY_DESCRIPTION",
-                    "COUNTRY_CODE", "COUNTRY_DESCRIPTION", 
-                    "STATE_CODE", "STATE_DESCRIPTION", "CITY", "POSTAL_CODE",
-                    "RISK_RATING_CODE", "RISK_RATING_DESCRIPTION",
-                    "CUSTOMER_STATUS", "ESTABLISHED_DATE", "RELATIONSHIP_MANAGER"
-                ]
-            },
-            "FIS_CL_DETAIL_FACT": {
-                "description": "Commercial loan detail fact table with current balances",
-                "columns": [
-                    "LOAN_ID", "CUSTOMER_KEY", "MONTH_ID", "AS_OF_DATE",
-                    "CURRENT_PRINCIPAL_BALANCE", "OUTSTANDING_BALANCE", "CREDIT_LIMIT",
-                    "INTEREST_RATE", "MATURITY_DATE", "LOAN_STATUS"
-                ]
-            },
-            "FIS_CA_DETAIL_FACT": {
-                "description": "Current account detail fact table",
-                "columns": [
-                    "ACCOUNT_ID", "CUSTOMER_KEY", "MONTH_ID", "AS_OF_DATE",
-                    "CURRENT_BALANCE", "AVAILABLE_BALANCE", "OVERDRAFT_LIMIT"
-                ]
-            },
-            "FIS_MONTH_DIMENSION": {
-                "description": "Time dimension for monthly reporting",
-                "columns": [
-                    "MONTH_ID", "YEAR", "MONTH", "QUARTER", 
-                    "MONTH_DESCRIPTION", "QUARTER_DESCRIPTION"
-                ]
-            }
-        }
-    }
-    
-    # Format schema for LLM consumption
-    schema_text = "Power BI Semantic Model Schema:\n\n"
-    
-    for table_name, table_info in powerbi_schema["tables"].items():
-        schema_text += f"Table: {table_name}\n"
-        schema_text += f"Description: {table_info['description']}\n"
-        schema_text += "Columns: " + ", ".join(table_info["columns"]) + "\n\n"
-    
-    schema_text += """
-Key Relationships:
-- FIS_CL_DETAIL_FACT.CUSTOMER_KEY -> FIS_CUSTOMER_DIMENSION.CUSTOMER_KEY
-- FIS_CA_DETAIL_FACT.CUSTOMER_KEY -> FIS_CUSTOMER_DIMENSION.CUSTOMER_KEY  
-- FIS_CL_DETAIL_FACT.MONTH_ID -> FIS_MONTH_DIMENSION.MONTH_ID
-- FIS_CA_DETAIL_FACT.MONTH_ID -> FIS_MONTH_DIMENSION.MONTH_ID
+    return """
+POWER BI SEMANTIC MODEL SCHEMA:
+===============================================
+Schema information sourced directly from database metadata via INFORMATION_SCHEMA.COLUMNS.
 
-Important Notes:
-- Use table names with single quotes in DAX: 'FIS_CUSTOMER_DIMENSION'
-- Column references should include table name: 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
-- Use EVALUATE statements for table expressions
-- Use SELECTCOLUMNS for column selection and aliasing
+FACT TABLES:
+
+'FIS_CA_DETAIL_FACT' (Credit Arrangement Detail Facts) - 43 columns:
+  Keys: CA_DETAIL_KEY (Primary Key), CUSTOMER_KEY, CA_PRODUCT_KEY, INVESTOR_KEY, OWNER_KEY, LIMIT_KEY, MONTH_ID
+  Amounts: LIMIT_AMOUNT, LIMIT_AVAILABLE, LIMIT_USED, LIMIT_WITHHELD, PRINCIPAL_AMOUNT_DUE, ORIGINAL_LIMIT_AMOUNT
+  Status: LIMIT_STATUS_CODE, LIMIT_STATUS_DESCRIPTION, CA_CURRENCY_CODE
+  Dates: AS_OF_DATE, LIMIT_STATUS_DATE
+  Fees: FEES_CHARGED_ITD, FEES_CHARGED_MTD, FEES_CHARGED_QTD, FEES_CHARGED_YTD, FEES_EARNED_ITD, FEES_EARNED_MTD, FEES_EARNED_QTD, FEES_EARNED_YTD, FEES_PAID_ITD, FEES_PAID_MTD, FEES_PAID_QTD, FEES_PAID_YTD
+  Risk: EXPOSURE_AT_DEFAULT, LOSS_GIVEN_DEFAULT, PROBABILITY_OF_DEFAULT, RISK_WEIGHT_PERCENTAGE
+  Rates: COMMITMENT_FEE_RATE, UTILIZATION_FEE_RATE, FINANCIAL_FX_RATE
+  Other: FACILITY_ID, CONTRACTUAL_OWNERSHIP_PCT, LIMIT_VALUE_OF_COLLATERAL, NUMBER_OF_LIMIT_EXPOSURE, PORTFOLIO_ID, REGULATORY_CAPITAL
+
+'FIS_CL_DETAIL_FACT' (Commercial Loan Detail Facts) - 50 columns:
+  Keys: CL_DETAIL_KEY (Primary Key), CUSTOMER_KEY, LOAN_PRODUCT_KEY, CURRENCY_KEY, INVESTOR_KEY, OWNER_KEY, MONTH_ID
+  Amounts: PRINCIPAL_BALANCE, ACCRUED_INTEREST, TOTAL_BALANCE, ORIGINAL_AMOUNT, PAYMENT_AMOUNT, CHARGE_OFF_AMOUNT, RECOVERY_AMOUNT
+  Status: LOAN_STATUS, PAYMENT_STATUS, IS_NON_PERFORMING, IS_RESTRUCTURED, IS_IMPAIRED
+  Dates: ORIGINATION_DATE, MATURITY_DATE, LAST_PAYMENT_DATE, NEXT_PAYMENT_DATE, CHARGE_OFF_DATE
+  Risk: RISK_RATING_CODE, RISK_RATING_DESCRIPTION, PD_RATING, LGD_RATING
+  Other: OBLIGATION_NUMBER, LOAN_CURRENCY_CODE, CUSTOMER_ID, DELINQUENCY_DAYS
+
+DIMENSION TABLES:
+
+'FIS_CUSTOMER_DIMENSION' (Customer Information) - 19 columns:
+  Keys: CUSTOMER_KEY (Primary Key)
+  Identity: CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_SHORT_NAME
+  Classification: CUSTOMER_TYPE_CODE, CUSTOMER_TYPE_DESCRIPTION (IMPORTANT: No column named 'CUSTOMER_TYPE')
+  Risk: RISK_RATING_CODE, RISK_RATING_DESCRIPTION
+  Geography: COUNTRY_CODE, COUNTRY_DESCRIPTION, STATE_CODE, STATE_DESCRIPTION, CITY
+  Industry: INDUSTRY_CODE, INDUSTRY_DESCRIPTION
+  Contact: POSTAL_CODE
+  Management: RELATIONSHIP_MANAGER
+  Status: CUSTOMER_STATUS
+  Dates: ESTABLISHED_DATE
+
+'FIS_MONTH_DIMENSION' (Time/Date Information) - 12 columns:
+  Keys: MONTH_ID (Primary Key)
+  Core: REPORTING_DATE, MONTH_NAME, YEAR_ID, QUARTER_ID
+  Extended: MONTH_NUMBER, QUARTER_NAME, MONTH_YEAR, FISCAL_YEAR, FISCAL_QUARTER, IS_MONTH_END, IS_QUARTER_END, IS_YEAR_END
+
+'FIS_CA_PRODUCT_DIMENSION' (Credit Arrangement Products) - 20 columns:
+  Keys: CA_PRODUCT_KEY (Primary Key)
+  Identity: CA_NUMBER, CA_DESCRIPTION
+  Classification: CA_PRODUCT_TYPE_CODE, CA_PRODUCT_TYPE_DESC
+  Status: CA_OVERALL_STATUS_CODE, CA_OVERALL_STATUS_DESCRIPTION
+  Customer: CA_CUSTOMER_ID, CA_CUSTOMER_NAME
+  Financial: CA_CURRENCY_CODE, AVAILABLE_AMOUNT, COMMITMENT_AMOUNT
+  Limit: CA_LIMIT_SECTION_ID, CA_LIMIT_TYPE
+  Purpose: FACILITY_PURPOSE, PRICING_OPTION
+  Risk: CA_COUNTRY_OF_EXPOSURE_RISK
+  Dates: CA_EFFECTIVE_DATE, CA_MATURITY_DATE
+  Other: RENEWAL_INDICATOR
+
+'FIS_CURRENCY_DIMENSION' (Currency Information) - 10 columns:
+  Keys: CURRENCY_KEY (Primary Key), CURRENCY_MONTH_ID
+  From Currency: FROM_CURRENCY_CODE, FROM_CURRENCY_DESCRIPTION
+  To Currency: TO_CURRENCY_CODE, TO_CURRENCY_DESCRIPTION
+  Rates: CONVERSION_RATE, CRNCY_EXCHANGE_RATE
+  Grouping: CURRENCY_RATE_GROUP
+  Operation: OPERATION_INDICATOR
+
+'FIS_INVESTOR_DIMENSION' (Investor Information) - 14 columns:
+  Keys: INVESTOR_KEY (Primary Key)
+  Identity: INVESTOR_ID, INVESTOR_NAME
+  Classification: INVESTOR_TYPE_CODE, INVESTOR_TYPE_DESCRIPTION
+  Class: INVESTOR_CLASS_CODE, INVESTOR_CLASS_DESCRIPTION
+  Domain: INVESTOR_DOMAIN_CODE, INVESTOR_DOMAIN_DESCRIPTION
+  Account: INVESTOR_ACCOUNT_TYPE_CODE, INVESTOR_ACCOUNT_TYPE_DESC
+  Financial: PARTICIPATION_PERCENTAGE
+  Dates: EFFECTIVE_DATE, EXPIRATION_DATE
+
+'FIS_LIMIT_DIMENSION' (Credit Limit Information) - 18 columns:
+  Keys: LIMIT_KEY (Primary Key)
+  Identity: CA_LIMIT_SECTION_ID, CA_LIMIT_TYPE, LIMIT_DESCRIPTION
+  Status: LIMIT_STATUS_CODE, LIMIT_STATUS_DESCRIPTION
+  Amounts: CURRENT_LIMIT_AMOUNT, ORIGINAL_LIMIT_AMOUNT
+  Facility: FACILITY_TYPE_CODE, FACILITY_TYPE_DESCRIPTION
+  Type: LIMIT_TYPE_DESCRIPTION
+  Currency: LIMIT_CURRENCY_CODE
+  Rates: COMMITMENT_FEE_RATE, UTILIZATION_FEE_RATE
+  Dates: EFFECTIVE_DATE, MATURITY_DATE, REVIEW_DATE
+  Terms: RENEWAL_TERMS
+
+'FIS_LOAN_PRODUCT_DIMENSION' (Loan Product Information) - 30 columns:
+  Keys: LOAN_PRODUCT_KEY (Primary Key)
+  Identity: OBLIGATION_NUMBER, CA_NUMBER
+  Loan Type: LOAN_TYPE_CODE, LOAN_TYPE_DESCRIPTION
+  Status: LOAN_STATUS_CODE, LOAN_STATUS_DESCRIPTION
+  Product: PRODUCT_TYPE_CODE, PRODUCT_TYPE_DESCRIPTION
+  Currency: LOAN_CURRENCY_CODE, LOAN_CURRENCY_DESCRIPTION, CA_CURRENCY_CODE
+  Customer: CA_CUSTOMER_ID
+  Amounts: ORIGINAL_AMOUNT
+  Dates: EFFECTIVE_DATE, ORIGINATION_DATE, LEGAL_MATURITY_DATE, INT_RATE_MATURITY_DATE
+  Collateral: COLLATERAL_CODE, COLLATERAL_DESCRIPTION
+  Purpose: PURPOSE_CODE, PURPOSE_DESCRIPTION
+  Accounting: ACCOUNTING_METHOD_CODE, ACCOUNTING_METHOD_DESCRIPTION
+  Structure: ACCOUNT_STRUCTURE_CODE, ACCOUNT_STRUCTURE_DESC
+  Booking: BOOKING_UNIT_CODE, BOOKING_UNIT_DESCRIPTION
+  Portfolio: PORTFOLIO_ID, PORTFOLIO_DESCRIPTION
+
+'FIS_OWNER_DIMENSION' (Owner/Relationship Manager Information) - 19 columns:
+  Keys: OWNER_KEY (Primary Key)
+  Identity: OWNER_ID, OWNER_NAME, OWNER_SHORT_NAME, OWNER_NAME_2, OWNER_NAME_3
+  Classification: OWNER_TYPE_CODE, OWNER_TYPE_DESC
+  Industry: INDUSTRY_GROUP_CODE, INDUSTRY_GROUP_NAME, PRIMARY_INDUSTRY_CODE, PRIMARY_INDUSTRY_DESC
+  Geography: COUNTRY_CD, STATE, LOCATION_CD, POSTAL_ZIP_CD
+  Risk: OFFICER_RISK_RATING_CODE, OFFICER_RISK_RATING_DESC
+  Alternative: ALT_OWNER_NUMBER
+
+RELATIONSHIPS:
+- 'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY] → 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY]
+- 'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY] → 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY]
+- 'FIS_CA_DETAIL_FACT'[MONTH_ID] → 'FIS_MONTH_DIMENSION'[MONTH_ID]
+- 'FIS_CL_DETAIL_FACT'[MONTH_ID] → 'FIS_MONTH_DIMENSION'[MONTH_ID]
+- 'FIS_CA_DETAIL_FACT'[CA_PRODUCT_KEY] → 'FIS_CA_PRODUCT_DIMENSION'[CA_PRODUCT_KEY]
+- 'FIS_CL_DETAIL_FACT'[LOAN_PRODUCT_KEY] → 'FIS_LOAN_PRODUCT_DIMENSION'[LOAN_PRODUCT_KEY]
+- 'FIS_CA_DETAIL_FACT'[CURRENCY_KEY] → 'FIS_CURRENCY_DIMENSION'[CURRENCY_KEY]
+- 'FIS_CL_DETAIL_FACT'[CURRENCY_KEY] → 'FIS_CURRENCY_DIMENSION'[CURRENCY_KEY]
+- 'FIS_CA_DETAIL_FACT'[OWNER_KEY] → 'FIS_OWNER_DIMENSION'[OWNER_KEY]
+- 'FIS_CL_DETAIL_FACT'[OWNER_KEY] → 'FIS_OWNER_DIMENSION'[OWNER_KEY]
+- 'FIS_CL_DETAIL_FACT'[INVESTOR_KEY] → 'FIS_INVESTOR_DIMENSION'[INVESTOR_KEY]
+
+CRITICAL DAX SYNTAX RULES:
+- All column names above are exact database column names - use them precisely
+- Table references MUST use single quotes: 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+- For customer type, use CUSTOMER_TYPE_CODE or CUSTOMER_TYPE_DESCRIPTION (NOT 'CUSTOMER_TYPE')
+- Use CALCULATE() for filtered aggregations: CALCULATE(SUM('TableName'[Column]), FilterCondition)
+- Use SUMX(), COUNTX() for row-by-row calculations
+- Use RELATED() to access related table columns: RELATED('RelatedTable'[Column])
+- Use FILTER() for complex row filtering: FILTER('TableName', Condition)
+- Use TOPN() for ranking: TOPN(N, Table, OrderByColumn, DESC/ASC)
+- String filters use double quotes: FILTER('Table', 'Table'[Column] = "Value")
+- Always validate column names against this schema to prevent execution errors
 """
-    
-    return schema_text

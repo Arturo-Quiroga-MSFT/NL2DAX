@@ -1,0 +1,46 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me customer names with their limit amounts from both tables
+
+========== GENERATED SQL ==========
+SELECT
+    c.CUSTOMER_NAME,
+    f.LIMIT_AMOUNT
+FROM FIS_CUSTOMER_DIMENSION AS c
+INNER JOIN FIS_CA_DETAIL_FACT AS f
+    ON c.CUSTOMER_KEY = f.CUSTOMER_KEY;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CUSTOMER_NAME             | LIMIT_AMOUNT
+--------------------------+-------------
+Desert Manufacturing LLC  | 5000000.00  
+Palm Investors Inc.       | 2500000.00  
+Southwest Energy Partners | 3500000.00  
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CA_DETAIL_FACT',
+        TRUE()
+    ),
+    "CustomerName",    RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+    "LimitAmount",     'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CA_DETAIL_FACT',
+        TRUE()
+    ),
+    "CustomerName",    RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+    "LimitAmount",     'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (7, 32) The column '<oii>FIS_CUSTOMER_DIMENSION</oii>[<oii>CUSTOMER_NAME</oii>]' either doesn't exist or doesn't have a relationship to any table available in the current context."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803795"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 52.23 seconds

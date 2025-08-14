@@ -1,0 +1,65 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me to tp 5 counterparties
+
+========== GENERATED SQL ==========
+SELECT TOP 5
+    Counterparty_Rank,
+    Customer_Name,
+    Entity_Type,
+    Industry,
+    Country,
+    Loan_Count,
+    Total_Exposure_USD,
+    Total_Credit_Limit_USD,
+    Utilization_Percentage,
+    Avg_Interest_Rate,
+    Portfolio_Percentage
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+ORDER BY Counterparty_Rank;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+Counterparty_Rank | Customer_Name                | Entity_Type               | Industry                             | Country       | Loan_Count | Total_Exposure_USD | Total_Credit_Limit_USD | Utilization_Percentage | Avg_Interest_Rate | Portfolio_Percentage
+------------------+------------------------------+---------------------------+--------------------------------------+---------------+------------+--------------------+------------------------+------------------------+-------------------+---------------------
+1                 | Desert Manufacturing LLC     | Corporation               | Manufacturing - Industrial Equipment | United States | 1          | 3750000.00         | 5000000.00             | 75.00                  | 6.7500            | 41.40               
+2                 | Southwest Energy Partners    | Limited Liability Company | Oil and Gas Exploration              | United States | 1          | 2625000.00         | 3500000.00             | 75.00                  | 7.6000            | 29.00               
+3                 | Palm Investors Inc.          | Corporation               | Real Estate Investment               | United States | 1          | 1875000.00         | 2500000.00             | 75.00                  | 5.8500            | 20.70               
+4                 | Pacific Technology Solutions | Corporation               | Technology Services                  | United States | 1          | 800000.00          | 1200000.00             | 66.70                  | 6.5000            | 8.80                
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        5,
+        ADDCOLUMNS(
+            VALUES('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+            "TotalPrincipalBalance",
+            CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE] ) )
+        ),
+        [TotalPrincipalBalance], DESC
+    ),
+    "CustomerName",      'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "TotalPrincipalBalance",  [TotalPrincipalBalance]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        5,
+        ADDCOLUMNS(
+            VALUES('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+            "TotalPrincipalBalance",
+            CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE] ) )
+        ),
+        [TotalPrincipalBalance], DESC
+    ),
+    "CustomerName",      'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "TotalPrincipalBalance",  [TotalPrincipalBalance]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (1, 5) The following syntax error occurred during parsing: Invalid token, Line 1, Offset 5, ’."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3238920239"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 71.84 seconds

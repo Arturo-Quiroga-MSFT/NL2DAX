@@ -1,0 +1,60 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+SHOW ME THE TOP 2 COUNTERPARTIES
+
+========== GENERATED SQL ==========
+SELECT TOP (2)
+  ANALYSIS_DATE,
+  COUNTERPARTY_RANK,
+  CUSTOMER_NAME,
+  ENTITY_TYPE,
+  LOAN_COUNT,
+  TOTAL_EXPOSURE_USD,
+  TOTAL_CREDIT_LIMIT_USD,
+  UTILIZATION_PERCENTAGE,
+  AVG_INTEREST_RATE,
+  PORTFOLIO_PERCENTAGE
+FROM FIS_TOP_COUNTERPARTIES_ANALYSIS
+ORDER BY COUNTERPARTY_RANK ASC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+ANALYSIS_DATE              | COUNTERPARTY_RANK | CUSTOMER_NAME             | ENTITY_TYPE               | LOAN_COUNT | TOTAL_EXPOSURE_USD | TOTAL_CREDIT_LIMIT_USD | UTILIZATION_PERCENTAGE | AVG_INTEREST_RATE | PORTFOLIO_PERCENTAGE
+---------------------------+-------------------+---------------------------+---------------------------+------------+--------------------+------------------------+------------------------+-------------------+---------------------
+2025-07-26 19:17:35.383333 | 1                 | Desert Manufacturing LLC  | Corporation               | 1          | 3750000.00         | 5000000.00             | 75.00                  | 6.7500            | 41.40               
+2025-07-26 19:17:35.383333 | 2                 | Southwest Energy Partners | Limited Liability Company | 1          | 2625000.00         | 3500000.00             | 75.00                  | 7.6000            | 29.00               
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        2,
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[RANKING], ASC
+    ),
+    "CustomerKey",              'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_KEY],
+    "CustomerName",             'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],
+    "TotalExposure",            'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE],
+    "Ranking",                  'FIS_TOP_COUNTERPARTIES_ANALYSIS'[RANKING],
+    "PercentageOfPortfolio",    'FIS_TOP_COUNTERPARTIES_ANALYSIS'[PERCENTAGE_OF_PORTFOLIO]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        2,
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS',
+        'FIS_TOP_COUNTERPARTIES_ANALYSIS'[RANKING], ASC
+    ),
+    "CustomerKey",              'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_KEY],
+    "CustomerName",             'FIS_TOP_COUNTERPARTIES_ANALYSIS'[CUSTOMER_NAME],
+    "TotalExposure",            'FIS_TOP_COUNTERPARTIES_ANALYSIS'[TOTAL_EXPOSURE],
+    "Ranking",                  'FIS_TOP_COUNTERPARTIES_ANALYSIS'[RANKING],
+    "PercentageOfPortfolio",    'FIS_TOP_COUNTERPARTIES_ANALYSIS'[PERCENTAGE_OF_PORTFOLIO]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (5, 9) Cannot find table '<oii>FIS_TOP_COUNTERPARTIES_ANALYSIS</oii>'."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803779"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 37.44 seconds

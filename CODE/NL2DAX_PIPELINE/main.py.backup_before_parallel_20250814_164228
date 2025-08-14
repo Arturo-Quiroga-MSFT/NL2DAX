@@ -4,8 +4,34 @@ main.py - NL2DAX & NL2SQL Pipeline Entrypoint
 =============================================
 
 This script demonstrates how to build an end-to-end natural language to DAX and SQL pipeline 
-using LangChain, Azure OpenAI, and schema-aware query generation. It serves as a comprehensive
-example of how to:
+using LangChain, Azure OpenAI, and schema-aware query generation. It serves as a compreh    # --- Step 4: SQL Code Extraction & Sanitization ---
+    # Extract only the SQL code from the LLM output (removing explanations and code fences).
+    import re
+    sql_code = sql
+    code_block = re.search(r"```sql\s*([\s\S]+?)```", sql, re.IGNORECASE)
+    if not code_block:
+        code_block = re.search(r"```([\s\S]+?)```", sql)
+    if code_block:
+        sql_code = code_block.group(1).strip()
+    else:
+        select_match = re.search(r'(SELECT[\s\S]+)', sql, re.IGNORECASE)
+        if select_match:
+            sql_code = select_match.group(1).strip()
+    
+    # Replace smart quotes with standard quotes for SQL execution.
+    sql_sanitized = sql_code.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')
+    
+    # Remove problematic statements that are not supported in Azure SQL Database
+    lines = sql_sanitized.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        line = line.strip()
+        # Skip USE statements and GO statements
+        if not (line.upper().startswith('USE ') or line.upper() == 'GO' or line.upper().startswith('GO;')):
+            if line:  # Only add non-empty lines
+                cleaned_lines.append(line)
+    
+    sql_sanitized = '\n'.join(cleaned_lines)of how to:
 
 1. Extract intent and entities from natural language queries
 2. Generate both SQL and DAX queries from structured intent
@@ -145,10 +171,23 @@ def generate_sql(intent_entities):
     - Follow T-SQL syntax conventions for Azure SQL Database
     - Align with the user's expressed intent and identified entities
     """
-    from schema_reader import get_sql_database_schema_context  # Import SQL database schema
-    schema = get_sql_database_schema_context()  # Get SQL database schema for context injection
+    # Try to get cached SQL response first
+    from query_cache import get_cache
+    cache = get_cache()
+    
+    cached_response = cache.get(intent_entities, "sql")
+    if cached_response:
+        return cached_response
+    
+    # If not cached, generate SQL with LLM
+    from dax_generator import get_powerbi_schema_context  # Import Power BI specific schema
+    schema = get_powerbi_schema_context()  # Get Power BI semantic model schema for context injection
     chain = sql_prompt | llm  # Create LangChain prompt-to-LLM pipeline
     result = chain.invoke({"schema": schema, "intent_entities": intent_entities})  # Execute with context
+    
+    # Cache the SQL response
+    cache.set(intent_entities, result.content, "sql")
+    
     return result.content  # Return the generated SQL query
 
 
@@ -238,8 +277,21 @@ def parse_nl_query(user_input):
     both SQL and DAX query types, ensuring that the user's intent is preserved
     throughout the transformation process.
     """
+    # Try to get cached response first
+    from query_cache import get_cache
+    cache = get_cache()
+    
+    cached_response = cache.get(user_input, "intent")
+    if cached_response:
+        return cached_response
+    
+    # If not cached, process with LLM
     chain = prompt | llm  # Create prompt-to-LLM processing chain
     result = chain.invoke({"input": user_input})  # Process the natural language input
+    
+    # Cache the response for future use
+    cache.set(user_input, result.content, "intent")
+    
     return result.content  # Return structured intent/entity analysis
 
 
@@ -406,43 +458,6 @@ if __name__ == "__main__":
     print("[DEBUG] Generated DAX expression:")
     print(dax)
 
-    # --- Step 7.5: DAX Code Extraction & Sanitization ---
-    # Extract only the DAX code from the LLM output (removing explanations and code fences).
-    dax_code = dax
-    # Look for DAX code blocks first
-    dax_code_block = re.search(r"```dax\s*([\s\S]+?)```", dax, re.IGNORECASE)
-    if not dax_code_block:
-        dax_code_block = re.search(r"```([\s\S]+?)```", dax)
-    if dax_code_block:
-        dax_code = dax_code_block.group(1).strip()
-    else:
-        # Look for EVALUATE statement (DAX queries always start with EVALUATE)
-        evaluate_match = re.search(r'(EVALUATE[\s\S]+)', dax, re.IGNORECASE)
-        if evaluate_match:
-            dax_code = evaluate_match.group(1).strip()
-        else:
-            # Try to find any pattern that looks like DAX after explanatory text
-            lines = dax.split('\n')
-            dax_lines = []
-            found_dax = False
-            for line in lines:
-                # Skip explanatory lines
-                if any(phrase in line.lower() for phrase in ['here\'s', 'here is', 'following', 'below', 'query', ':']):
-                    continue
-                # Look for DAX keywords
-                if any(keyword in line.upper() for keyword in ['EVALUATE', 'SELECTCOLUMNS', 'FILTER', 'ADDCOLUMNS']):
-                    found_dax = True
-                if found_dax:
-                    dax_lines.append(line)
-            if dax_lines:
-                dax_code = '\n'.join(dax_lines).strip()
-    
-    # Replace smart quotes with standard quotes for DAX execution
-    dax_sanitized = dax_code.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')
-    
-    print("[DEBUG] Extracted DAX code:")
-    print(dax_sanitized)
-
     # --- Step 8: DAX Formatting & Validation ---
     # Format and validate the generated DAX using the DAX Formatter API.
     # This step ensures that:
@@ -453,15 +468,15 @@ if __name__ == "__main__":
     #
     # The DAX Formatter API provides professional-grade formatting that
     # improves readability and helps catch syntax errors before execution.
-    formatted_dax, _ = format_and_validate_dax(dax_sanitized)
+    formatted_dax, _ = format_and_validate_dax(dax)
     print("[DEBUG] Formatted DAX:")
     print(formatted_dax)
 
     # Display both raw and formatted DAX for comparison and transparency
     print(colored_banner("GENERATED DAX", Colors.PURPLE))
-    print(dax_sanitized + "\n")
+    print(dax + "\n")
     output_lines.append(plain_banner("GENERATED DAX"))
-    output_lines.append(f"{dax_sanitized}\n")
+    output_lines.append(f"{dax}\n")
 
     print(colored_banner("FORMATTED DAX", Colors.PURPLE))
     print(formatted_dax + "\n")
@@ -485,7 +500,7 @@ if __name__ == "__main__":
     # - Container environments: May need additional runtime configuration
     try:
         print(colored_banner("EXECUTING DAX QUERY", Colors.PURPLE))
-        dax_results = execute_dax_query(dax_sanitized)  # Execute against Power BI/Analysis Services
+        dax_results = execute_dax_query(dax)  # Execute against Power BI/Analysis Services
         
         if dax_results:
             # Format DAX results using the same table formatting approach as SQL

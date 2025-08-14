@@ -1,0 +1,64 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me all records from the credit arrangement fact table
+
+========== GENERATED SQL ==========
+SELECT *
+FROM FIS_CA_DETAIL_FACT;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CA_DETAIL_KEY | CUSTOMER_KEY | CA_PRODUCT_KEY | LIMIT_KEY | INVESTOR_KEY | OWNER_KEY | MONTH_ID | CA_CURRENCY_CODE | FACILITY_ID | AS_OF_DATE | LIMIT_AMOUNT | LIMIT_WITHHELD | LIMIT_USED | LIMIT_AVAILABLE | PRINCIPAL_AMOUNT_DUE | NUMBER_OF_LIMIT_EXPOSURE | LIMIT_VALUE_OF_COLLATERAL | FEES_CHARGED_MTD | FEES_CHARGED_QTD | FEES_CHARGED_YTD | FEES_CHARGED_ITD | FEES_EARNED_MTD | FEES_EARNED_QTD | FEES_EARNED_YTD | FEES_EARNED_ITD | FEES_PAID_MTD | FEES_PAID_QTD | FEES_PAID_YTD | FEES_PAID_ITD | COMMITMENT_FEE_RATE | UTILIZATION_FEE_RATE | CONTRACTUAL_OWNERSHIP_PCT | ORIGINAL_LIMIT_AMOUNT | FINANCIAL_FX_RATE | PORTFOLIO_ID | LIMIT_STATUS_CODE | LIMIT_STATUS_DESCRIPTION | LIMIT_STATUS_DATE | PROBABILITY_OF_DEFAULT | LOSS_GIVEN_DEFAULT | EXPOSURE_AT_DEFAULT | RISK_WEIGHT_PERCENTAGE | REGULATORY_CAPITAL
+--------------+--------------+----------------+-----------+--------------+-----------+----------+------------------+-------------+------------+--------------+----------------+------------+-----------------+----------------------+--------------------------+---------------------------+------------------+------------------+------------------+------------------+-----------------+-----------------+-----------------+-----------------+---------------+---------------+---------------+---------------+---------------------+----------------------+---------------------------+-----------------------+-------------------+--------------+-------------------+--------------------------+-------------------+------------------------+--------------------+---------------------+------------------------+-------------------
+1             | 1            | 1              | 1         | 1            | 1         | 202407   | USD              | FCL-001     | 2025-07-31 | 5000000.00   | 0.00           | 1500000.00 | 3500000.00      | 0.00                 | 3                        | 7500000.00                | 12500.00         | 37500.00         | 87500.00         | 125000.00        | 12500.00        | 37500.00        | 87500.00        | 125000.00       | 12000.00      | 36000.00      | 84000.00      | 120000.00     | 0.002500            | 0.005000             | 1.0000                    | 5000000.00            | 1.00000000        | CL           | A                 | Active                   | 2025-07-31        | 0.020000               | 0.250000           | 3750000.00          | 100.00                 | 300000.00         
+2             | 2            | 2              | 2         | 2            | 2         | 202407   | USD              | FCL-002     | 2025-07-31 | 2500000.00   | 0.00           | 625000.00  | 1875000.00      | 0.00                 | 2                        | 3750000.00                | 6750.00          | 20250.00         | 47250.00         | 67500.00         | 6750.00         | 20250.00        | 47250.00        | 67500.00        | 6400.00       | 19200.00      | 44800.00      | 64000.00      | 0.003000            | 0.007500             | 0.6000                    | 2500000.00            | 1.00000000        | CL           | A                 | Active                   | 2025-07-31        | 0.015000               | 0.200000           | 1875000.00          | 75.00                  | 150000.00         
+3             | 3            | 3              | 4         | 3            | 3         | 202407   | USD              | FCL-003     | 2025-07-31 | 3500000.00   | 0.00           | 2625000.00 | 875000.00       | 0.00                 | 4                        | 5250000.00                | 9875.00          | 29625.00         | 69125.00         | 98750.00         | 9875.00         | 29625.00        | 69125.00        | 98750.00        | 9400.00       | 28200.00      | 65800.00      | 94000.00      | 0.003500            | 0.005500             | 0.4000                    | 3500000.00            | 1.00000000        | CL           | A                 | Active                   | 2025-07-31        | 0.030000               | 0.350000           | 2625000.00          | 100.00                 | 262500.00         
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CA_DETAIL_FACT',
+        TRUE()
+    ),
+    "CA_DETAIL_KEY",        'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY],
+    "CUSTOMER_KEY",         'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY],
+    "CA_PRODUCT_KEY",       'FIS_CA_DETAIL_FACT'[CA_PRODUCT_KEY],
+    "MONTH_ID",             'FIS_CA_DETAIL_FACT'[MONTH_ID],
+    "AS_OF_DATE",           'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+    "LIMIT_AMOUNT",         'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT],
+    "LIMIT_AVAILABLE",      'FIS_CA_DETAIL_FACT'[LIMIT_AVAILABLE],
+    "LIMIT_USED",           'FIS_CA_DETAIL_FACT'[LIMIT_USED],
+    "PRINCIPAL_AMOUNT_DUE", 'FIS_CA_DETAIL_FACT'[PRINCIPAL_AMOUNT_DUE],
+    "LIMIT_STATUS_CODE",    'FIS_CA_DETAIL_FACT'[LIMIT_STATUS_CODE],
+    "LIMIT_STATUS_DATE",    'FIS_CA_DETAIL_FACT'[LIMIT_STATUS_DATE]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CA_DETAIL_FACT',
+        TRUE()
+    ),
+    "CA_DETAIL_KEY",        'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY],
+    "CUSTOMER_KEY",         'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY],
+    "CA_PRODUCT_KEY",       'FIS_CA_DETAIL_FACT'[CA_PRODUCT_KEY],
+    "MONTH_ID",             'FIS_CA_DETAIL_FACT'[MONTH_ID],
+    "AS_OF_DATE",           'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+    "LIMIT_AMOUNT",         'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT],
+    "LIMIT_AVAILABLE",      'FIS_CA_DETAIL_FACT'[LIMIT_AVAILABLE],
+    "LIMIT_USED",           'FIS_CA_DETAIL_FACT'[LIMIT_USED],
+    "PRINCIPAL_AMOUNT_DUE", 'FIS_CA_DETAIL_FACT'[PRINCIPAL_AMOUNT_DUE],
+    "LIMIT_STATUS_CODE",    'FIS_CA_DETAIL_FACT'[LIMIT_STATUS_CODE],
+    "LIMIT_STATUS_DATE",    'FIS_CA_DETAIL_FACT'[LIMIT_STATUS_DATE]
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CA_DETAIL_KEY] | [CUSTOMER_KEY] | [CA_PRODUCT_KEY] | [MONTH_ID] | [AS_OF_DATE]        | [LIMIT_AMOUNT] | [LIMIT_AVAILABLE] | [LIMIT_USED] | [PRINCIPAL_AMOUNT_DUE] | [LIMIT_STATUS_CODE] | [LIMIT_STATUS_DATE]
+----------------+----------------+------------------+------------+---------------------+----------------+-------------------+--------------+------------------------+---------------------+--------------------
+1               | 1              | 1                | 202407     | 2025-07-31T00:00:00 | 5000000.0      | 3500000.0         | 1500000.0    | 0.0                    | A                   | 2025-07-31T00:00:00
+2               | 2              | 2                | 202407     | 2025-07-31T00:00:00 | 2500000.0      | 1875000.0         | 625000.0     | 0.0                    | A                   | 2025-07-31T00:00:00
+3               | 3              | 3                | 202407     | 2025-07-31T00:00:00 | 3500000.0      | 875000.0          | 2625000.0    | 0.0                    | A                   | 2025-07-31T00:00:00
+
+========== RUN DURATION ==========
+Run duration: 50.15 seconds

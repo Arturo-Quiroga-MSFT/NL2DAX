@@ -1,0 +1,8 @@
+{
+  "04b1678d1ffda5b9dd5d4a155504c364": {
+    "query": "Intent:\n- Retrieve aggregated data\n\nEntities:\n- Aggregate function: SUM\n- Metric/Field: limit_amount\n- Group by: customer_type",
+    "response": "EVALUATE\nSUMMARIZE(\n    ADDCOLUMNS(\n        'FIS_CA_DETAIL_FACT',\n        \"CustomerType\",\n        LOOKUPVALUE(\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]\n        )\n    ),\n    [CustomerType],\n    \"Total Limit Amount\", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])\n)",
+    "timestamp": 1755214767.423945,
+    "cache_type": "dax"
+  }
+}

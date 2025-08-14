@@ -1,0 +1,49 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me the first row from the month dimension table
+
+========== GENERATED SQL ==========
+SELECT *
+FROM FIS_MONTH_DIMENSION
+ORDER BY MONTH_ID
+OFFSET 0 ROWS
+FETCH NEXT 1 ROWS ONLY;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+MONTH_ID | MONTH_DESCRIPTION | MONTH_TIMESPAN | PERIOD_END_DATE | QUARTER_ID | QUARTER_DESCRIPTION | QUARTER_TIMESPAN | QUARTER_END_DATE | YEAR_ID | YEAR_DESCRIPTION | YEAR_TIMESPAN | YEAR_END_DATE
+---------+-------------------+----------------+-----------------+------------+---------------------+------------------+------------------+---------+------------------+---------------+--------------
+202401   | January, 2024     | 31             | 2024-01-31      | Q1.2024    | Quarter One, 2024   | 91               | 2024-03-31       | 2024    | 2024             | 366           | 2024-12-31   
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_MONTH_DIMENSION',
+        'FIS_MONTH_DIMENSION'[MONTH_ID], ASC
+    ),
+    "MonthID",   'FIS_MONTH_DIMENSION'[MONTH_ID],
+    "Year",      'FIS_MONTH_DIMENSION'[YEAR],
+    "Month",     'FIS_MONTH_DIMENSION'[MONTH],
+    "Quarter",   'FIS_MONTH_DIMENSION'[QUARTER]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_MONTH_DIMENSION',
+        'FIS_MONTH_DIMENSION'[MONTH_ID], ASC
+    ),
+    "MonthID",   'FIS_MONTH_DIMENSION'[MONTH_ID],
+    "Year",      'FIS_MONTH_DIMENSION'[YEAR],
+    "Month",     'FIS_MONTH_DIMENSION'[MONTH],
+    "Quarter",   'FIS_MONTH_DIMENSION'[QUARTER]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (11, 18) Column '<oii>QUARTER</oii>' in table '<oii>FIS_MONTH_DIMENSION</oii>' cannot be found or may not be used in this expression."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803780"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 48.84 seconds

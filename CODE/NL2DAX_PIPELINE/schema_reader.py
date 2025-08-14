@@ -416,3 +416,152 @@ if __name__ == '__main__':
         # Display interactive schema summary
         metadata = get_schema_metadata()
         print_schema_summary(metadata)
+
+
+def get_sql_database_schema_context():
+    """
+    Get database schema context for SQL generation.
+    
+    Returns a string representation of the database schema
+    limited to approved tables for NL2DAX operations.
+    Schema information sourced directly from database metadata.
+    """
+    # Define the approved tables
+    APPROVED_TABLES = [
+        'FIS_CA_DETAIL_FACT',
+        'FIS_CUSTOMER_DIMENSION', 
+        'FIS_CL_DETAIL_FACT',
+        'FIS_MONTH_DIMENSION',
+        'FIS_CA_PRODUCT_DIMENSION',
+        'FIS_CURRENCY_DIMENSION',
+        'FIS_INVESTOR_DIMENSION',
+        'FIS_LIMIT_DIMENSION',
+        'FIS_LOAN_PRODUCT_DIMENSION',
+        'FIS_OWNER_DIMENSION'
+    ]
+    
+    schema_context = """
+    DATABASE SCHEMA CONTEXT:
+    You are working with an Azure SQL Database containing financial services data.
+    You have access to the following approved tables for query generation.
+    Schema information sourced directly from database metadata via INFORMATION_SCHEMA.COLUMNS.
+    
+    -- FACT TABLES --
+    
+    FIS_CA_DETAIL_FACT (Credit Arrangement Detail Facts) - 43 columns:
+    Keys: CA_DETAIL_KEY (int, Primary Key), CUSTOMER_KEY (int), CA_PRODUCT_KEY (int), INVESTOR_KEY (int), OWNER_KEY (int), LIMIT_KEY (int), MONTH_ID (int)
+    Amounts: LIMIT_AMOUNT (decimal), LIMIT_AVAILABLE (decimal), LIMIT_USED (decimal), LIMIT_WITHHELD (decimal), PRINCIPAL_AMOUNT_DUE (decimal), ORIGINAL_LIMIT_AMOUNT (decimal)
+    Codes/Status: LIMIT_STATUS_CODE (nvarchar), LIMIT_STATUS_DESCRIPTION (nvarchar), CA_CURRENCY_CODE (nvarchar)
+    Dates: AS_OF_DATE (date), LIMIT_STATUS_DATE (date)
+    Fees: FEES_CHARGED_ITD (decimal), FEES_CHARGED_MTD (decimal), FEES_CHARGED_QTD (decimal), FEES_CHARGED_YTD (decimal), FEES_EARNED_ITD (decimal), FEES_EARNED_MTD (decimal), FEES_EARNED_QTD (decimal), FEES_EARNED_YTD (decimal), FEES_PAID_ITD (decimal), FEES_PAID_MTD (decimal), FEES_PAID_QTD (decimal), FEES_PAID_YTD (decimal)
+    Risk: EXPOSURE_AT_DEFAULT (decimal), LOSS_GIVEN_DEFAULT (decimal), PROBABILITY_OF_DEFAULT (decimal), RISK_WEIGHT_PERCENTAGE (decimal)
+    Rates: COMMITMENT_FEE_RATE (decimal), UTILIZATION_FEE_RATE (decimal), FINANCIAL_FX_RATE (decimal)
+    Other: FACILITY_ID (nvarchar), CONTRACTUAL_OWNERSHIP_PCT (decimal), LIMIT_VALUE_OF_COLLATERAL (decimal), NUMBER_OF_LIMIT_EXPOSURE (int), PORTFOLIO_ID (nvarchar), REGULATORY_CAPITAL (decimal)
+    
+    FIS_CL_DETAIL_FACT (Commercial Loan Detail Facts) - 50 columns:
+    Keys: CL_DETAIL_KEY (int, Primary Key), CUSTOMER_KEY (int), LOAN_PRODUCT_KEY (int), CURRENCY_KEY (int), INVESTOR_KEY (int), OWNER_KEY (int), MONTH_ID (int)
+    Amounts: PRINCIPAL_BALANCE (decimal), ACCRUED_INTEREST (decimal), TOTAL_BALANCE (decimal), ORIGINAL_AMOUNT (decimal), PAYMENT_AMOUNT (decimal), CHARGE_OFF_AMOUNT (decimal), RECOVERY_AMOUNT (decimal)
+    Status/Performance: LOAN_STATUS (nvarchar), PAYMENT_STATUS (nvarchar), IS_NON_PERFORMING (nchar), IS_RESTRUCTURED (nchar), IS_IMPAIRED (nchar)
+    Dates: ORIGINATION_DATE (date), MATURITY_DATE (date), LAST_PAYMENT_DATE (date), NEXT_PAYMENT_DATE (date), CHARGE_OFF_DATE (date)
+    Risk: RISK_RATING_CODE (nvarchar), RISK_RATING_DESCRIPTION (nvarchar), PD_RATING (decimal), LGD_RATING (decimal)
+    Other: OBLIGATION_NUMBER (nvarchar), LOAN_CURRENCY_CODE (nvarchar), CUSTOMER_ID (nvarchar), DELINQUENCY_DAYS (int), etc.
+    
+    -- DIMENSION TABLES --
+    
+    FIS_CUSTOMER_DIMENSION (Customer Information) - 19 columns:
+    Keys: CUSTOMER_KEY (int, Primary Key)
+    Identity: CUSTOMER_ID (nvarchar), CUSTOMER_NAME (nvarchar), CUSTOMER_SHORT_NAME (nvarchar)
+    Classification: CUSTOMER_TYPE_CODE (nvarchar), CUSTOMER_TYPE_DESCRIPTION (nvarchar)
+    Risk: RISK_RATING_CODE (nvarchar), RISK_RATING_DESCRIPTION (nvarchar)
+    Geography: COUNTRY_CODE (nvarchar), COUNTRY_DESCRIPTION (nvarchar), STATE_CODE (nvarchar), STATE_DESCRIPTION (nvarchar), CITY (nvarchar)
+    Industry: INDUSTRY_CODE (nvarchar), INDUSTRY_DESCRIPTION (nvarchar)
+    Contact: POSTAL_CODE (nvarchar)
+    Management: RELATIONSHIP_MANAGER (nvarchar)
+    Status: CUSTOMER_STATUS (nvarchar)
+    Dates: ESTABLISHED_DATE (date)
+    
+    FIS_MONTH_DIMENSION (Time/Date Information) - 12 columns:
+    Keys: MONTH_ID (int, Primary Key)
+    Core: REPORTING_DATE (date), MONTH_NAME (nvarchar), YEAR_ID (int), QUARTER_ID (int)
+    Extended: MONTH_NUMBER (int), QUARTER_NAME (nvarchar), MONTH_YEAR (nvarchar), FISCAL_YEAR (int), FISCAL_QUARTER (int), IS_MONTH_END (nchar), IS_QUARTER_END (nchar), IS_YEAR_END (nchar)
+    
+    FIS_CA_PRODUCT_DIMENSION (Credit Arrangement Products) - 20 columns:
+    Keys: CA_PRODUCT_KEY (int, Primary Key)
+    Identity: CA_NUMBER (nvarchar), CA_DESCRIPTION (nvarchar)
+    Classification: CA_PRODUCT_TYPE_CODE (nvarchar), CA_PRODUCT_TYPE_DESC (nvarchar)
+    Status: CA_OVERALL_STATUS_CODE (nvarchar), CA_OVERALL_STATUS_DESCRIPTION (nvarchar)
+    Customer: CA_CUSTOMER_ID (nvarchar), CA_CUSTOMER_NAME (nvarchar)
+    Financial: CA_CURRENCY_CODE (nvarchar), AVAILABLE_AMOUNT (decimal), COMMITMENT_AMOUNT (decimal)
+    Limit: CA_LIMIT_SECTION_ID (nvarchar), CA_LIMIT_TYPE (nvarchar)
+    Purpose: FACILITY_PURPOSE (nvarchar), PRICING_OPTION (nvarchar)
+    Risk: CA_COUNTRY_OF_EXPOSURE_RISK (nvarchar)
+    Dates: CA_EFFECTIVE_DATE (date), CA_MATURITY_DATE (date)
+    Other: RENEWAL_INDICATOR (nchar)
+    
+    FIS_CURRENCY_DIMENSION (Currency Information) - 10 columns:
+    Keys: CURRENCY_KEY (int, Primary Key), CURRENCY_MONTH_ID (int)
+    From Currency: FROM_CURRENCY_CODE (nvarchar), FROM_CURRENCY_DESCRIPTION (nvarchar)
+    To Currency: TO_CURRENCY_CODE (nvarchar), TO_CURRENCY_DESCRIPTION (nvarchar)
+    Rates: CONVERSION_RATE (decimal), CRNCY_EXCHANGE_RATE (decimal)
+    Grouping: CURRENCY_RATE_GROUP (nvarchar)
+    Operation: OPERATION_INDICATOR (nchar)
+    
+    FIS_INVESTOR_DIMENSION (Investor Information) - 14 columns:
+    Keys: INVESTOR_KEY (int, Primary Key)
+    Identity: INVESTOR_ID (nvarchar), INVESTOR_NAME (nvarchar)
+    Classification: INVESTOR_TYPE_CODE (nvarchar), INVESTOR_TYPE_DESCRIPTION (nvarchar)
+    Class: INVESTOR_CLASS_CODE (nvarchar), INVESTOR_CLASS_DESCRIPTION (nvarchar)
+    Domain: INVESTOR_DOMAIN_CODE (nvarchar), INVESTOR_DOMAIN_DESCRIPTION (nvarchar)
+    Account: INVESTOR_ACCOUNT_TYPE_CODE (nvarchar), INVESTOR_ACCOUNT_TYPE_DESC (nvarchar)
+    Financial: PARTICIPATION_PERCENTAGE (decimal)
+    Dates: EFFECTIVE_DATE (date), EXPIRATION_DATE (date)
+    
+    FIS_LIMIT_DIMENSION (Credit Limit Information) - 18 columns:
+    Keys: LIMIT_KEY (int, Primary Key)
+    Identity: CA_LIMIT_SECTION_ID (nvarchar), CA_LIMIT_TYPE (nvarchar), LIMIT_DESCRIPTION (nvarchar)
+    Status: LIMIT_STATUS_CODE (nvarchar), LIMIT_STATUS_DESCRIPTION (nvarchar)
+    Amounts: CURRENT_LIMIT_AMOUNT (decimal), ORIGINAL_LIMIT_AMOUNT (decimal)
+    Facility: FACILITY_TYPE_CODE (nvarchar), FACILITY_TYPE_DESCRIPTION (nvarchar)
+    Type: LIMIT_TYPE_DESCRIPTION (nvarchar)
+    Currency: LIMIT_CURRENCY_CODE (nvarchar)
+    Rates: COMMITMENT_FEE_RATE (decimal), UTILIZATION_FEE_RATE (decimal)
+    Dates: EFFECTIVE_DATE (date), MATURITY_DATE (date), REVIEW_DATE (date)
+    Terms: RENEWAL_TERMS (nvarchar)
+    
+    FIS_LOAN_PRODUCT_DIMENSION (Loan Product Information) - 30 columns:
+    Keys: LOAN_PRODUCT_KEY (int, Primary Key)
+    Identity: OBLIGATION_NUMBER (nvarchar), CA_NUMBER (nvarchar)
+    Loan Type: LOAN_TYPE_CODE (nvarchar), LOAN_TYPE_DESCRIPTION (nvarchar)
+    Status: LOAN_STATUS_CODE (nvarchar), LOAN_STATUS_DESCRIPTION (nvarchar)
+    Product: PRODUCT_TYPE_CODE (nvarchar), PRODUCT_TYPE_DESCRIPTION (nvarchar)
+    Currency: LOAN_CURRENCY_CODE (nvarchar), LOAN_CURRENCY_DESCRIPTION (nvarchar), CA_CURRENCY_CODE (nvarchar)
+    Customer: CA_CUSTOMER_ID (nvarchar)
+    Amounts: ORIGINAL_AMOUNT (decimal)
+    Dates: EFFECTIVE_DATE (date), ORIGINATION_DATE (date), LEGAL_MATURITY_DATE (date), INT_RATE_MATURITY_DATE (date)
+    Collateral: COLLATERAL_CODE (nvarchar), COLLATERAL_DESCRIPTION (nvarchar)
+    Purpose: PURPOSE_CODE (nvarchar), PURPOSE_DESCRIPTION (nvarchar)
+    Accounting: ACCOUNTING_METHOD_CODE (nvarchar), ACCOUNTING_METHOD_DESCRIPTION (nvarchar)
+    Structure: ACCOUNT_STRUCTURE_CODE (nvarchar), ACCOUNT_STRUCTURE_DESC (nvarchar)
+    Booking: BOOKING_UNIT_CODE (nvarchar), BOOKING_UNIT_DESCRIPTION (nvarchar)
+    Portfolio: PORTFOLIO_ID (nvarchar), PORTFOLIO_DESCRIPTION (nvarchar)
+    
+    FIS_OWNER_DIMENSION (Owner/Relationship Manager Information) - 19 columns:
+    Keys: OWNER_KEY (int, Primary Key)
+    Identity: OWNER_ID (nvarchar), OWNER_NAME (nvarchar), OWNER_SHORT_NAME (nvarchar), OWNER_NAME_2 (nvarchar), OWNER_NAME_3 (nvarchar)
+    Classification: OWNER_TYPE_CODE (nvarchar), OWNER_TYPE_DESC (nvarchar)
+    Industry: INDUSTRY_GROUP_CODE (nvarchar), INDUSTRY_GROUP_NAME (nvarchar), PRIMARY_INDUSTRY_CODE (nvarchar), PRIMARY_INDUSTRY_DESC (nvarchar)
+    Geography: COUNTRY_CD (nvarchar), STATE (nvarchar), LOCATION_CD (nvarchar), POSTAL_ZIP_CD (nvarchar)
+    Risk: OFFICER_RISK_RATING_CODE (nvarchar), OFFICER_RISK_RATING_DESC (nvarchar)
+    Alternative: ALT_OWNER_NUMBER (nvarchar)
+    
+    IMPORTANT NOTES:
+    - All column names above are the exact names from the database schema
+    - Use proper SQL syntax for Azure SQL Database
+    - Include appropriate JOIN conditions using foreign keys (*_KEY fields)
+    - Consider data types when filtering: int for keys, decimal for amounts, nvarchar for text, date for dates
+    - Use meaningful aliases for readability
+    - Apply appropriate WHERE clauses for business logic
+    - Primary keys are non-nullable, other fields may be nullable (marked as such in schema)
+    """
+    
+    return schema_context

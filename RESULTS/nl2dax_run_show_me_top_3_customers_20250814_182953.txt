@@ -1,0 +1,66 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me top 3 customers
+
+========== GENERATED SQL ==========
+SELECT TOP 3
+    f.CUSTOMER_KEY,
+    c.CUSTOMER_NAME,
+    SUM(f.TOTAL_BALANCE) AS TotalBalance
+FROM FIS_CL_DETAIL_FACT AS f
+JOIN FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+    f.CUSTOMER_KEY,
+    c.CUSTOMER_NAME
+ORDER BY
+    SUM(f.TOTAL_BALANCE) DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CUSTOMER_KEY | CUSTOMER_NAME             | TotalBalance
+-------------+---------------------------+-------------
+1            | Desert Manufacturing LLC  | 3780000.00  
+3            | Southwest Energy Partners | 2649000.00  
+2            | Palm Investors Inc.       | 1892000.00  
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        3,
+        'FIS_CUSTOMER_DIMENSION',
+        CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] ) ),
+        DESC
+    ),
+    "CustomerKey",    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName",   'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "TotalLoanBalance", CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] ) )
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        3,
+        'FIS_CUSTOMER_DIMENSION',
+        CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] ) ),
+        DESC
+    ),
+    "CustomerKey",    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName",   'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "TotalLoanBalance", CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] ) )
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerKey] | [CustomerName]                    | [TotalLoanBalance]
+--------------+-----------------------------------+-------------------
+1002          | Atlantic Biomedical Corporation   | 9138000.0         
+1004          | Northwest Retail Enterprises Inc. | 9138000.0         
+1003          | Mountain Capital Advisors LLC     | 9138000.0         
+1             | Desert Manufacturing LLC          | 9138000.0         
+2             | Palm Investors Inc.               | 9138000.0         
+3             | Southwest Energy Partners         | 9138000.0         
+4             | Pacific Technology Solutions      | 9138000.0         
+
+========== RUN DURATION ==========
+Run duration: 71.98 seconds

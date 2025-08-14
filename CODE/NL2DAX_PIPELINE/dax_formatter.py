@@ -76,6 +76,50 @@ def format_and_validate_dax(dax_code):
         - Consider caching formatted results for repeated queries
         - Timeout set to 10 seconds to balance responsiveness and reliability
     """
+    
+    # --- Step 1: Extract pure DAX code from LLM response ---
+    # Remove explanatory text and extract only the DAX query
+    import re
+    
+    extracted_dax = dax_code
+    
+    # Look for DAX code blocks first
+    dax_code_block = re.search(r"```dax\s*([\s\S]+?)```", dax_code, re.IGNORECASE)
+    if not dax_code_block:
+        dax_code_block = re.search(r"```([\s\S]+?)```", dax_code)
+    if dax_code_block:
+        extracted_dax = dax_code_block.group(1).strip()
+    else:
+        # Look for EVALUATE statement (DAX queries always start with EVALUATE)
+        evaluate_match = re.search(r'(EVALUATE[\s\S]+)', dax_code, re.IGNORECASE)
+        if evaluate_match:
+            extracted_dax = evaluate_match.group(1).strip()
+        else:
+            # Try to find any pattern that looks like DAX after explanatory text
+            lines = dax_code.split('\n')
+            dax_lines = []
+            found_dax = False
+            for line in lines:
+                # Skip explanatory lines
+                if any(phrase in line.lower() for phrase in ['here\'s', 'here is', 'following', 'below', 'query', 'returns']):
+                    continue
+                # Look for DAX keywords
+                if any(keyword in line.upper() for keyword in ['EVALUATE', 'SELECTCOLUMNS', 'FILTER', 'ADDCOLUMNS']):
+                    found_dax = True
+                if found_dax:
+                    dax_lines.append(line)
+            if dax_lines:
+                extracted_dax = '\n'.join(dax_lines).strip()
+    
+    # Replace smart quotes with standard quotes for DAX execution
+    extracted_dax = extracted_dax.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')
+    
+    print(f"[DEBUG] DAX Formatter - Extracted code: {extracted_dax[:100]}...")
+    
+    # Use extracted DAX for formatting
+    dax_code = extracted_dax
+    
+    # --- Step 2: Format the extracted DAX code ---
     # DAXFormatter.com API endpoint for professional DAX formatting service
     url = "https://www.daxformatter.com/api/daxformatter/"
     

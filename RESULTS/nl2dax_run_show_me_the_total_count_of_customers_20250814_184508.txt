@@ -1,0 +1,32 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me the total count of customers
+
+========== GENERATED SQL ==========
+SELECT COUNT(*) AS CustomerCount
+FROM FIS_CUSTOMER_DIMENSION;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CustomerCount
+-------------
+7            
+
+========== GENERATED DAX ==========
+EVALUATE
+ROW(
+    "CustomerCount", COUNTROWS('FIS_CUSTOMER_DIMENSION')
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+ROW(
+    "CustomerCount", COUNTROWS('FIS_CUSTOMER_DIMENSION')
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerCount]
+---------------
+7              
+
+========== RUN DURATION ==========
+Run duration: 31.53 seconds

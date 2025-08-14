@@ -1,0 +1,88 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me all customers
+
+========== GENERATED SQL ==========
+SELECT * 
+FROM FIS_CUSTOMER_DIMENSION;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CUSTOMER_KEY | CUSTOMER_ID | CUSTOMER_NAME                     | CUSTOMER_SHORT_NAME | CUSTOMER_TYPE_CODE | CUSTOMER_TYPE_DESCRIPTION | INDUSTRY_CODE | INDUSTRY_DESCRIPTION                         | COUNTRY_CODE | COUNTRY_DESCRIPTION | STATE_CODE | STATE_DESCRIPTION | CITY        | POSTAL_CODE | RISK_RATING_CODE | RISK_RATING_DESCRIPTION     | CUSTOMER_STATUS | ESTABLISHED_DATE | RELATIONSHIP_MANAGER
+-------------+-------------+-----------------------------------+---------------------+--------------------+---------------------------+---------------+----------------------------------------------+--------------+---------------------+------------+-------------------+-------------+-------------+------------------+-----------------------------+-----------------+------------------+---------------------
+1            | CUST001     | Desert Manufacturing LLC          | Desert Mfg          | CORP               | Corporation               | 3100          | Manufacturing - Industrial Equipment         | US           | United States       | NY         | New York          | New York    | 10001       | B+               | Good Credit Quality         | Active          | 2018-03-15       | Sarah Johnson       
+2            | CUST002     | Palm Investors Inc.               | Palm Invest         | CORP               | Corporation               | 6200          | Real Estate Investment                       | US           | United States       | TX         | Texas             | Dallas      | 75201       | A-               | Strong Credit Quality       | Active          | 2015-09-22       | Michael Chen        
+3            | CUST003     | Southwest Energy Partners         | SW Energy           | LLC                | Limited Liability Company | 2100          | Oil and Gas Exploration                      | US           | United States       | AZ         | Arizona           | Phoenix     | 85001       | B                | Satisfactory Credit Quality | Active          | 2020-01-10       | Lisa Rodriguez      
+4            | CUST004     | Pacific Technology Solutions      | Pac Tech            | CORP               | Corporation               | 5400          | Technology Services                          | US           | United States       | CA         | California        | Los Angeles | 90001       | A                | Excellent Credit Quality    | Active          | 2019-11-08       | David Kim           
+1002         | CUST005     | Atlantic Biomedical Corporation   | Atlantic Bio        | CORP               | Corporation               | 2800          | Pharmaceutical and Medical Devices           | US           | United States       | FL         | Florida           | Miami       | 33101       | A-               | Strong Credit Quality       | Active          | 2017-06-14       | Jennifer Martinez   
+1003         | CUST006     | Mountain Capital Advisors LLC     | Mountain Cap        | LLC                | Limited Liability Company | 5200          | Financial Services and Investment Management | US           | United States       | CO         | Colorado          | Denver      | 80202       | B+               | Good Credit Quality         | Active          | 2021-03-08       | Robert Thompson     
+1004         | CUST007     | Northwest Retail Enterprises Inc. | NW Retail           | CORP               | Corporation               | 4400          | Retail and Consumer Goods                    | US           | United States       | WA         | Washington        | Seattle     | 98101       | B                | Satisfactory Credit Quality | Active          | 2016-12-02       | Amanda Foster       
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CUSTOMER_KEY",               'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CUSTOMER_ID",                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CUSTOMER_NAME",              'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CUSTOMER_SHORT_NAME",        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_SHORT_NAME],
+    "CUSTOMER_TYPE_CODE",         'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_CODE],
+    "CUSTOMER_TYPE_DESCRIPTION",  'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "INDUSTRY_CODE",              'FIS_CUSTOMER_DIMENSION'[INDUSTRY_CODE],
+    "INDUSTRY_DESCRIPTION",       'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+    "COUNTRY_CODE",               'FIS_CUSTOMER_DIMENSION'[COUNTRY_CODE],
+    "COUNTRY_DESCRIPTION",        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    "STATE_CODE",                 'FIS_CUSTOMER_DIMENSION'[STATE_CODE],
+    "STATE_DESCRIPTION",          'FIS_CUSTOMER_DIMENSION'[STATE_DESCRIPTION],
+    "CITY",                       'FIS_CUSTOMER_DIMENSION'[CITY],
+    "POSTAL_CODE",                'FIS_CUSTOMER_DIMENSION'[POSTAL_CODE],
+    "RISK_RATING_CODE",           'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RISK_RATING_DESCRIPTION",    'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION],
+    "CUSTOMER_STATUS",            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_STATUS],
+    "ESTABLISHED_DATE",           'FIS_CUSTOMER_DIMENSION'[ESTABLISHED_DATE],
+    "RELATIONSHIP_MANAGER",       'FIS_CUSTOMER_DIMENSION'[RELATIONSHIP_MANAGER]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CUSTOMER_KEY",               'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CUSTOMER_ID",                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CUSTOMER_NAME",              'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CUSTOMER_SHORT_NAME",        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_SHORT_NAME],
+    "CUSTOMER_TYPE_CODE",         'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_CODE],
+    "CUSTOMER_TYPE_DESCRIPTION",  'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "INDUSTRY_CODE",              'FIS_CUSTOMER_DIMENSION'[INDUSTRY_CODE],
+    "INDUSTRY_DESCRIPTION",       'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+    "COUNTRY_CODE",               'FIS_CUSTOMER_DIMENSION'[COUNTRY_CODE],
+    "COUNTRY_DESCRIPTION",        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    "STATE_CODE",                 'FIS_CUSTOMER_DIMENSION'[STATE_CODE],
+    "STATE_DESCRIPTION",          'FIS_CUSTOMER_DIMENSION'[STATE_DESCRIPTION],
+    "CITY",                       'FIS_CUSTOMER_DIMENSION'[CITY],
+    "POSTAL_CODE",                'FIS_CUSTOMER_DIMENSION'[POSTAL_CODE],
+    "RISK_RATING_CODE",           'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RISK_RATING_DESCRIPTION",    'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION],
+    "CUSTOMER_STATUS",            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_STATUS],
+    "ESTABLISHED_DATE",           'FIS_CUSTOMER_DIMENSION'[ESTABLISHED_DATE],
+    "RELATIONSHIP_MANAGER",       'FIS_CUSTOMER_DIMENSION'[RELATIONSHIP_MANAGER]
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CUSTOMER_KEY] | [CUSTOMER_ID] | [CUSTOMER_NAME]                   | [CUSTOMER_SHORT_NAME] | [CUSTOMER_TYPE_CODE] | [CUSTOMER_TYPE_DESCRIPTION] | [INDUSTRY_CODE] | [INDUSTRY_DESCRIPTION]                       | [COUNTRY_CODE] | [COUNTRY_DESCRIPTION] | [STATE_CODE] | [STATE_DESCRIPTION] | [CITY]      | [POSTAL_CODE] | [RISK_RATING_CODE] | [RISK_RATING_DESCRIPTION]   | [CUSTOMER_STATUS] | [ESTABLISHED_DATE]  | [RELATIONSHIP_MANAGER]
+---------------+---------------+-----------------------------------+-----------------------+----------------------+-----------------------------+-----------------+----------------------------------------------+----------------+-----------------------+--------------+---------------------+-------------+---------------+--------------------+-----------------------------+-------------------+---------------------+-----------------------
+1              | CUST001       | Desert Manufacturing LLC          | Desert Mfg            | CORP                 | Corporation                 | 3100            | Manufacturing - Industrial Equipment         | US             | United States         | NY           | New York            | New York    | 10001         | B+                 | Good Credit Quality         | Active            | 2018-03-15T00:00:00 | Sarah Johnson         
+2              | CUST002       | Palm Investors Inc.               | Palm Invest           | CORP                 | Corporation                 | 6200            | Real Estate Investment                       | US             | United States         | TX           | Texas               | Dallas      | 75201         | A-                 | Strong Credit Quality       | Active            | 2015-09-22T00:00:00 | Michael Chen          
+3              | CUST003       | Southwest Energy Partners         | SW Energy             | LLC                  | Limited Liability Company   | 2100            | Oil and Gas Exploration                      | US             | United States         | AZ           | Arizona             | Phoenix     | 85001         | B                  | Satisfactory Credit Quality | Active            | 2020-01-10T00:00:00 | Lisa Rodriguez        
+4              | CUST004       | Pacific Technology Solutions      | Pac Tech              | CORP                 | Corporation                 | 5400            | Technology Services                          | US             | United States         | CA           | California          | Los Angeles | 90001         | A                  | Excellent Credit Quality    | Active            | 2019-11-08T00:00:00 | David Kim             
+1002           | CUST005       | Atlantic Biomedical Corporation   | Atlantic Bio          | CORP                 | Corporation                 | 2800            | Pharmaceutical and Medical Devices           | US             | United States         | FL           | Florida             | Miami       | 33101         | A-                 | Strong Credit Quality       | Active            | 2017-06-14T00:00:00 | Jennifer Martinez     
+1003           | CUST006       | Mountain Capital Advisors LLC     | Mountain Cap          | LLC                  | Limited Liability Company   | 5200            | Financial Services and Investment Management | US             | United States         | CO           | Colorado            | Denver      | 80202         | B+                 | Good Credit Quality         | Active            | 2021-03-08T00:00:00 | Robert Thompson       
+1004           | CUST007       | Northwest Retail Enterprises Inc. | NW Retail             | CORP                 | Corporation                 | 4400            | Retail and Consumer Goods                    | US             | United States         | WA           | Washington          | Seattle     | 98101         | B                  | Satisfactory Credit Quality | Active            | 2016-12-02T00:00:00 | Amanda Foster         
+
+========== RUN DURATION ==========
+Run duration: 3.44 seconds

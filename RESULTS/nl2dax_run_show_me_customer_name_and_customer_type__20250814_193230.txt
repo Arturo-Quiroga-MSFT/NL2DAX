@@ -1,0 +1,57 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me customer name and customer type for all customers
+
+========== GENERATED SQL ==========
+SELECT
+    CUSTOMER_NAME AS customer_name,
+    CUSTOMER_TYPE_DESCRIPTION AS customer_type
+FROM FIS_CUSTOMER_DIMENSION
+ORDER BY CUSTOMER_NAME;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+customer_name                     | customer_type            
+----------------------------------+--------------------------
+Atlantic Biomedical Corporation   | Corporation              
+Desert Manufacturing LLC          | Corporation              
+Mountain Capital Advisors LLC     | Limited Liability Company
+Northwest Retail Enterprises Inc. | Corporation              
+Pacific Technology Solutions      | Corporation              
+Palm Investors Inc.               | Corporation              
+Southwest Energy Partners         | Limited Liability Company
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerType", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerType", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION]
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerName]                    | [CustomerType]           
+----------------------------------+--------------------------
+Mountain Capital Advisors LLC     | Limited Liability Company
+Southwest Energy Partners         | Limited Liability Company
+Atlantic Biomedical Corporation   | Corporation              
+Northwest Retail Enterprises Inc. | Corporation              
+Desert Manufacturing LLC          | Corporation              
+Palm Investors Inc.               | Corporation              
+Pacific Technology Solutions      | Corporation              
+
+========== RUN DURATION ==========
+Run duration: 37.72 seconds
