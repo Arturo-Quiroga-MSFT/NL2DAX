@@ -34,7 +34,7 @@ Dependencies:
 - schema_reader: Database schema reading and caching functionality
 - python-dotenv: Environment variable management for secure configuration
 
-Author: NL2DAX Pipeline Development Team
+Author: NL2DAX Pipeline Development Team (R2D2)
 Last Updated: August 14, 2025
 """
 
@@ -118,7 +118,7 @@ def get_schema_context():
         try:
             # Load and parse cached schema metadata from JSON file
             metadata = json.loads(cache_file.read_text())
-            print("[INFO] Loaded schema metadata from cache for DAX generation.")
+            print("[INFO] Loaded schema metadata from cache for query generation.")
         except Exception:
             # Fall back to live database query if cache is corrupted or invalid
             metadata = get_schema_metadata()
@@ -245,8 +245,8 @@ def generate_dax(intent_entities):
         - Gracefully handles Azure OpenAI API errors and timeouts
         - Provides meaningful error messages for debugging
     """
-    # Get current database schema context for schema-aware DAX generation
-    schema = get_schema_context()
+    # Get Power BI specific schema context for schema-aware DAX generation
+    schema = get_powerbi_schema_context()
     
     # Create LangChain chain combining prompt template with Azure OpenAI LLM
     # This chain handles the transformation from structured intent to DAX expression
@@ -258,3 +258,79 @@ def generate_dax(intent_entities):
     
     # Return the generated DAX content from the LLM response
     return result.content
+
+
+def get_powerbi_schema_context():
+    """
+    Get Power BI specific schema context for DAX generation.
+    
+    This function provides a curated schema that only includes tables and columns
+    that actually exist in the Power BI semantic model, ensuring that generated
+    DAX queries will execute successfully.
+    
+    Returns:
+        str: Formatted schema description for Power BI semantic model tables
+    """
+    # Power BI Semantic Model Schema - only tables confirmed to exist
+    powerbi_schema = {
+        "tables": {
+            "FIS_CUSTOMER_DIMENSION": {
+                "description": "Customer information and demographics",
+                "columns": [
+                    "CUSTOMER_KEY", "CUSTOMER_ID", "CUSTOMER_NAME", "CUSTOMER_SHORT_NAME",
+                    "CUSTOMER_TYPE_CODE", "CUSTOMER_TYPE_DESCRIPTION", 
+                    "INDUSTRY_CODE", "INDUSTRY_DESCRIPTION",
+                    "COUNTRY_CODE", "COUNTRY_DESCRIPTION", 
+                    "STATE_CODE", "STATE_DESCRIPTION", "CITY", "POSTAL_CODE",
+                    "RISK_RATING_CODE", "RISK_RATING_DESCRIPTION",
+                    "CUSTOMER_STATUS", "ESTABLISHED_DATE", "RELATIONSHIP_MANAGER"
+                ]
+            },
+            "FIS_CL_DETAIL_FACT": {
+                "description": "Commercial loan detail fact table with current balances",
+                "columns": [
+                    "LOAN_ID", "CUSTOMER_KEY", "MONTH_ID", "AS_OF_DATE",
+                    "CURRENT_PRINCIPAL_BALANCE", "OUTSTANDING_BALANCE", "CREDIT_LIMIT",
+                    "INTEREST_RATE", "MATURITY_DATE", "LOAN_STATUS"
+                ]
+            },
+            "FIS_CA_DETAIL_FACT": {
+                "description": "Current account detail fact table",
+                "columns": [
+                    "ACCOUNT_ID", "CUSTOMER_KEY", "MONTH_ID", "AS_OF_DATE",
+                    "CURRENT_BALANCE", "AVAILABLE_BALANCE", "OVERDRAFT_LIMIT"
+                ]
+            },
+            "FIS_MONTH_DIMENSION": {
+                "description": "Time dimension for monthly reporting",
+                "columns": [
+                    "MONTH_ID", "YEAR", "MONTH", "QUARTER", 
+                    "MONTH_DESCRIPTION", "QUARTER_DESCRIPTION"
+                ]
+            }
+        }
+    }
+    
+    # Format schema for LLM consumption
+    schema_text = "Power BI Semantic Model Schema:\n\n"
+    
+    for table_name, table_info in powerbi_schema["tables"].items():
+        schema_text += f"Table: {table_name}\n"
+        schema_text += f"Description: {table_info['description']}\n"
+        schema_text += "Columns: " + ", ".join(table_info["columns"]) + "\n\n"
+    
+    schema_text += """
+Key Relationships:
+- FIS_CL_DETAIL_FACT.CUSTOMER_KEY -> FIS_CUSTOMER_DIMENSION.CUSTOMER_KEY
+- FIS_CA_DETAIL_FACT.CUSTOMER_KEY -> FIS_CUSTOMER_DIMENSION.CUSTOMER_KEY  
+- FIS_CL_DETAIL_FACT.MONTH_ID -> FIS_MONTH_DIMENSION.MONTH_ID
+- FIS_CA_DETAIL_FACT.MONTH_ID -> FIS_MONTH_DIMENSION.MONTH_ID
+
+Important Notes:
+- Use table names with single quotes in DAX: 'FIS_CUSTOMER_DIMENSION'
+- Column references should include table name: 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+- Use EVALUATE statements for table expressions
+- Use SELECTCOLUMNS for column selection and aliasing
+"""
+    
+    return schema_text

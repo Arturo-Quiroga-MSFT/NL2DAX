@@ -1,0 +1,120 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me all customers in the db and describe them for me
+
+========== GENERATED SQL ==========
+Below are three common ways in T-SQL to “describe” (i.e. return metadata or a quick look) your customer table (`FIS_CUSTOMER_DIMENSION`).  Pick whichever best suits your needs:
+
+1) Use the built-in system stored procedure SP_HELP  
+```sql
+USE [db];
+GO
+
+EXEC sp_help 'dbo.FIS_CUSTOMER_DIMENSION';
+```
+
+2) Query the catalog view to return column names, types, lengths, nullability, etc.  
+```sql
+USE [db];
+GO
+
+SELECT 
+    c.COLUMN_NAME,
+    c.DATA_TYPE,
+    c.CHARACTER_MAXIMUM_LENGTH,
+    c.NUMERIC_PRECISION,
+    c.NUMERIC_SCALE,
+    c.IS_NULLABLE,
+    c.COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS AS c
+WHERE c.TABLE_SCHEMA = 'dbo'
+  AND c.TABLE_NAME   = 'FIS_CUSTOMER_DIMENSION'
+ORDER BY c.ORDINAL_POSITION;
+```
+
+3) Do a quick data peek to see actual rows and sample data  
+```sql
+USE [db];
+GO
+
+SELECT TOP (100)
+    CUSTOMER_KEY,
+    CUSTOMER_ID,
+    CUSTOMER_NAME,
+    CUSTOMER_SHORT_NAME,
+    CUSTOMER_TYPE_CODE,
+    CUSTOMER_TYPE_DESCRIPTION,
+    INDUSTRY_CODE,
+    INDUSTRY_DESCRIPTION,
+    COUNTRY_CODE,
+    COUNTRY_DESCRIPTION,
+    RISK_RATING_CODE,
+    RISK_RATING_DESCRIPTION,
+    ESTABLISHED_DATE,
+    RELATIONSHIP_MANAGER
+FROM dbo.FIS_CUSTOMER_DIMENSION
+ORDER BY CUSTOMER_NAME;
+```
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+USE [db];
+GO
+
+EXEC sp_help 'dbo.FIS_CUSTOMER_DIMENSION';
+
+========== SQL QUERY ERROR ==========
+[ERROR] Failed to execute SQL query: ('42000', '[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]USE statement is not supported to switch between databases. Use a new connection to connect to a different database. (40508) (SQLExecDirectW)')
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CustomerKey",      'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerID",       'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CustomerName",     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerType",     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "Industry",         'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+    "Country",          'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    "State",            'FIS_CUSTOMER_DIMENSION'[STATE_DESCRIPTION],
+    "City",             'FIS_CUSTOMER_DIMENSION'[CITY],
+    "PostalCode",       'FIS_CUSTOMER_DIMENSION'[POSTAL_CODE],
+    "RiskRating",       'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION],
+    "Status",           'FIS_CUSTOMER_DIMENSION'[CUSTOMER_STATUS],
+    "EstablishedDate",  'FIS_CUSTOMER_DIMENSION'[ESTABLISHED_DATE],
+    "RelationshipMgr",  'FIS_CUSTOMER_DIMENSION'[RELATIONSHIP_MANAGER]
+) 
+ORDER BY
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        TRUE()
+    ),
+    "CustomerKey",      'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerID",       'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CustomerName",     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerType",     'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+    "Industry",         'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+    "Country",          'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    "State",            'FIS_CUSTOMER_DIMENSION'[STATE_DESCRIPTION],
+    "City",             'FIS_CUSTOMER_DIMENSION'[CITY],
+    "PostalCode",       'FIS_CUSTOMER_DIMENSION'[POSTAL_CODE],
+    "RiskRating",       'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION],
+    "Status",           'FIS_CUSTOMER_DIMENSION'[CUSTOMER_STATUS],
+    "EstablishedDate",  'FIS_CUSTOMER_DIMENSION'[ESTABLISHED_DATE],
+    "RelationshipMgr",  'FIS_CUSTOMER_DIMENSION'[RELATIONSHIP_MANAGER]
+) 
+ORDER BY
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+
+========== DAX EXECUTION ERROR ==========
+[ERROR] Failed to execute DAX query: name 'banner' is not defined
+
+========== RUN DURATION ==========
+Run duration: 45.97 seconds

@@ -1,0 +1,57 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+test query
+
+========== GENERATED SQL ==========
+SELECT TOP 10
+    fact.LOAN_ID,
+    fact.CUSTOMER_KEY,
+    cust.CUSTOMER_NAME,
+    dim.MONTH_DESCRIPTION,
+    fact.CURRENT_PRINCIPAL_BALANCE
+FROM FIS_CL_DETAIL_FACT fact
+JOIN FIS_CUSTOMER_DIMENSION cust
+    ON fact.CUSTOMER_KEY = cust.CUSTOMER_KEY
+JOIN FIS_MONTH_DIMENSION dim
+    ON fact.MONTH_ID = dim.MONTH_ID
+ORDER BY fact.AS_OF_DATE DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+LOAN_ID        | CUSTOMER_KEY | CUSTOMER_NAME                | MONTH_DESCRIPTION | CURRENT_PRINCIPAL_BALANCE
+---------------+--------------+------------------------------+-------------------+--------------------------
+LN001-2024-001 | 1            | Desert Manufacturing LLC     | July, 2024        | 3750000.00               
+LN002-2024-002 | 2            | Palm Investors Inc.          | July, 2024        | 1875000.00               
+LN003-2023-003 | 3            | Southwest Energy Partners    | July, 2024        | 2625000.00               
+LN004-2024-004 | 4            | Pacific Technology Solutions | July, 2024        | 800000.00                
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_LOAN_EXPOSURE_BY_CURRENCY',
+        'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE] = "USD"
+    ),
+    "CurrencyCode",        'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE],
+    "CustomerCount",       'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CUSTOMER_COUNT],
+    "LoanCount",           'FIS_LOAN_EXPOSURE_BY_CURRENCY'[LOAN_COUNT],
+    "TotalExposureUSD",    'FIS_LOAN_EXPOSURE_BY_CURRENCY'[TOTAL_EXPOSURE_USD]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_LOAN_EXPOSURE_BY_CURRENCY',
+        'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE] = "USD"
+    ),
+    "CurrencyCode",        'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE],
+    "CustomerCount",       'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CUSTOMER_COUNT],
+    "LoanCount",           'FIS_LOAN_EXPOSURE_BY_CURRENCY'[LOAN_COUNT],
+    "TotalExposureUSD",    'FIS_LOAN_EXPOSURE_BY_CURRENCY'[TOTAL_EXPOSURE_USD]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (4, 9) Cannot find table '<oii>FIS_LOAN_EXPOSURE_BY_CURRENCY</oii>'."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803779"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 59.63 seconds

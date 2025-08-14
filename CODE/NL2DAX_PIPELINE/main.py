@@ -4,57 +4,63 @@ main.py - NL2DAX & NL2SQL Pipeline Entrypoint
 =============================================
 
 This script demonstrates how to build an end-to-end natural language to DAX and SQL pipeline 
-using LangChain, Azure OpenAI, and schema-aware p    # --- Step 4: SQL Code Extraction & Sanitization ---
-    # Clean and prepare the generated SQL for execution by handling common LLM output issues:
-    # 1. Remove markdown code fences (```sql ... ```) that LLMs often include
-    # 2. Extract pure SQL code from explanatory text
-    # 3. Replace smart quotes with standard ASCII quotes for SQL compatibility
-    # 4. Handle various formatting inconsistencies from LLM generation
-    #
-    # This sanitization process is crucial because LLMs often return formatted responses
-    # with markdown, explanations, and special characters that must be removed before
-    # SQL execution can succeed.
+using LangChain, Azure OpenAI, and schema-aware query generation. It serves as a compreh    # --- Step 4: SQL Code Extraction & Sanitization ---
+    # Extract only the SQL code from the LLM output (removing explanations and code fences).
     import re
-    sql_code = sql  # Start with the raw LLM output
-    
-    # Try to extract SQL code from markdown code blocks (most common LLM format)
+    sql_code = sql
     code_block = re.search(r"```sql\s*([\s\S]+?)```", sql, re.IGNORECASE)
     if not code_block:
-        # Fallback: try generic code blocks without language specification
         code_block = re.search(r"```([\s\S]+?)```", sql)
     if code_block:
         sql_code = code_block.group(1).strip()
-        print(f"[DEBUG] Extracted SQL from code block: {sql_code[:100]}...")
     else:
-        # Enhanced SQL extraction - handle complex SQL scripts and simple queries
-        # For queries asking for "all tables" or "sample content", generate a simpler query
-        if any(phrase in sql.lower() for phrase in ['all tables', 'sample content', 'show tables', 'list tables']):
-            # Generate a simpler query to list tables with sample data
-            sql_code = "SELECT t.TABLE_SCHEMA, t.TABLE_NAME, t.TABLE_TYPE, (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS c WHERE c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME) AS COLUMN_COUNT FROM INFORMATION_SCHEMA.TABLES t WHERE t.TABLE_TYPE = 'BASE TABLE' ORDER BY t.TABLE_SCHEMA, t.TABLE_NAME"
-            print(f"[DEBUG] Generated simpler query for table listing")
-        else:
-            # Try different patterns for regular SQL extraction
-            select_patterns = [
-                r'(SELECT\s+.*?FROM\s+[A-Z_][A-Z0-9_]*[^;]*)',  # SELECT...FROM with table name
-                r'(SELECT[\s\S]*?;)',  # SELECT until semicolon
-                r'(SELECT[\s\S]+)',    # Any SELECT statement
-            ]
-            
-            for pattern in select_patterns:
-                select_match = re.search(pattern, sql, re.IGNORECASE | re.DOTALL)
-                if select_match:
-                    candidate = select_match.group(1).strip()
-                    # Make sure this looks like valid SQL (contains FROM)
-                    if 'FROM' in candidate.upper():
-                        sql_code = candidate
-                        break
-                if 'FROM' in candidate.upper():
-                    sql_code = candidate
-                    break
+        select_match = re.search(r'(SELECT[\s\S]+)', sql, re.IGNORECASE)
+        if select_match:
+            sql_code = select_match.group(1).strip()
     
-    # Replace smart quotes and special characters that can break SQL execution
-    # This handles copy-paste issues and LLM-generated special characters
-    sql_sanitized = sql_code.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')ng. It serves as a comprehensive
+    # Replace smart quotes with standard quotes for SQL execution.
+    sql_sanitized = sql_code.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')
+    
+    # Remove problematic statements that are not supported in Azure SQL Database
+    lines = sql_sanitized.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        line = line.strip()
+        # Skip USE statements and GO statements
+        if not (line.upper().startswith('USE ') or line.upper() == 'GO' or line.upper().startswith('GO;')):
+            if line:  # Only add non-empty lines
+                cleaned_lines.append(line)
+    
+    sql_sanitized = '\n'.join(cleaned_lines)of how to:
+
+1. Extract intent and entities from natural language queries
+2. Generate both SQL and DAX queries from structured intent
+3. Validate and format generated queries
+4. Execute queries against both SQL databases and Power BI semantic models
+5. Present results in formatted tables
+6. Handle errors gracefully and provide debugging information
+
+Architecture Overview:
+- Uses Azure OpenAI GPT models for natural language understanding
+- Implements schema-aware query generation for better accuracy
+- Supports dual query generation (SQL for Azure SQL DB, DAX for Power BI)
+- Includes comprehensive error handling and execution logging
+- Provides formatted output for both console and file persistence
+
+Key Features:
+- Intent extraction using advanced prompting techniques
+- SQL query generation with T-SQL syntax validation
+- DAX query generation with Power BI semantic model awareness
+- Query sanitization and smart quote handling
+- Tabular result formatting for readability
+- Performance timing and execution metrics
+- Persistent output storage with timestamped filenames
+
+Target Use Cases:
+- Business users who need to query data using natural language
+- Developers building NL2SQL/NL2DAX applications
+- Data analysts who want to bridge natural language and technical queries
+- Educational demonstrations of LLM-powered query generation
 example of how to:
 
 1. Extract intent and entities from natural language queries
@@ -118,11 +124,20 @@ from langchain.prompts import ChatPromptTemplate as SQLChatPromptTemplate
 # - Intent-driven query logic based on extracted entities
 sql_prompt = SQLChatPromptTemplate.from_template(
     """
-    You are an expert in SQL and Azure SQL DB. Given the following database schema and the intent/entities, generate a valid T-SQL query for querying the database.
+    You are an expert in SQL and Azure SQL Database. Given the following database schema and the intent/entities, generate a valid T-SQL query for querying the database.
+    
+    IMPORTANT: 
+    - Do NOT use USE statements (USE [database] is not supported in Azure SQL Database)
+    - Generate only the SELECT query without USE or GO statements
+    - Return only executable T-SQL code without markdown formatting
+    - The database connection is already established to the correct database
+    
     Schema:
     {schema}
     Intent and Entities:
     {intent_entities}
+    
+    Generate a T-SQL query that can be executed directly:
     """
 )
 
@@ -156,8 +171,8 @@ def generate_sql(intent_entities):
     - Follow T-SQL syntax conventions for Azure SQL Database
     - Align with the user's expressed intent and identified entities
     """
-    from dax_generator import get_schema_context  # Import schema context provider
-    schema = get_schema_context()  # Get current database schema for context injection
+    from dax_generator import get_powerbi_schema_context  # Import Power BI specific schema
+    schema = get_powerbi_schema_context()  # Get Power BI semantic model schema for context injection
     chain = sql_prompt | llm  # Create LangChain prompt-to-LLM pipeline
     result = chain.invoke({"schema": schema, "intent_entities": intent_entities})  # Execute with context
     return result.content  # Return the generated SQL query
@@ -313,30 +328,45 @@ if __name__ == "__main__":
     # 3. Consistent formatting is maintained across different output channels
     output_lines = []  # Collect all output for file writing
     
-    # Create ASCII banner function for clear visual separation of output sections
+    # ANSI color codes for enhanced visual output
+    class Colors:
+        BLUE = '\033[94m'      # Input/Query phase
+        GREEN = '\033[92m'     # SQL phase  
+        PURPLE = '\033[95m'    # DAX phase
+        YELLOW = '\033[93m'    # Results phase
+        RED = '\033[91m'       # Error phase
+        CYAN = '\033[96m'      # Info/Duration phase
+        RESET = '\033[0m'      # Reset to default
+    
+    # Create colored ASCII banner function for clear visual separation of output sections
     # This improves readability and makes it easier to parse results visually
-    banner = lambda title: f"\n{'='*10} {title} {'='*10}\n"
+    def colored_banner(title, color=Colors.RESET):
+        banner_text = f"\n{'='*10} {title} {'='*10}\n"
+        return f"{color}{banner_text}{Colors.RESET}"
+    
+    # Plain banner for file output (no ANSI codes)
+    plain_banner = lambda title: f"\n{'='*10} {title} {'='*10}\n"
 
     # Display and record the original natural language query
     # This provides context for understanding the generated queries and results
-    print(banner("NATURAL LANGUAGE QUERY"))
+    print(colored_banner("NATURAL LANGUAGE QUERY", Colors.BLUE))
     print(query + "\n")
-    output_lines.append(banner("NATURAL LANGUAGE QUERY"))
+    output_lines.append(plain_banner("NATURAL LANGUAGE QUERY"))
     output_lines.append(f"{query}\n")
 
     # Display and record the generated SQL query with full LLM response
     # This includes any explanatory text or formatting that the LLM provided
-    print(banner("GENERATED SQL"))
+    print(colored_banner("GENERATED SQL", Colors.GREEN))
     print(sql + "\n")
-    output_lines.append(banner("GENERATED SQL"))
+    output_lines.append(plain_banner("GENERATED SQL"))
     output_lines.append(f"{sql}\n")
 
     # If sanitization was needed, show the cleaned SQL for transparency
     # This helps users understand what modifications were made for execution
     if sql != sql_sanitized:
-        print(banner("SANITIZED SQL (FOR EXECUTION)"))
+        print(colored_banner("SANITIZED SQL (FOR EXECUTION)", Colors.GREEN))
         print(sql_sanitized + "\n")
-        output_lines.append(banner("SANITIZED SQL (FOR EXECUTION)"))
+        output_lines.append(plain_banner("SANITIZED SQL (FOR EXECUTION)"))
         output_lines.append(f"{sql_sanitized}\n")
 
     # --- Step 6: SQL Query Execution & Result Formatting ---
@@ -344,7 +374,7 @@ if __name__ == "__main__":
     # in a readable table format. This section includes comprehensive error handling
     # to gracefully manage connection issues, syntax errors, and execution problems.
     try:
-        print(banner("EXECUTING SQL QUERY"))
+        print(colored_banner("EXECUTING SQL QUERY", Colors.GREEN))
         sql_results = execute_sql_query(sql_sanitized)  # Execute against Azure SQL DB
         
         if sql_results:
@@ -359,7 +389,7 @@ if __name__ == "__main__":
             header = " | ".join([col.ljust(col_widths[col]) for col in columns])
             sep = "-+-".join(['-' * col_widths[col] for col in columns])  # Separator line
             
-            print(banner("SQL QUERY RESULTS (TABLE)"))
+            print(colored_banner("SQL QUERY RESULTS (TABLE)", Colors.YELLOW))
             print(header)
             print(sep)
             
@@ -368,24 +398,24 @@ if __name__ == "__main__":
                 print(" | ".join([str(row[col]).ljust(col_widths[col]) for col in columns]))
             
             # Record table results for file output
-            output_lines.append(banner("SQL QUERY RESULTS (TABLE)"))
+            output_lines.append(plain_banner("SQL QUERY RESULTS (TABLE)"))
             output_lines.append(header + "\n")
             output_lines.append(sep + "\n")
             for row in sql_results:
                 output_lines.append(" | ".join([str(row[col]).ljust(col_widths[col]) for col in columns]) + "\n")
         else:
             # Handle case where query executes successfully but returns no data
-            print(banner("SQL QUERY RESULTS"))
+            print(colored_banner("SQL QUERY RESULTS", Colors.YELLOW))
             print("No results returned.")
-            output_lines.append(banner("SQL QUERY RESULTS"))
+            output_lines.append(plain_banner("SQL QUERY RESULTS"))
             output_lines.append("No results returned.\n")
     except Exception as e:
         # Comprehensive error handling for SQL execution failures
         # This catches connection errors, syntax errors, permission issues, etc.
         err_msg = f"[ERROR] Failed to execute SQL query: {e}"
-        print(banner("SQL QUERY ERROR"))
+        print(colored_banner("SQL QUERY ERROR", Colors.RED))
         print(err_msg)
-        output_lines.append(banner("SQL QUERY ERROR"))
+        output_lines.append(plain_banner("SQL QUERY ERROR"))
         output_lines.append(err_msg + "\n")
 
     # --- Step 7: DAX Query Generation ---
@@ -417,14 +447,14 @@ if __name__ == "__main__":
     print(formatted_dax)
 
     # Display both raw and formatted DAX for comparison and transparency
-    print(banner("GENERATED DAX"))
+    print(colored_banner("GENERATED DAX", Colors.PURPLE))
     print(dax + "\n")
-    output_lines.append(banner("GENERATED DAX"))
+    output_lines.append(plain_banner("GENERATED DAX"))
     output_lines.append(f"{dax}\n")
 
-    print(banner("FORMATTED DAX"))
+    print(colored_banner("FORMATTED DAX", Colors.PURPLE))
     print(formatted_dax + "\n")
-    output_lines.append(banner("FORMATTED DAX"))
+    output_lines.append(plain_banner("FORMATTED DAX"))
     output_lines.append(f"{formatted_dax}\n")
 
     # --- Step 9: DAX Query Execution (Power BI/Analysis Services) ---
@@ -443,7 +473,7 @@ if __name__ == "__main__":
     # - Windows: Native support through .NET Framework/.NET Core
     # - Container environments: May need additional runtime configuration
     try:
-        print(banner("EXECUTING DAX QUERY"))
+        print(colored_banner("EXECUTING DAX QUERY", Colors.PURPLE))
         dax_results = execute_dax_query(dax)  # Execute against Power BI/Analysis Services
         
         if dax_results:
@@ -454,38 +484,38 @@ if __name__ == "__main__":
             dax_header = " | ".join([col.ljust(dax_col_widths[col]) for col in dax_columns])
             dax_sep = "-+-".join(['-' * dax_col_widths[col] for col in dax_columns])
             
-            print(banner("DAX QUERY RESULTS (TABLE)"))
+            print(colored_banner("DAX QUERY RESULTS (TABLE)", Colors.YELLOW))
             print(dax_header)
             print(dax_sep)
             for row in dax_results:
                 print(" | ".join([str(row[col]).ljust(dax_col_widths[col]) for col in dax_columns]))
             
             # Record DAX results for file output
-            output_lines.append(banner("DAX QUERY RESULTS (TABLE)"))
+            output_lines.append(plain_banner("DAX QUERY RESULTS (TABLE)"))
             output_lines.append(dax_header + "\n")
             output_lines.append(dax_sep + "\n")
             for row in dax_results:
                 output_lines.append(" | ".join([str(row[col]).ljust(dax_col_widths[col]) for col in dax_columns]) + "\n")
         else:
             # Handle successful execution with no results
-            print(banner("DAX QUERY RESULTS"))
+            print(colored_banner("DAX QUERY RESULTS", Colors.YELLOW))
             print("No results returned.")
-            output_lines.append(banner("DAX QUERY RESULTS"))
+            output_lines.append(plain_banner("DAX QUERY RESULTS"))
             output_lines.append("No results returned.\n")
     except RuntimeError as e:
         # Handle platform-specific runtime dependency issues (especially on macOS/Linux)
         warn_msg = f"[WARN] Skipping DAX execution: {e}"
-        print(banner("DAX EXECUTION WARNING"))
+        print(colored_banner("DAX EXECUTION WARNING", Colors.YELLOW))
         print(warn_msg)
         print("Install Mono and pythonnet (`brew install mono`), then `pip install pyadomd pythonnet`.")
-        output_lines.append(banner("DAX EXECUTION WARNING"))
+        output_lines.append(plain_banner("DAX EXECUTION WARNING"))
         output_lines.append(warn_msg + "\n")
     except Exception as e:
         # Handle other DAX execution errors (authentication, network, syntax, etc.)
         err_msg = f"[ERROR] Failed to execute DAX query: {e}"
-        print(banner("DAX EXECUTION ERROR"))
+        print(colored_banner("DAX EXECUTION ERROR", Colors.RED))
         print(err_msg)
-        output_lines.append(banner("DAX EXECUTION ERROR"))
+        output_lines.append(plain_banner("DAX EXECUTION ERROR"))
         output_lines.append(err_msg + "\n")
 
     # --- Step 10: Show Run Duration ---
@@ -493,9 +523,9 @@ if __name__ == "__main__":
     end_time = time.time()
     duration = end_time - start_time
     duration_str = f"Run duration: {duration:.2f} seconds"
-    print(banner("RUN DURATION"))
+    print(colored_banner("RUN DURATION", Colors.CYAN))
     print(duration_str)
-    output_lines.append(banner("RUN DURATION"))
+    output_lines.append(plain_banner("RUN DURATION"))
     output_lines.append(duration_str + "\n")
 
     # --- Step 11: Results Persistence and Session Logging ---
