@@ -66,11 +66,11 @@ logs/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# Results and exports that might contain sensitive data
-RESULTS/
+# Exports that might contain sensitive data
 EXPORTS/
 **/exports/
-**/results/
+
+# Note: RESULTS/ directory is now tracked (contains important query results)
 
 # Backup files
 *_backup_*/

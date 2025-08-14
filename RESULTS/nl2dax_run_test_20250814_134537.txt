@@ -1,0 +1,91 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+test
+
+========== GENERATED SQL ==========
+Here’s a simple “test” query that hits a few of the core tables, shows you 10 recent loan‐detail rows along with the customer name and month description, and orders by the as‐of date descending:
+
+```sql
+SELECT TOP 10
+    f.LOAN_ID,
+    f.FACILITY_ID,
+    c.CUSTOMER_NAME,
+    m.MONTH_ID,
+    m.MONTH_DESCRIPTION,
+    f.CURRENT_PRINCIPAL_BALANCE,
+    f.PRINCIPAL_BALANCE,
+    f.PRINCIPAL_PAID,
+    f.INTEREST_BALANCE,
+    f.INTEREST_ACCRUED,
+    f.INTEREST_PAID,
+    f.AS_OF_DATE
+FROM FIS_CL_DETAIL_FACT AS f
+LEFT JOIN FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+LEFT JOIN FIS_MONTH_DIMENSION AS m
+    ON f.MONTH_ID = m.MONTH_ID
+ORDER BY f.AS_OF_DATE DESC;
+```
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+SELECT TOP 10
+    f.LOAN_ID,
+    f.FACILITY_ID,
+    c.CUSTOMER_NAME,
+    m.MONTH_ID,
+    m.MONTH_DESCRIPTION,
+    f.CURRENT_PRINCIPAL_BALANCE,
+    f.PRINCIPAL_BALANCE,
+    f.PRINCIPAL_PAID,
+    f.INTEREST_BALANCE,
+    f.INTEREST_ACCRUED,
+    f.INTEREST_PAID,
+    f.AS_OF_DATE
+FROM FIS_CL_DETAIL_FACT AS f
+LEFT JOIN FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+LEFT JOIN FIS_MONTH_DIMENSION AS m
+    ON f.MONTH_ID = m.MONTH_ID
+ORDER BY f.AS_OF_DATE DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+LOAN_ID        | FACILITY_ID | CUSTOMER_NAME                | MONTH_ID | MONTH_DESCRIPTION | CURRENT_PRINCIPAL_BALANCE | PRINCIPAL_BALANCE | PRINCIPAL_PAID | INTEREST_BALANCE | INTEREST_ACCRUED | INTEREST_PAID | AS_OF_DATE
+---------------+-------------+------------------------------+----------+-------------------+---------------------------+-------------------+----------------+------------------+------------------+---------------+-----------
+LN001-2024-001 | FCL-001     | Desert Manufacturing LLC     | 202407   | July, 2024        | 3750000.00                | 3750000.00        | 1250000.00     | 15000.00         | 45000.00         | 42000.00      | 2025-07-31
+LN002-2024-002 | FCL-002     | Palm Investors Inc.          | 202407   | July, 2024        | 1875000.00                | 1875000.00        | 625000.00      | 8500.00          | 22500.00         | 21000.00      | 2025-07-31
+LN003-2023-003 | FCL-003     | Southwest Energy Partners    | 202407   | July, 2024        | 2625000.00                | 2625000.00        | 875000.00      | 12000.00         | 35000.00         | 33000.00      | 2025-07-31
+LN004-2024-004 | FCL-004     | Pacific Technology Solutions | 202407   | July, 2024        | 800000.00                 | 800000.00         | 400000.00      | 5000.00          | 12000.00         | 11000.00      | 2025-07-31
+
+========== GENERATED DAX ==========
+Here’s a simple “test” query that lists loans with a current principal balance greater than 100 000. It uses EVALUATE, FILTER and SELECTCOLUMNS as per your rules:
+
+EVALUATE  
+SELECTCOLUMNS(  
+    FILTER(  
+        'FIS_CL_DETAIL_FACT',  
+        'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE] > 100000  
+    ),  
+    "LoanID",                         'FIS_CL_DETAIL_FACT'[LOAN_ID],  
+    "FacilityID",                     'FIS_CL_DETAIL_FACT'[FACILITY_ID],  
+    "CurrentPrincipalBalance",        'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE]  
+)
+
+========== FORMATTED DAX ==========
+Here’s a simple “test” query that lists loans with a current principal balance greater than 100 000. It uses EVALUATE, FILTER and SELECTCOLUMNS as per your rules:
+
+EVALUATE  
+SELECTCOLUMNS(  
+    FILTER(  
+        'FIS_CL_DETAIL_FACT',  
+        'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE] > 100000  
+    ),  
+    "LoanID",                         'FIS_CL_DETAIL_FACT'[LOAN_ID],  
+    "FacilityID",                     'FIS_CL_DETAIL_FACT'[FACILITY_ID],  
+    "CurrentPrincipalBalance",        'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE]  
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 401. Error details: {"error":{"code":"PowerBINotAuthorizedException","pbi.error":{"code":"PowerBINotAuthorizedException","parameters":{},"details":[],"exceptionCulprit":1}}}
+
+========== RUN DURATION ==========
+Run duration: 88.86 seconds

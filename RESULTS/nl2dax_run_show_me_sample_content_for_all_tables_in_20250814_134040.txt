@@ -1,0 +1,281 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me sample content for all tables in the db
+
+========== GENERATED SQL ==========
+The following T-SQL script will automatically loop through every user table in your current database and show you a small “sample” from each one.  By default it pulls the top 10 rows from each table.  You can adjust the number (and add an ORDER BY if you like).
+
+```
+--==================================================================================
+--  SAMPLE CONTENT:  Loop all user tables in the current database
+--==================================================================================
+SET NOCOUNT ON;
+
+DECLARE 
+    @SchemaName   SYSNAME,
+    @TableName    SYSNAME,
+    @SQL          NVARCHAR(MAX);
+
+-- Cursor to fetch every user table (non‐system)
+DECLARE table_cursor CURSOR LOCAL FAST_FORWARD FOR
+SELECT  
+    s.[name]  AS SchemaName,
+    t.[name]  AS TableName
+FROM sys.tables t
+JOIN sys.schemas s
+  ON t.schema_id = s.schema_id
+WHERE t.is_ms_shipped = 0    -- skip system-internal tables
+ORDER BY s.[name], t.[name];
+
+OPEN table_cursor;
+
+FETCH NEXT FROM table_cursor 
+INTO @SchemaName, @TableName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @SQL = 
+        'PRINT ''------------------------------------------------------------------'';' + CHAR(13) +
+        'PRINT ''[' + @SchemaName + '].[' + @TableName + ']: TOP 10 SAMPLE'';' + CHAR(13) +
+        'SELECT TOP (10) *' + CHAR(13) +
+        '  FROM [' + @SchemaName + '].[' + @TableName + '];' + CHAR(13);
+
+    -- Execute the generated SELECT
+    EXEC sp_executesql @SQL;
+
+    FETCH NEXT FROM table_cursor 
+    INTO @SchemaName, @TableName;
+END
+
+CLOSE table_cursor;
+DEALLOCATE table_cursor;
+
+SET NOCOUNT OFF;
+```
+
+How it works:
+
+1.  We build a cursor over `sys.tables` (joined to `sys.schemas`) to get every user table.
+2.  For each table we dynamically build a small script that:
+    • Prints a separator and the table’s name  
+    • Selects the top 10 rows from that table  
+3.  We then `EXEC sp_executesql` to actually run it.
+4.  You end up with one “chunk” of output per table.
+
+Feel free to:
+
+• Change `TOP (10)` to any other sample size.  
+• Add an `ORDER BY` if you want consistent sorting.  
+• Filter on particular schemas or tables by adjusting the cursor’s `WHERE` clause.
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+--==================================================================================
+--  SAMPLE CONTENT:  Loop all user tables in the current database
+--==================================================================================
+SET NOCOUNT ON;
+
+DECLARE 
+    @SchemaName   SYSNAME,
+    @TableName    SYSNAME,
+    @SQL          NVARCHAR(MAX);
+
+-- Cursor to fetch every user table (non‐system)
+DECLARE table_cursor CURSOR LOCAL FAST_FORWARD FOR
+SELECT  
+    s.[name]  AS SchemaName,
+    t.[name]  AS TableName
+FROM sys.tables t
+JOIN sys.schemas s
+  ON t.schema_id = s.schema_id
+WHERE t.is_ms_shipped = 0    -- skip system-internal tables
+ORDER BY s.[name], t.[name];
+
+OPEN table_cursor;
+
+FETCH NEXT FROM table_cursor 
+INTO @SchemaName, @TableName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @SQL = 
+        'PRINT ''------------------------------------------------------------------'';' + CHAR(13) +
+        'PRINT ''[' + @SchemaName + '].[' + @TableName + ']: TOP 10 SAMPLE'';' + CHAR(13) +
+        'SELECT TOP (10) *' + CHAR(13) +
+        '  FROM [' + @SchemaName + '].[' + @TableName + '];' + CHAR(13);
+
+    -- Execute the generated SELECT
+    EXEC sp_executesql @SQL;
+
+    FETCH NEXT FROM table_cursor 
+    INTO @SchemaName, @TableName;
+END
+
+CLOSE table_cursor;
+DEALLOCATE table_cursor;
+
+SET NOCOUNT OFF;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+SystemInformationID | Database Version | VersionDate         | ModifiedDate       
+--------------------+------------------+---------------------+--------------------
+1                   | 10.50.91013.00   | 2009-10-13 00:00:00 | 2009-10-13 00:00:00
+
+========== GENERATED DAX ==========
+EVALUATE
+UNION(
+    /* Sample from FIS_CL_DETAIL_FACT */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CL_DETAIL_FACT', 'FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY], ASC),
+        "SourceTable",            "FIS_CL_DETAIL_FACT",
+        "CL_DETAIL_KEY",          'FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY],
+        "AS_OF_DATE",             'FIS_CL_DETAIL_FACT'[AS_OF_DATE],
+        "CURRENT_PRINCIPAL_BALANCE", 'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE]
+    ),
+    /* Sample from FIS_CA_DETAIL_FACT */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CA_DETAIL_FACT', 'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY], ASC),
+        "SourceTable",            "FIS_CA_DETAIL_FACT",
+        "CA_DETAIL_KEY",          'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY],
+        "AS_OF_DATE",             'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+        "LIMIT_AMOUNT",           'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]
+    ),
+    /* Sample from FIS_LOAN_EXPOSURE_BY_CURRENCY */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_LOAN_EXPOSURE_BY_CURRENCY', 'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE], ASC),
+        "SourceTable",            "FIS_LOAN_EXPOSURE_BY_CURRENCY",
+        "CURRENCY_CODE",          'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE],
+        "ANALYSIS_DATE",          'FIS_LOAN_EXPOSURE_BY_CURRENCY'[ANALYSIS_DATE],
+        "TOTAL_EXPOSURE_ORIGINAL",'FIS_LOAN_EXPOSURE_BY_CURRENCY'[TOTAL_EXPOSURE_ORIGINAL]
+    ),
+    /* Sample from FIS_LOAN_EXPOSURE_BY_INDUSTRY */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_LOAN_EXPOSURE_BY_INDUSTRY', 'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[INDUSTRY_DESCRIPTION], ASC),
+        "SourceTable",            "FIS_LOAN_EXPOSURE_BY_INDUSTRY",
+        "INDUSTRY_DESCRIPTION",   'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[INDUSTRY_DESCRIPTION],
+        "ANALYSIS_DATE",          'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[ANALYSIS_DATE],
+        "TOTAL_EXPOSURE_USD",     'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[TOTAL_EXPOSURE_USD]
+    ),
+    /* Sample from FIS_NPL_DETAIL_ANALYSIS */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_NPL_DETAIL_ANALYSIS', 'FIS_NPL_DETAIL_ANALYSIS'[DETAIL_ID], ASC),
+        "SourceTable",            "FIS_NPL_DETAIL_ANALYSIS",
+        "DETAIL_ID",              'FIS_NPL_DETAIL_ANALYSIS'[DETAIL_ID],
+        "CUSTOMER_NAME",          'FIS_NPL_DETAIL_ANALYSIS'[CUSTOMER_NAME],
+        "LOAN_BALANCE_USD",       'FIS_NPL_DETAIL_ANALYSIS'[LOAN_BALANCE_USD]
+    ),
+    /* Sample from FIS_CUSTOMER_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CUSTOMER_DIMENSION', 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY], ASC),
+        "SourceTable",            "FIS_CUSTOMER_DIMENSION",
+        "CUSTOMER_KEY",           'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+        "CUSTOMER_NAME",          'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+        "COUNTRY_DESCRIPTION",    'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]
+    ),
+    /* Sample from FIS_INVESTOR_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_INVESTOR_DIMENSION', 'FIS_INVESTOR_DIMENSION'[INVESTOR_KEY], ASC),
+        "SourceTable",            "FIS_INVESTOR_DIMENSION",
+        "INVESTOR_KEY",           'FIS_INVESTOR_DIMENSION'[INVESTOR_KEY],
+        "INVESTOR_NAME",          'FIS_INVESTOR_DIMENSION'[INVESTOR_NAME],
+        "INVESTOR_TYPE_DESCRIPTION",'FIS_INVESTOR_DIMENSION'[INVESTOR_TYPE_DESCRIPTION]
+    ),
+    /* Sample from FIS_MONTH_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_MONTH_DIMENSION', 'FIS_MONTH_DIMENSION'[MONTH_ID], ASC),
+        "SourceTable",            "FIS_MONTH_DIMENSION",
+        "MONTH_ID",               'FIS_MONTH_DIMENSION'[MONTH_ID],
+        "MONTH_DESCRIPTION",      'FIS_MONTH_DIMENSION'[MONTH_DESCRIPTION],
+        "YEAR_ID",                'FIS_MONTH_DIMENSION'[YEAR_ID]
+    ),
+    /* Sample from ProductCategory */
+    SELECTCOLUMNS(
+        TOPN(5, 'ProductCategory', 'ProductCategory'[ProductCategoryID], ASC),
+        "SourceTable",            "ProductCategory",
+        "ProductCategoryID",      'ProductCategory'[ProductCategoryID],
+        "Name",                   'ProductCategory'[Name],
+        "ModifiedDate",           'ProductCategory'[ModifiedDate]
+    )
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+UNION(
+    /* Sample from FIS_CL_DETAIL_FACT */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CL_DETAIL_FACT', 'FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY], ASC),
+        "SourceTable",            "FIS_CL_DETAIL_FACT",
+        "CL_DETAIL_KEY",          'FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY],
+        "AS_OF_DATE",             'FIS_CL_DETAIL_FACT'[AS_OF_DATE],
+        "CURRENT_PRINCIPAL_BALANCE", 'FIS_CL_DETAIL_FACT'[CURRENT_PRINCIPAL_BALANCE]
+    ),
+    /* Sample from FIS_CA_DETAIL_FACT */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CA_DETAIL_FACT', 'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY], ASC),
+        "SourceTable",            "FIS_CA_DETAIL_FACT",
+        "CA_DETAIL_KEY",          'FIS_CA_DETAIL_FACT'[CA_DETAIL_KEY],
+        "AS_OF_DATE",             'FIS_CA_DETAIL_FACT'[AS_OF_DATE],
+        "LIMIT_AMOUNT",           'FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]
+    ),
+    /* Sample from FIS_LOAN_EXPOSURE_BY_CURRENCY */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_LOAN_EXPOSURE_BY_CURRENCY', 'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE], ASC),
+        "SourceTable",            "FIS_LOAN_EXPOSURE_BY_CURRENCY",
+        "CURRENCY_CODE",          'FIS_LOAN_EXPOSURE_BY_CURRENCY'[CURRENCY_CODE],
+        "ANALYSIS_DATE",          'FIS_LOAN_EXPOSURE_BY_CURRENCY'[ANALYSIS_DATE],
+        "TOTAL_EXPOSURE_ORIGINAL",'FIS_LOAN_EXPOSURE_BY_CURRENCY'[TOTAL_EXPOSURE_ORIGINAL]
+    ),
+    /* Sample from FIS_LOAN_EXPOSURE_BY_INDUSTRY */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_LOAN_EXPOSURE_BY_INDUSTRY', 'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[INDUSTRY_DESCRIPTION], ASC),
+        "SourceTable",            "FIS_LOAN_EXPOSURE_BY_INDUSTRY",
+        "INDUSTRY_DESCRIPTION",   'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[INDUSTRY_DESCRIPTION],
+        "ANALYSIS_DATE",          'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[ANALYSIS_DATE],
+        "TOTAL_EXPOSURE_USD",     'FIS_LOAN_EXPOSURE_BY_INDUSTRY'[TOTAL_EXPOSURE_USD]
+    ),
+    /* Sample from FIS_NPL_DETAIL_ANALYSIS */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_NPL_DETAIL_ANALYSIS', 'FIS_NPL_DETAIL_ANALYSIS'[DETAIL_ID], ASC),
+        "SourceTable",            "FIS_NPL_DETAIL_ANALYSIS",
+        "DETAIL_ID",              'FIS_NPL_DETAIL_ANALYSIS'[DETAIL_ID],
+        "CUSTOMER_NAME",          'FIS_NPL_DETAIL_ANALYSIS'[CUSTOMER_NAME],
+        "LOAN_BALANCE_USD",       'FIS_NPL_DETAIL_ANALYSIS'[LOAN_BALANCE_USD]
+    ),
+    /* Sample from FIS_CUSTOMER_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_CUSTOMER_DIMENSION', 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY], ASC),
+        "SourceTable",            "FIS_CUSTOMER_DIMENSION",
+        "CUSTOMER_KEY",           'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+        "CUSTOMER_NAME",          'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+        "COUNTRY_DESCRIPTION",    'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]
+    ),
+    /* Sample from FIS_INVESTOR_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_INVESTOR_DIMENSION', 'FIS_INVESTOR_DIMENSION'[INVESTOR_KEY], ASC),
+        "SourceTable",            "FIS_INVESTOR_DIMENSION",
+        "INVESTOR_KEY",           'FIS_INVESTOR_DIMENSION'[INVESTOR_KEY],
+        "INVESTOR_NAME",          'FIS_INVESTOR_DIMENSION'[INVESTOR_NAME],
+        "INVESTOR_TYPE_DESCRIPTION",'FIS_INVESTOR_DIMENSION'[INVESTOR_TYPE_DESCRIPTION]
+    ),
+    /* Sample from FIS_MONTH_DIMENSION */
+    SELECTCOLUMNS(
+        TOPN(5, 'FIS_MONTH_DIMENSION', 'FIS_MONTH_DIMENSION'[MONTH_ID], ASC),
+        "SourceTable",            "FIS_MONTH_DIMENSION",
+        "MONTH_ID",               'FIS_MONTH_DIMENSION'[MONTH_ID],
+        "MONTH_DESCRIPTION",      'FIS_MONTH_DIMENSION'[MONTH_DESCRIPTION],
+        "YEAR_ID",                'FIS_MONTH_DIMENSION'[YEAR_ID]
+    ),
+    /* Sample from ProductCategory */
+    SELECTCOLUMNS(
+        TOPN(5, 'ProductCategory', 'ProductCategory'[ProductCategoryID], ASC),
+        "SourceTable",            "ProductCategory",
+        "ProductCategoryID",      'ProductCategory'[ProductCategoryID],
+        "Name",                   'ProductCategory'[Name],
+        "ModifiedDate",           'ProductCategory'[ModifiedDate]
+    )
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 401. Error details: {"error":{"code":"PowerBINotAuthorizedException","pbi.error":{"code":"PowerBINotAuthorizedException","parameters":{},"details":[],"exceptionCulprit":1}}}
+
+========== RUN DURATION ==========
+Run duration: 116.70 seconds
