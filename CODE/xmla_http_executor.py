@@ -225,7 +225,7 @@ def rest_execute_dax_via_api(tenant_id: str, client_id: str, client_secret: str,
   print(f"[DEBUG] Found dataset '{dataset_name}' with ID: {dataset_id}")
   
   # Execute DAX
-  exec_url = f"https://api.powerbi.com/v1.0/myorg/groups/{group_id}/datasets/{dataset_id}/executeQueries"
+  exec_url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries"
   print(f"[DEBUG] Making executeQueries request to: {exec_url}")
   payload = {"queries": [{"query": dax_query}], "serializerSettings": {"includeNulls": True}}
   ex_resp = sess.post(exec_url, headers=headers, data=json.dumps(payload), timeout=120)

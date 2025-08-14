@@ -47,7 +47,7 @@ def test_xmla_quick():
             "queries": [{"query": "EVALUATE ROW(\"Test\", 1)"}]
         }
         
-        url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/executeQueries"
+        url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries"
         
         response = requests.post(url, json=payload, headers=headers, timeout=30)
         

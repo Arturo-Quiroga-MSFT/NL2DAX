@@ -79,7 +79,7 @@ def test_permission_levels():
         },
         {
             "name": "5. Execute DAX Query (MAIN TEST)",
-            "url": f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/executeQueries",
+            "url": f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries",
             "method": "POST",
             "body": {"queries": [{"query": "EVALUATE { 1 }"}], "serializerSettings": {"includeNulls": True}},
             "expected": "May fail - requires execute permission + capacity access"

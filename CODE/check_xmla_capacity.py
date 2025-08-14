@@ -354,7 +354,7 @@ def test_xmla_specific_issue():
         }
     }
     
-    url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/executeQueries"
+    url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries"
     response = requests.post(url, headers=headers, json=dax_query, timeout=30)
     
     if response.status_code == 200:

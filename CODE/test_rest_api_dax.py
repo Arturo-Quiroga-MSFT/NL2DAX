@@ -168,7 +168,7 @@ class PowerBIRestAPITester:
             }
         ]
         
-        base_url = f"https://api.powerbi.com/v1.0/myorg/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
+        base_url = f"https://api.powerbi.com/v1.0/myorg/datasets/{self.dataset_id}/executeQueries"
         
         for i, test_query in enumerate(test_queries, 1):
             print(f"\n🔍 Test {i}: {test_query['name']}")
@@ -312,7 +312,7 @@ class PowerBIRestAPITester:
         
         print("🔧 COMPARISON WITH XMLA APPROACH:")
         print("• XMLA Endpoint: powerbi://api.powerbi.com/v1.0/myorg/FIS")
-        print("• REST Endpoint: https://api.powerbi.com/v1.0/myorg/groups/{workspace}/datasets/{dataset}/executeQueries")
+        print("• REST Endpoint: https://api.powerbi.com/v1.0/myorg/datasets/{dataset}/executeQueries")
         print("• XMLA requires capacity-level XMLA Endpoint = 'Read Write'")
         print("• REST API requires tenant-level 'Dataset Execute Queries REST API' = Enabled")
         print()

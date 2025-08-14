@@ -1,12 +1,22 @@
 # Power BI DAX 401 Error Resolution - Final Summary
 
-**Date:** August 13, 2025  
-**Status:** Root Cause Identified - Capacity Access Issue  
-**Resolution:** Pending Capacity Propagation  
+**Date:** August 13-14, 2025  
+**Status:** Root Cause Identified - Capacity Access Issue (Persistent)  
+**Resolution:** Requires Admin Intervention  
 
 ## 🎯 Executive Summary
 
-Investigation into Power BI DAX execution 401 errors has been completed. The root cause has been identified as a **capacity accessibility issue** rather than authentication, permissions, or configuration problems. A comprehensive diagnostic suite has been created to monitor and resolve the issue.
+Investigation into Power BI DAX execution 401 errors has been completed. The root cause has been identified as a **persistent capacity accessibility issue** that has not resolved overnight, indicating the need for Power BI administrator intervention. A comprehensive diagnostic suite has been created to monitor and resolve the issue.
+
+## 🔄 Status Update (August 14, 2025)
+
+**Overnight Monitoring Results:**
+- ❌ Capacity still not accessible via user API (24+ hours)
+- ❌ DAX and SQL queries continue to fail with 401 errors
+- ✅ All diagnostic tools remain functional and consistent
+- ✅ Service principal authentication continues to work properly
+
+**Conclusion:** The issue requires **Power BI administrator intervention** rather than waiting for automatic propagation.
 
 ## 🔍 Problem Description
 
@@ -135,8 +145,32 @@ The issue should resolve automatically once capacity propagation completes and t
 
 ### Timeline Expectations
 - **Immediate:** Continue monitoring capacity status
-- **5-15 minutes:** Expected capacity propagation completion
+- **24+ Hours:** Issue persists - requires admin intervention
+- **Upon admin action:** Capacity configuration or service principal permissions need review
 - **Upon resolution:** All query types should work immediately
+
+## 🚨 Updated Recommendations (August 14)
+
+Since the issue has persisted for 24+ hours, the following actions are now recommended:
+
+### Immediate Actions Required
+1. **Contact Power BI Administrator**
+   - Request capacity status review
+   - Verify service principal has "Execute Queries" permission at dataset level
+   - Check if workspace is properly assigned to a running capacity
+
+2. **Admin Portal Actions Needed**
+   - Verify capacity is truly running (not just showing as running)
+   - Check XMLA Endpoint settings: Should be "Read Write"
+   - Review service principal permissions in workspace security
+   - Confirm tenant setting: "Dataset Execute Queries REST API" is enabled
+
+3. **Alternative Dataset Testing**
+   ```bash
+   # Test with AdventureWorks dataset instead
+   export POWERBI_DATASET_ID=fc4d80c8-090e-4441-8336-217490bde820
+   python3 compare_dax_sql.py
+   ```
 
 ## 🛠️ Tools Usage Guide
 

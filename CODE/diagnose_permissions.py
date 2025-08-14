@@ -158,7 +158,7 @@ def test_simple_dax():
         ]
     }
     
-    url = f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/executeQueries"
+    url = f"https://api.powerbi.com/v1.0/myorg/datasets/{dataset_id}/executeQueries"
     
     try:
         response = requests.post(url, json=dax_query, headers=headers, timeout=60)

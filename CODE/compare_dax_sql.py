@@ -61,7 +61,7 @@ class DAXvsSQLTester:
             "serializerSettings": {"includeNulls": True}
         }
         
-        url = f"https://api.powerbi.com/v1.0/myorg/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
+        url = f"https://api.powerbi.com/v1.0/myorg/datasets/{self.dataset_id}/executeQueries"
         
         try:
             start_time = time.time()
