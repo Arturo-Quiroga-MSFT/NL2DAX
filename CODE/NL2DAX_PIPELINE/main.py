@@ -24,20 +24,30 @@ using LangChain, Azure OpenAI, and schema-aware p    # --- Step 4: SQL Code Extr
         code_block = re.search(r"```([\s\S]+?)```", sql)
     if code_block:
         sql_code = code_block.group(1).strip()
+        print(f"[DEBUG] Extracted SQL from code block: {sql_code[:100]}...")
     else:
-        # Enhanced SQL extraction - look for SELECT statements more carefully
-        # First try to find a SELECT statement with better boundary detection
-        select_patterns = [
-            r'(SELECT\s+.*?FROM\s+[A-Z_][A-Z0-9_]*[^;]*)',  # SELECT...FROM with table name
-            r'(SELECT[\s\S]*?;)',  # SELECT until semicolon
-            r'(SELECT[\s\S]+)',    # Any SELECT statement
-        ]
-        
-        for pattern in select_patterns:
-            select_match = re.search(pattern, sql, re.IGNORECASE | re.DOTALL)
-            if select_match:
-                candidate = select_match.group(1).strip()
-                # Make sure this looks like valid SQL (contains FROM)
+        # Enhanced SQL extraction - handle complex SQL scripts and simple queries
+        # For queries asking for "all tables" or "sample content", generate a simpler query
+        if any(phrase in sql.lower() for phrase in ['all tables', 'sample content', 'show tables', 'list tables']):
+            # Generate a simpler query to list tables with sample data
+            sql_code = "SELECT t.TABLE_SCHEMA, t.TABLE_NAME, t.TABLE_TYPE, (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS c WHERE c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME) AS COLUMN_COUNT FROM INFORMATION_SCHEMA.TABLES t WHERE t.TABLE_TYPE = 'BASE TABLE' ORDER BY t.TABLE_SCHEMA, t.TABLE_NAME"
+            print(f"[DEBUG] Generated simpler query for table listing")
+        else:
+            # Try different patterns for regular SQL extraction
+            select_patterns = [
+                r'(SELECT\s+.*?FROM\s+[A-Z_][A-Z0-9_]*[^;]*)',  # SELECT...FROM with table name
+                r'(SELECT[\s\S]*?;)',  # SELECT until semicolon
+                r'(SELECT[\s\S]+)',    # Any SELECT statement
+            ]
+            
+            for pattern in select_patterns:
+                select_match = re.search(pattern, sql, re.IGNORECASE | re.DOTALL)
+                if select_match:
+                    candidate = select_match.group(1).strip()
+                    # Make sure this looks like valid SQL (contains FROM)
+                    if 'FROM' in candidate.upper():
+                        sql_code = candidate
+                        break
                 if 'FROM' in candidate.upper():
                     sql_code = candidate
                     break
