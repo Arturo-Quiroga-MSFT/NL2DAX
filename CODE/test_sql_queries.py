@@ -70,7 +70,8 @@ class PowerBISQLTester:
             "serializerSettings": {"includeNulls": True}
         }
         
-        url = f"https://api.powerbi.com/v1.0/myorg/datasets/{self.dataset_id}/executeQueries"
+        # Microsoft Power BI REST API endpoint - workspace-based for shared workspaces
+        url = f"https://api.powerbi.com/v1.0/myorg/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
         
         try:
             response = requests.post(url, headers=headers, json=query_payload, timeout=30)
@@ -100,7 +101,8 @@ class PowerBISQLTester:
             "serializerSettings": {"includeNulls": True}
         }
         
-        url = f"https://api.powerbi.com/v1.0/myorg/datasets/{self.dataset_id}/executeQueries"
+        # Microsoft Power BI REST API endpoint - workspace-based for shared workspaces
+        url = f"https://api.powerbi.com/v1.0/myorg/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
         
         try:
             start_time = time.time()
