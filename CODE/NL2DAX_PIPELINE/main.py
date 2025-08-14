@@ -25,10 +25,22 @@ using LangChain, Azure OpenAI, and schema-aware p    # --- Step 4: SQL Code Extr
     if code_block:
         sql_code = code_block.group(1).strip()
     else:
-        # Last resort: extract anything that looks like a SELECT statement
-        select_match = re.search(r'(SELECT[\s\S]+)', sql, re.IGNORECASE)
-        if select_match:
-            sql_code = select_match.group(1).strip()
+        # Enhanced SQL extraction - look for SELECT statements more carefully
+        # First try to find a SELECT statement with better boundary detection
+        select_patterns = [
+            r'(SELECT\s+.*?FROM\s+[A-Z_][A-Z0-9_]*[^;]*)',  # SELECT...FROM with table name
+            r'(SELECT[\s\S]*?;)',  # SELECT until semicolon
+            r'(SELECT[\s\S]+)',    # Any SELECT statement
+        ]
+        
+        for pattern in select_patterns:
+            select_match = re.search(pattern, sql, re.IGNORECASE | re.DOTALL)
+            if select_match:
+                candidate = select_match.group(1).strip()
+                # Make sure this looks like valid SQL (contains FROM)
+                if 'FROM' in candidate.upper():
+                    sql_code = candidate
+                    break
     
     # Replace smart quotes and special characters that can break SQL execution
     # This handles copy-paste issues and LLM-generated special characters
