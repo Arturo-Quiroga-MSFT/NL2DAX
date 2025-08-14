@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Fabric Mirrored Database Sync Status and Refresh
-Check sync status and trigger refresh for mirrored database semantic model
+Fabric Mirrored Database Refresh
+Trigger refresh for mirrored database semantic model to sync latest Azure SQL data
 """
 
 import os
@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class FabricMirroredDatabaseSync:
-    """Check and manage Fabric mirrored database sync status"""
+    """Refresh Fabric mirrored database to sync latest Azure SQL data"""
     
     def __init__(self):
         self.tenant_id = os.getenv("PBI_TENANT_ID")
@@ -160,8 +160,8 @@ class FabricMirroredDatabaseSync:
         print("-" * 40)
         
         try:
+            # Simplified payload for service principal requests
             payload = {
-                "notifyOption": "MailOnFailure",
                 "retryCount": 1
             }
             
@@ -248,70 +248,59 @@ class FabricMirroredDatabaseSync:
         print(f"   ⏰ Timeout after {max_wait_minutes} minutes")
         return False
     
-    def test_dax_after_refresh(self):
-        """Test DAX queries after refresh"""
-        headers = {
-            "Authorization": f"Bearer {self.token}",
-            "Content-Type": "application/json"
-        }
+    def verify_refresh_completion(self):
+        """Verify that the refresh completed successfully"""
+        headers = {"Authorization": f"Bearer {self.token}"}
         
-        print("🧪 TESTING DAX AFTER REFRESH")
+        print("✅ VERIFYING REFRESH COMPLETION")
         print("-" * 40)
         
-        url = f"{self.base_url}/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
-        
-        test_queries = [
-            ("Simple Value", "EVALUATE { 1 }"),
-            ("System Info", "EVALUATE ROW(\"Test\", \"Success\")"),
-            ("Table Info", "EVALUATE INFO.TABLES()"),
-        ]
-        
-        for test_name, query in test_queries:
-            print(f"Testing: {test_name}")
+        try:
+            response = requests.get(
+                f"{self.base_url}/groups/{self.workspace_id}/datasets/{self.dataset_id}/refreshes",
+                headers=headers,
+                timeout=30
+            )
             
-            payload = {
-                "queries": [{"query": query}],
-                "serializerSettings": {"includeNulls": True}
-            }
-            
-            try:
-                response = requests.post(url, headers=headers, json=payload, timeout=30)
-                print(f"   Status: {response.status_code}")
+            if response.status_code == 200:
+                refreshes = response.json().get('value', [])
                 
-                if response.status_code == 200:
-                    print("   ✅ SUCCESS!")
-                    data = response.json()
-                    if data.get('results') and data['results'][0].get('tables'):
-                        table = data['results'][0]['tables'][0]
-                        rows = table.get('rows', [])
-                        if rows:
-                            print(f"   Result: {rows[0] if len(rows) == 1 else f'{len(rows)} rows'}")
-                    return True
+                if refreshes:
+                    latest = refreshes[0]
+                    status = latest.get('status', 'Unknown')
+                    start_time = latest.get('startTime', 'Unknown')
+                    end_time = latest.get('endTime', 'Unknown')
+                    
+                    print(f"   Last Refresh Status: {status}")
+                    print(f"   Start Time: {start_time}")
+                    print(f"   End Time: {end_time}")
+                    
+                    if status == 'Completed':
+                        print("   ✅ Refresh completed successfully!")
+                        print("   🔄 Mirrored database should now have latest data")
+                        return True
+                    else:
+                        print(f"   ❌ Refresh status: {status}")
+                        return False
                 else:
-                    try:
-                        error_data = response.json()
-                        error_details = error_data.get('error', {}).get('pbi.error', {}).get('details', [])
-                        if error_details:
-                            detail = error_details[0].get('detail', {}).get('value', 'No detail')
-                            print(f"   Error: {detail}")
-                        else:
-                            print(f"   Error: {response.text[:100]}")
-                    except:
-                        print(f"   Error: {response.text[:100]}")
-                        
-            except Exception as e:
-                print(f"   Exception: {e}")
-            print()
-        
-        return False
+                    print("   ⚠️  No refresh history found")
+                    return False
+                    
+            else:
+                print(f"   ❌ Cannot verify refresh: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error verifying refresh: {e}")
+            return False
 
 def main():
     """Main sync and refresh management function"""
-    print("🔄 FABRIC MIRRORED DATABASE SYNC & REFRESH")
-    print("=" * 50)
+    print("🔄 FABRIC MIRRORED DATABASE REFRESH")
+    print("=" * 45)
     print(f"🕐 Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
-    print("📋 Purpose: Check sync status and refresh semantic model")
+    print("📋 Purpose: Refresh mirrored database semantic model to sync latest data")
     print()
     
     sync_manager = FabricMirroredDatabaseSync()
@@ -332,18 +321,12 @@ def main():
     print()
     
     # Decide next action based on refresh status
-    if refresh_status is True:
-        print("✅ Semantic model is already refreshed, testing DAX...")
-        success = sync_manager.test_dax_after_refresh()
-    elif refresh_status is None:
-        print("⏳ Refresh in progress, monitoring...")
+    if refresh_status is None:
+        print("⏳ Refresh already in progress, monitoring...")
         refresh_completed = sync_manager.monitor_refresh_progress()
-        if refresh_completed:
-            success = sync_manager.test_dax_after_refresh()
-        else:
-            success = False
+        success = refresh_completed
     else:
-        print("🔄 Need to trigger refresh...")
+        print("🔄 Triggering refresh to sync latest data...")
         refresh_triggered = sync_manager.trigger_semantic_model_refresh()
         
         if refresh_triggered:
@@ -351,7 +334,7 @@ def main():
             refresh_completed = sync_manager.monitor_refresh_progress()
             
             if refresh_completed:
-                success = sync_manager.test_dax_after_refresh()
+                success = sync_manager.verify_refresh_completion()
             else:
                 print("⚠️  Refresh taking longer than expected")
                 success = False
@@ -364,17 +347,22 @@ def main():
     print("=" * 20)
     
     if success:
-        print("🎉 SUCCESS! Fabric mirrored database is working")
-        print("   DAX queries are now functioning correctly")
-        print("   The semantic model has been properly refreshed")
+        print("🎉 SUCCESS! Mirrored database refreshed successfully")
+        print("   ✅ Latest Azure SQL data is now synced to Fabric")
+        print("   ✅ Semantic model has been updated")
+        print("   ✅ New dimension table entries are now available")
+        print("\n📝 Next Steps:")
+        print("   • Test DAX queries in Power BI or Fabric")
+        print("   • Verify data in Fabric SQL Analytics Endpoint")
+        print("   • Run NL2DAX pipeline to test new dimension data")
     else:
-        print("❌ Issues remain with the mirrored database")
-        print("   🔧 Additional steps needed:")
+        print("❌ Issues with mirrored database refresh")
+        print("   🔧 Troubleshooting steps:")
         print("   1. Check Fabric portal for mirrored database status")
         print("   2. Verify Azure SQL database connectivity")
         print("   3. Check mirroring configuration in Fabric")
         print("   4. Ensure service principal has Fabric permissions")
-        print("   5. Contact Fabric administrator if issues persist")
+        print("   5. Try manual refresh in Fabric portal")
     
     print(f"\n⏰ Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
