@@ -19,7 +19,7 @@ import hashlib
 import os
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 
 class QueryCache:
     """Simple file-based cache for LLM responses."""
@@ -60,17 +60,10 @@ class QueryCache:
         except IOError as e:
             print(f"[DEBUG] Cache save warning: {e}")
     
-    def _get_cache_key(self, query: Union[str, Dict], cache_type: str = "general") -> str:
+    def _get_cache_key(self, query: str, cache_type: str = "general") -> str:
         """Generate a cache key from query text and type."""
-        # Handle both string and dict inputs
-        if isinstance(query, dict):
-            # Convert dict to string for hashing
-            query_str = json.dumps(query, sort_keys=True)
-        else:
-            query_str = str(query)
-            
         # Normalize query (lowercase, strip whitespace, remove extra spaces)
-        normalized = " ".join(query_str.lower().strip().split())
+        normalized = " ".join(query.lower().strip().split())
         # Create hash with cache type prefix
         key_text = f"{cache_type}:{normalized}"
         return hashlib.md5(key_text.encode('utf-8')).hexdigest()
@@ -79,7 +72,7 @@ class QueryCache:
         """Check if a cache entry is expired."""
         return (time.time() - timestamp) > self.ttl_seconds
     
-    def get(self, query: Union[str, Dict], cache_type: str = "general") -> Optional[str]:
+    def get(self, query: str, cache_type: str = "general") -> Optional[str]:
         """
         Get cached response for a query.
         
@@ -113,7 +106,7 @@ class QueryCache:
             print(f"[DEBUG] Cache get error: {e}")
             return None
     
-    def set(self, query: Union[str, Dict], response: str, cache_type: str = "general") -> None:
+    def set(self, query: str, response: str, cache_type: str = "general") -> None:
         """
         Store a response in the cache.
         

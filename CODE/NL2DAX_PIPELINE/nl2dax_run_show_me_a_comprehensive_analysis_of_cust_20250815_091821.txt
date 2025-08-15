@@ -1,0 +1,68 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me a comprehensive analysis of customers with their credit amounts, risk ratings, and counterparty exposures grouped by customer type
+
+========== GENERATED SQL ==========
+SELECT 
+    c.CUSTOMER_TYPE_DESCRIPTION AS CustomerType,
+    SUM(f.LIMIT_AMOUNT) AS TotalCreditAmount,
+    AVG(f.PROBABILITY_OF_DEFAULT) AS AvgProbabilityOfDefault,
+    SUM(f.EXPOSURE_AT_DEFAULT) AS TotalExposureAtDefault
+FROM FIS_CA_DETAIL_FACT AS f
+INNER JOIN FIS_CUSTOMER_DIMENSION AS c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY 
+    c.CUSTOMER_TYPE_DESCRIPTION
+ORDER BY 
+    c.CUSTOMER_TYPE_DESCRIPTION;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CustomerType              | TotalCreditAmount | AvgProbabilityOfDefault | TotalExposureAtDefault
+--------------------------+-------------------+-------------------------+-----------------------
+Corporation               | 7500000.00        | 0.017500                | 5625000.00            
+Limited Liability Company | 3500000.00        | 0.030000                | 2625000.00            
+
+========== GENERATED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CA_DETAIL_FACT',
+        "CustomerType",
+        LOOKUPVALUE(
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]
+        )
+    ),
+    [CustomerType],
+    "Credit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]),
+    "Risk Rating", AVERAGE('FIS_CA_DETAIL_FACT'[PROBABILITY_OF_DEFAULT]),
+    "Counterparty Exposure", SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT])
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CA_DETAIL_FACT',
+        "CustomerType",
+        LOOKUPVALUE(
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]
+        )
+    ),
+    [CustomerType],
+    "Credit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]),
+    "Risk Rating", AVERAGE('FIS_CA_DETAIL_FACT'[PROBABILITY_OF_DEFAULT]),
+    "Counterparty Exposure", SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT])
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerType]            | [Credit Amount] | [Risk Rating] | [Counterparty Exposure]
+--------------------------+-----------------+---------------+------------------------
+Corporation               | 7500000.0       | 0.0175        | 5625000.0              
+Limited Liability Company | 3500000.0       | 0.03          | 2625000.0              
+
+========== RUN DURATION ==========
+Run duration: 61.60 seconds

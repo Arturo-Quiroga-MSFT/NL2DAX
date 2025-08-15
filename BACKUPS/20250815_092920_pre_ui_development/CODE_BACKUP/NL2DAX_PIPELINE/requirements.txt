@@ -1,0 +1,9 @@
+langchain
+openai
+azure-identity
+python-dotenv
+requests
+langchain-openai
+pyodbc
+pyadomd
+msal

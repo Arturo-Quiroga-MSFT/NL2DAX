@@ -160,9 +160,7 @@ dax_prompt = ChatPromptTemplate.from_template(
     5. For detailed row data, use table functions like FILTER, SELECTCOLUMNS, ADDCOLUMNS
     6. Always specify explicit column names in SELECTCOLUMNS
     7. Use VALUES() function when you need distinct values from a column
-    8. For top/ranking queries, use TOPN(N, Table, SortColumn, DESC/ASC) - NEVER add ORDER BY after TOPN
-    9. TOPN handles sorting internally - syntax: TOPN(count, table, orderBy_expression, order)
-    10. For aggregation queries with grouping, avoid RELATED() as relationships may not exist.
+    8. For aggregation queries with grouping, avoid RELATED() as relationships may not exist.
        Use ADDCOLUMNS to create calculated columns with LOOKUPVALUE, then group:
        EVALUATE
        SUMMARIZE(
@@ -185,8 +183,8 @@ dax_prompt = ChatPromptTemplate.from_template(
            [CustomerType],
            "Total Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
        )
-    11. When using CALCULATE with grouping, ensure proper filter context is maintained
-    12. For simple row listings, this pattern works well:
+    9. When using CALCULATE with grouping, ensure proper filter context is maintained
+    10. For simple row listings, this pattern works well:
        EVALUATE 
        SELECTCOLUMNS(
            FILTER('TableName', condition),
@@ -202,23 +200,12 @@ dax_prompt = ChatPromptTemplate.from_template(
     
     Generate a complete, valid DAX query that follows these rules and returns the requested data. 
     
-    CRITICAL DAX SYNTAX RULES - FOLLOW EXACTLY:
-    - NEVER use "ORDER BY" in DAX - this is SQL syntax, not DAX
-    - NEVER use standalone "ORDERBY" function - use TOPN for sorting
-    - For ranking/sorting, ALWAYS use TOPN: TOPN(N, table, column, DESC)
-    - Example of CORRECT DAX for top customers: 
-      EVALUATE SELECTCOLUMNS(TOPN(5, 'Customers', 'Customers'[Sales], DESC), ...)
-    - WRONG: ORDER BY, ORDERBY function
-    - RIGHT: TOPN function with DESC/ASC parameter
-    
     CRITICAL REQUIREMENTS:
     - The query MUST be complete and syntactically correct
     - MUST start with EVALUATE 
     - MUST end with a closing parenthesis for all opened functions
     - NO explanatory text - return ONLY the DAX query
     - For aggregation queries, ensure proper filter context is applied to get accurate results per group
-    - NEVER use ORDER BY after TOPN - TOPN handles sorting internally with DESC/ASC parameter
-    - When using TOPN for ranking, use: TOPN(N, Table, SortColumn, DESC/ASC) - no separate ORDER BY needed
     
     Return ONLY the DAX query, nothing else.
     """

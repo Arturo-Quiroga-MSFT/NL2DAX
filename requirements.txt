@@ -1,0 +1,21 @@
+# Core Dependencies
+python-dotenv>=1.0.0
+langchain>=0.1.0
+langchain-openai>=0.1.0
+requests>=2.31.0
+pyodbc>=4.0.39
+
+# Azure Authentication
+azure-identity>=1.15.0
+msal>=1.24.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# UI Framework
+streamlit>=1.29.0
+plotly>=5.17.0
+
+# Development
+pytest>=7.4.0

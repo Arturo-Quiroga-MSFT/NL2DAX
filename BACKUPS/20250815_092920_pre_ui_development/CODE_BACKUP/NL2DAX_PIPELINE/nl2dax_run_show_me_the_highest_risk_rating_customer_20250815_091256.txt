@@ -1,0 +1,84 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me the highest risk rating customer
+
+========== GENERATED SQL ==========
+WITH CustomerMaxRisk AS (
+    SELECT
+        c.CUSTOMER_KEY,
+        c.CUSTOMER_NAME,
+        MAX(f.PROBABILITY_OF_DEFAULT) AS MaxProbabilityOfDefault
+    FROM FIS_CA_DETAIL_FACT f
+    INNER JOIN FIS_CUSTOMER_DIMENSION c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+    WHERE f.PROBABILITY_OF_DEFAULT IS NOT NULL
+    GROUP BY
+        c.CUSTOMER_KEY,
+        c.CUSTOMER_NAME
+)
+SELECT TOP 1
+    CUSTOMER_KEY,
+    CUSTOMER_NAME,
+    MaxProbabilityOfDefault AS HighestRiskRating
+FROM CustomerMaxRisk
+ORDER BY HighestRiskRating DESC;
+
+========== SANITIZED SQL (FOR EXECUTION) ==========
+SELECT
+        c.CUSTOMER_KEY,
+        c.CUSTOMER_NAME,
+        MAX(f.PROBABILITY_OF_DEFAULT) AS MaxProbabilityOfDefault
+    FROM FIS_CA_DETAIL_FACT f
+    INNER JOIN FIS_CUSTOMER_DIMENSION c
+        ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+    WHERE f.PROBABILITY_OF_DEFAULT IS NOT NULL
+    GROUP BY
+        c.CUSTOMER_KEY,
+        c.CUSTOMER_NAME
+)
+SELECT TOP 1
+    CUSTOMER_KEY,
+    CUSTOMER_NAME,
+    MaxProbabilityOfDefault AS HighestRiskRating
+FROM CustomerMaxRisk
+ORDER BY HighestRiskRating DESC;
+
+========== SQL QUERY ERROR ==========
+[ERROR] Failed to execute SQL query: ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Incorrect syntax near ')'. (102) (SQLExecDirectW)")
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_CUSTOMER_DIMENSION',
+        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE], DESC
+    ),
+    "CustomerKey", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "RiskRatingCode", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RiskRatingDescription", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        1,
+        'FIS_CUSTOMER_DIMENSION',
+        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE], DESC
+    ),
+    "CustomerKey", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "RiskRatingCode", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RiskRatingDescription", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerKey] | [CustomerName]                | [RiskRatingCode] | [RiskRatingDescription]
+--------------+-------------------------------+------------------+------------------------
+1003          | Mountain Capital Advisors LLC | B+               | Good Credit Quality    
+1             | Desert Manufacturing LLC      | B+               | Good Credit Quality    
+
+========== RUN DURATION ==========
+Run duration: 61.43 seconds
