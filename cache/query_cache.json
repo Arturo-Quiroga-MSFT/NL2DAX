@@ -4,5 +4,29 @@
     "response": "EVALUATE\nSUMMARIZE(\n    ADDCOLUMNS(\n        'FIS_CA_DETAIL_FACT',\n        \"CustomerType\",\n        LOOKUPVALUE(\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]\n        )\n    ),\n    [CustomerType],\n    \"Total Limit Amount\", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])\n)",
     "timestamp": 1755214767.423945,
     "cache_type": "dax"
+  },
+  "164f6d05790cbd5e7639dbbb56e7cbff": {
+    "query": "{\"intent\":\"GetDatabaseSchema\",\"entities\":[{\"entity\":\"database\",\"value\":\"db\"}]}",
+    "response": "EVALUATE\nSELECTCOLUMNS(\n    FILTER(\n        'INFORMATION_SCHEMA.COLUMNS',\n        'INFORMATION_SCHEMA.COLUMNS'[TABLE_CATALOG] = \"db\"\n    ),\n    \"TableName\",   'INFORMATION_SCHEMA.COLUMNS'[TABLE_NAME],\n    \"ColumnName\",  'INFORMATION_SCHEMA.COLUMNS'[COLUMN_NAME]\n)",
+    "timestamp": 1755216243.988447,
+    "cache_type": "dax"
+  },
+  "125dbd4f97d0546430314d84d5171dda": {
+    "query": "Intent: get_aggregated_data\n\nEntities:\n- aggregation: sum\n- measure: limit_amount\n- group_by: industry",
+    "response": "EVALUATE\nSUMMARIZE(\n    ADDCOLUMNS(\n        'FIS_CA_DETAIL_FACT',\n        \"Industry\",\n        LOOKUPVALUE(\n            'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]\n        )\n    ),\n    [Industry],\n    \"Total Limit Amount\", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])\n)",
+    "timestamp": 1755216500.914301,
+    "cache_type": "dax"
+  },
+  "53c1980730b9f7cf324c8fa9f9222ba8": {
+    "query": "Intent: list_customers\n\nEntities:\n- table: customers\n- sort_by: risk_rating\n- sort_order: asc",
+    "response": "EVALUATE\nSELECTCOLUMNS(\n    'FIS_CUSTOMER_DIMENSION',\n    \"CustomerKey\",                  'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n    \"CustomerName\",                 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n    \"RiskRatingCode\",               'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],\n    \"RiskRatingDescription\",        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]\n)\nORDER BY\n    [RiskRatingCode] ASC\n",
+    "timestamp": 1755216546.994072,
+    "cache_type": "dax"
+  },
+  "0f76f2e293635ad8ee194bb9c41113fd": {
+    "query": "Intent:\n- get_loan_counts_by_currency\n\nEntities:\n- measure: “loan_count”\n- dimension (group_by): “currency”",
+    "response": "EVALUATE\nSUMMARIZE(\n    ADDCOLUMNS(\n        'FIS_CL_DETAIL_FACT',\n        \"CurrencyCode\",\n        LOOKUPVALUE(\n            'FIS_CURRENCY_DIMENSION'[FROM_CURRENCY_CODE],\n            'FIS_CURRENCY_DIMENSION'[CURRENCY_KEY],\n            'FIS_CL_DETAIL_FACT'[CURRENCY_KEY]\n        )\n    ),\n    [CurrencyCode],\n    \"Loan Count\", COUNT('FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY])\n)",
+    "timestamp": 1755216606.8411899,
+    "cache_type": "dax"
   }
 }

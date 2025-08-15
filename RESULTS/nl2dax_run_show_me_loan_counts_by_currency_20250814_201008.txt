@@ -1,0 +1,62 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me loan counts by currency
+
+========== GENERATED SQL ==========
+SELECT 
+    cur.FROM_CURRENCY_CODE AS currency_code,
+    cur.FROM_CURRENCY_DESCRIPTION AS currency_description,
+    COUNT(*) AS loan_count
+FROM FIS_CL_DETAIL_FACT fcl
+JOIN FIS_CURRENCY_DIMENSION cur
+    ON fcl.CURRENCY_KEY = cur.CURRENCY_KEY
+GROUP BY 
+    cur.FROM_CURRENCY_CODE,
+    cur.FROM_CURRENCY_DESCRIPTION
+ORDER BY 
+    loan_count DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+currency_code | currency_description | loan_count
+--------------+----------------------+-----------
+USD           | UNITED STATES DOLLAR | 4         
+
+========== GENERATED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CL_DETAIL_FACT',
+        "CurrencyCode",
+        LOOKUPVALUE(
+            'FIS_CURRENCY_DIMENSION'[FROM_CURRENCY_CODE],
+            'FIS_CURRENCY_DIMENSION'[CURRENCY_KEY],
+            'FIS_CL_DETAIL_FACT'[CURRENCY_KEY]
+        )
+    ),
+    [CurrencyCode],
+    "Loan Count", COUNT('FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY])
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CL_DETAIL_FACT',
+        "CurrencyCode",
+        LOOKUPVALUE(
+            'FIS_CURRENCY_DIMENSION'[FROM_CURRENCY_CODE],
+            'FIS_CURRENCY_DIMENSION'[CURRENCY_KEY],
+            'FIS_CL_DETAIL_FACT'[CURRENCY_KEY]
+        )
+    ),
+    [CurrencyCode],
+    "Loan Count", COUNT('FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY])
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CurrencyCode] | [Loan Count]
+---------------+-------------
+USD            | 4           
+
+========== RUN DURATION ==========
+Run duration: 53.74 seconds

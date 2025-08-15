@@ -1,0 +1,61 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+list all customers by risk rating
+
+========== GENERATED SQL ==========
+SELECT 
+    CUSTOMER_ID,
+    CUSTOMER_NAME,
+    RISK_RATING_CODE,
+    RISK_RATING_DESCRIPTION
+FROM FIS_CUSTOMER_DIMENSION
+ORDER BY RISK_RATING_CODE ASC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+CUSTOMER_ID | CUSTOMER_NAME                     | RISK_RATING_CODE | RISK_RATING_DESCRIPTION    
+------------+-----------------------------------+------------------+----------------------------
+CUST004     | Pacific Technology Solutions      | A                | Excellent Credit Quality   
+CUST005     | Atlantic Biomedical Corporation   | A-               | Strong Credit Quality      
+CUST002     | Palm Investors Inc.               | A-               | Strong Credit Quality      
+CUST003     | Southwest Energy Partners         | B                | Satisfactory Credit Quality
+CUST007     | Northwest Retail Enterprises Inc. | B                | Satisfactory Credit Quality
+CUST001     | Desert Manufacturing LLC          | B+               | Good Credit Quality        
+CUST006     | Mountain Capital Advisors LLC     | B+               | Good Credit Quality        
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    'FIS_CUSTOMER_DIMENSION',
+    "CustomerKey",                  'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName",                 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "RiskRatingCode",               'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RiskRatingDescription",        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]
+)
+ORDER BY
+    [RiskRatingCode] ASC
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    'FIS_CUSTOMER_DIMENSION',
+    "CustomerKey",                  'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerName",                 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "RiskRatingCode",               'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],
+    "RiskRatingDescription",        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]
+)
+ORDER BY
+    [RiskRatingCode] ASC
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[CustomerKey] | [CustomerName]                    | [RiskRatingCode] | [RiskRatingDescription]    
+--------------+-----------------------------------+------------------+----------------------------
+4             | Pacific Technology Solutions      | A                | Excellent Credit Quality   
+2             | Palm Investors Inc.               | A-               | Strong Credit Quality      
+1002          | Atlantic Biomedical Corporation   | A-               | Strong Credit Quality      
+3             | Southwest Energy Partners         | B                | Satisfactory Credit Quality
+1004          | Northwest Retail Enterprises Inc. | B                | Satisfactory Credit Quality
+1             | Desert Manufacturing LLC          | B+               | Good Credit Quality        
+1003          | Mountain Capital Advisors LLC     | B+               | Good Credit Quality        
+
+========== RUN DURATION ==========
+Run duration: 38.15 seconds

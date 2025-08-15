@@ -1,0 +1,67 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+show me total limit amounts by industry
+
+========== GENERATED SQL ==========
+SELECT
+    cust.INDUSTRY_CODE,
+    cust.INDUSTRY_DESCRIPTION,
+    SUM(fact.LIMIT_AMOUNT) AS TotalLimitAmount
+FROM
+    FIS_CA_DETAIL_FACT AS fact
+    INNER JOIN FIS_CUSTOMER_DIMENSION AS cust
+        ON fact.CUSTOMER_KEY = cust.CUSTOMER_KEY
+GROUP BY
+    cust.INDUSTRY_CODE,
+    cust.INDUSTRY_DESCRIPTION
+ORDER BY
+    TotalLimitAmount DESC;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+INDUSTRY_CODE | INDUSTRY_DESCRIPTION                 | TotalLimitAmount
+--------------+--------------------------------------+-----------------
+3100          | Manufacturing - Industrial Equipment | 5000000.00      
+2100          | Oil and Gas Exploration              | 3500000.00      
+6200          | Real Estate Investment               | 2500000.00      
+
+========== GENERATED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CA_DETAIL_FACT',
+        "Industry",
+        LOOKUPVALUE(
+            'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]
+        )
+    ),
+    [Industry],
+    "Total Limit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SUMMARIZE(
+    ADDCOLUMNS(
+        'FIS_CA_DETAIL_FACT',
+        "Industry",
+        LOOKUPVALUE(
+            'FIS_CUSTOMER_DIMENSION'[INDUSTRY_DESCRIPTION],
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]
+        )
+    ),
+    [Industry],
+    "Total Limit Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
+)
+
+========== DAX QUERY RESULTS (TABLE) ==========
+[Industry]                           | [Total Limit Amount]
+-------------------------------------+---------------------
+Manufacturing - Industrial Equipment | 5000000.0           
+Real Estate Investment               | 2500000.0           
+Oil and Gas Exploration              | 3500000.0           
+
+========== RUN DURATION ==========
+Run duration: 35.84 seconds

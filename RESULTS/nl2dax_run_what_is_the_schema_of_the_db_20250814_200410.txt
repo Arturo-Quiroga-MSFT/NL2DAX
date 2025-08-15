@@ -1,0 +1,437 @@
+
+========== NATURAL LANGUAGE QUERY ==========
+what is the schema of the db
+
+========== GENERATED SQL ==========
+SELECT 
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    COLUMN_NAME,
+    ORDINAL_POSITION,
+    DATA_TYPE,
+    CHARACTER_MAXIMUM_LENGTH,
+    NUMERIC_PRECISION,
+    NUMERIC_SCALE,
+    IS_NULLABLE
+FROM INFORMATION_SCHEMA.COLUMNS
+ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;
+
+========== SQL QUERY RESULTS (TABLE) ==========
+TABLE_SCHEMA | TABLE_NAME                        | COLUMN_NAME                   | ORDINAL_POSITION | DATA_TYPE        | CHARACTER_MAXIMUM_LENGTH | NUMERIC_PRECISION | NUMERIC_SCALE | IS_NULLABLE
+-------------+-----------------------------------+-------------------------------+------------------+------------------+--------------------------+-------------------+---------------+------------
+dbo          | BuildVersion                      | SystemInformationID           | 1                | tinyint          | None                     | 3                 | 0             | NO         
+dbo          | BuildVersion                      | Database Version              | 2                | nvarchar         | 25                       | None              | None          | NO         
+dbo          | BuildVersion                      | VersionDate                   | 3                | datetime         | None                     | None              | None          | NO         
+dbo          | BuildVersion                      | ModifiedDate                  | 4                | datetime         | None                     | None              | None          | NO         
+dbo          | ErrorLog                          | ErrorLogID                    | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | ErrorLog                          | ErrorTime                     | 2                | datetime         | None                     | None              | None          | NO         
+dbo          | ErrorLog                          | UserName                      | 3                | nvarchar         | 128                      | None              | None          | NO         
+dbo          | ErrorLog                          | ErrorNumber                   | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | ErrorLog                          | ErrorSeverity                 | 5                | int              | None                     | 10                | 0             | YES        
+dbo          | ErrorLog                          | ErrorState                    | 6                | int              | None                     | 10                | 0             | YES        
+dbo          | ErrorLog                          | ErrorProcedure                | 7                | nvarchar         | 126                      | None              | None          | YES        
+dbo          | ErrorLog                          | ErrorLine                     | 8                | int              | None                     | 10                | 0             | YES        
+dbo          | ErrorLog                          | ErrorMessage                  | 9                | nvarchar         | 4000                     | None              | None          | NO         
+dbo          | FIS_CA_DETAIL_FACT                | CA_DETAIL_KEY                 | 1                | bigint           | None                     | 19                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | CUSTOMER_KEY                  | 2                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | CA_PRODUCT_KEY                | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_KEY                     | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | INVESTOR_KEY                  | 5                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | OWNER_KEY                     | 6                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | MONTH_ID                      | 7                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | CA_CURRENCY_CODE              | 8                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_CA_DETAIL_FACT                | FACILITY_ID                   | 9                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_CA_DETAIL_FACT                | AS_OF_DATE                    | 10               | date             | None                     | None              | None          | NO         
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_AMOUNT                  | 11               | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_WITHHELD                | 12               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_USED                    | 13               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_AVAILABLE               | 14               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | PRINCIPAL_AMOUNT_DUE          | 15               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | NUMBER_OF_LIMIT_EXPOSURE      | 16               | int              | None                     | 10                | 0             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_VALUE_OF_COLLATERAL     | 17               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_CHARGED_MTD              | 18               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_CHARGED_QTD              | 19               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_CHARGED_YTD              | 20               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_CHARGED_ITD              | 21               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_EARNED_MTD               | 22               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_EARNED_QTD               | 23               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_EARNED_YTD               | 24               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_EARNED_ITD               | 25               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_PAID_MTD                 | 26               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_PAID_QTD                 | 27               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_PAID_YTD                 | 28               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FEES_PAID_ITD                 | 29               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | COMMITMENT_FEE_RATE           | 30               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | UTILIZATION_FEE_RATE          | 31               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | CONTRACTUAL_OWNERSHIP_PCT     | 32               | decimal          | None                     | 5                 | 4             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | ORIGINAL_LIMIT_AMOUNT         | 33               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | FINANCIAL_FX_RATE             | 34               | decimal          | None                     | 18                | 8             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | PORTFOLIO_ID                  | 35               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_STATUS_CODE             | 36               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_STATUS_DESCRIPTION      | 37               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LIMIT_STATUS_DATE             | 38               | date             | None                     | None              | None          | YES        
+dbo          | FIS_CA_DETAIL_FACT                | PROBABILITY_OF_DEFAULT        | 39               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | LOSS_GIVEN_DEFAULT            | 40               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | EXPOSURE_AT_DEFAULT           | 41               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | RISK_WEIGHT_PERCENTAGE        | 42               | decimal          | None                     | 5                 | 2             | YES        
+dbo          | FIS_CA_DETAIL_FACT                | REGULATORY_CAPITAL            | 43               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_PRODUCT_KEY                | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_NUMBER                     | 2                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_OVERALL_STATUS_CODE        | 3                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_OVERALL_STATUS_DESCRIPTION | 4                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_DESCRIPTION                | 5                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_CURRENCY_CODE              | 6                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_LIMIT_SECTION_ID           | 7                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_LIMIT_TYPE                 | 8                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_PRODUCT_TYPE_CODE          | 9                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_PRODUCT_TYPE_DESC          | 10               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_EFFECTIVE_DATE             | 11               | date             | None                     | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_MATURITY_DATE              | 12               | date             | None                     | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_CUSTOMER_ID                | 13               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_CUSTOMER_NAME              | 14               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | CA_COUNTRY_OF_EXPOSURE_RISK   | 15               | nvarchar         | 3                        | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | FACILITY_PURPOSE              | 16               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | COMMITMENT_AMOUNT             | 17               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | AVAILABLE_AMOUNT              | 18               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | RENEWAL_INDICATOR             | 19               | nchar            | 1                        | None              | None          | YES        
+dbo          | FIS_CA_PRODUCT_DIMENSION          | PRICING_OPTION                | 20               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | CL_DETAIL_KEY                 | 1                | bigint           | None                     | 19                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | LOAN_PRODUCT_KEY              | 2                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | CUSTOMER_KEY                  | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | INVESTOR_KEY                  | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | OWNER_KEY                     | 5                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | CURRENCY_KEY                  | 6                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | MONTH_ID                      | 7                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | LOAN_ID                       | 8                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | FACILITY_ID                   | 9                | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | LOAN_CURRENCY_CODE            | 10               | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | AS_OF_DATE                    | 11               | date             | None                     | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | CURRENT_PRINCIPAL_BALANCE     | 12               | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | PRINCIPAL_BALANCE             | 13               | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | PRINCIPAL_PAID                | 14               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | INTEREST_BALANCE              | 15               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | INTEREST_ACCRUED              | 16               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | INTEREST_PAID                 | 17               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | INTEREST_RECEIVED             | 18               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | FEE_BALANCE                   | 19               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | FEE_PAID                      | 20               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | OTHER_BALANCES                | 21               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | TOTAL_BALANCE                 | 22               | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | TOTAL_PAID                    | 23               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | REVOLVING_ACCOUNT_LIMIT       | 24               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | REVOLVING_ACCOUNT_AVAILABLE   | 25               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | ORIGINAL_AMOUNT               | 26               | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | ORIGINAL_TERM                 | 27               | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | REMAINING_TERM                | 28               | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | LOAN_STATUS                   | 29               | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | LOAN_STATUS_DESCRIPTION       | 30               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | MATURITY_DATE                 | 31               | date             | None                     | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | EFFECTIVE_DATE                | 32               | date             | None                     | None              | None          | NO         
+dbo          | FIS_CL_DETAIL_FACT                | NEXT_PAYMENT_DATE             | 33               | date             | None                     | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | INTEREST_RATE                 | 34               | decimal          | None                     | 8                 | 6             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | BASE_RATE                     | 35               | decimal          | None                     | 8                 | 6             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | MARGIN_RATE                   | 36               | decimal          | None                     | 8                 | 6             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | EFFECTIVE_RATE                | 37               | decimal          | None                     | 8                 | 6             | NO         
+dbo          | FIS_CL_DETAIL_FACT                | SCHEDULED_PAYMENT             | 38               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | ACTUAL_PAYMENT                | 39               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | PAYMENT_DIFFERENCE            | 40               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | PAST_DUE_DAYS                 | 41               | int              | None                     | 10                | 0             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | IS_NON_PERFORMING             | 42               | bit              | None                     | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | IS_DEFAULT                    | 43               | bit              | None                     | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | CHARGE_OFF_AMOUNT             | 44               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | RECOVERY_AMOUNT               | 45               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | PROVISION_AMOUNT              | 46               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | RISK_RATING                   | 47               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CL_DETAIL_FACT                | PROBABILITY_OF_DEFAULT        | 48               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | LOSS_GIVEN_DEFAULT            | 49               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_CL_DETAIL_FACT                | EXPOSURE_AT_DEFAULT           | 50               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_CURRENCY_DIMENSION            | CURRENCY_KEY                  | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | FROM_CURRENCY_CODE            | 2                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | FROM_CURRENCY_DESCRIPTION     | 3                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | TO_CURRENCY_CODE              | 4                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | TO_CURRENCY_DESCRIPTION       | 5                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | CURRENCY_MONTH_ID             | 6                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | CURRENCY_RATE_GROUP           | 7                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | CRNCY_EXCHANGE_RATE           | 8                | decimal          | None                     | 18                | 12            | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | OPERATION_INDICATOR           | 9                | nchar            | 1                        | None              | None          | NO         
+dbo          | FIS_CURRENCY_DIMENSION            | CONVERSION_RATE               | 10               | decimal          | None                     | 18                | 6             | NO         
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_KEY                  | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_ID                   | 2                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_NAME                 | 3                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_SHORT_NAME           | 4                | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_TYPE_CODE            | 5                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_TYPE_DESCRIPTION     | 6                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | INDUSTRY_CODE                 | 7                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | INDUSTRY_DESCRIPTION          | 8                | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | COUNTRY_CODE                  | 9                | nvarchar         | 3                        | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | COUNTRY_DESCRIPTION           | 10               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | STATE_CODE                    | 11               | nvarchar         | 5                        | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | STATE_DESCRIPTION             | 12               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | CITY                          | 13               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | POSTAL_CODE                   | 14               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | RISK_RATING_CODE              | 15               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | RISK_RATING_DESCRIPTION       | 16               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | CUSTOMER_STATUS               | 17               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | ESTABLISHED_DATE              | 18               | date             | None                     | None              | None          | YES        
+dbo          | FIS_CUSTOMER_DIMENSION            | RELATIONSHIP_MANAGER          | 19               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_KEY                  | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_TYPE_CODE            | 2                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_TYPE_DESCRIPTION     | 3                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_ACCOUNT_TYPE_CODE    | 4                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_ACCOUNT_TYPE_DESC    | 5                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_CLASS_CODE           | 6                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_CLASS_DESCRIPTION    | 7                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_DOMAIN_CODE          | 8                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_DOMAIN_DESCRIPTION   | 9                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_NAME                 | 10               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_INVESTOR_DIMENSION            | INVESTOR_ID                   | 11               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_INVESTOR_DIMENSION            | PARTICIPATION_PERCENTAGE      | 12               | decimal          | None                     | 5                 | 4             | YES        
+dbo          | FIS_INVESTOR_DIMENSION            | EFFECTIVE_DATE                | 13               | date             | None                     | None              | None          | YES        
+dbo          | FIS_INVESTOR_DIMENSION            | EXPIRATION_DATE               | 14               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_KEY                     | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LIMIT_DIMENSION               | CA_LIMIT_SECTION_ID           | 2                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | CA_LIMIT_TYPE                 | 3                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_STATUS_CODE             | 4                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_STATUS_DESCRIPTION      | 5                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_CURRENCY_CODE           | 6                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_DESCRIPTION             | 7                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_LIMIT_DIMENSION               | LIMIT_TYPE_DESCRIPTION        | 8                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | FACILITY_TYPE_CODE            | 9                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | FACILITY_TYPE_DESCRIPTION     | 10               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | EFFECTIVE_DATE                | 11               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | MATURITY_DATE                 | 12               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | ORIGINAL_LIMIT_AMOUNT         | 13               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_LIMIT_DIMENSION               | CURRENT_LIMIT_AMOUNT          | 14               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_LIMIT_DIMENSION               | COMMITMENT_FEE_RATE           | 15               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_LIMIT_DIMENSION               | UTILIZATION_FEE_RATE          | 16               | decimal          | None                     | 8                 | 6             | YES        
+dbo          | FIS_LIMIT_DIMENSION               | REVIEW_DATE                   | 17               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LIMIT_DIMENSION               | RENEWAL_TERMS                 | 18               | nvarchar         | 500                      | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | ANALYSIS_ID                   | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | COUNTRY_OF_RISK               | 3                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | CUSTOMER_COUNT                | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | LOAN_COUNT                    | 5                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | TOTAL_EXPOSURE_USD            | 6                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | AVG_BALANCE_PER_CUSTOMER_USD  | 7                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | AVG_BALANCE_PER_LOAN_USD      | 8                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | TOTAL_CREDIT_LIMIT_USD        | 9                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | UTILIZATION_PERCENTAGE        | 10               | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | AVG_INTEREST_RATE             | 11               | decimal          | None                     | 8                 | 4             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | PORTFOLIO_PERCENTAGE          | 12               | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | COUNTRY_RISK_RATING           | 13               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | SOVEREIGN_RATING              | 14               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | CONCENTRATION_RISK            | 15               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | CURRENCY_RISK                 | 16               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | POLITICAL_RISK                | 17               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | ECONOMIC_STABILITY            | 18               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_COUNTRY      | CREATED_BY                    | 19               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | CURRENCY_CODE                 | 1                | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | CURRENCY_NAME                 | 2                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | CUSTOMER_COUNT                | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | LOAN_COUNT                    | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | TOTAL_EXPOSURE_ORIGINAL       | 5                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | TOTAL_EXPOSURE_USD            | 6                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | AVG_BALANCE_PER_CUSTOMER_USD  | 7                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | AVG_BALANCE_PER_LOAN_USD      | 8                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | MARKET_SHARE_PERCENTAGE       | 9                | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | EXCHANGE_RATE_TO_USD          | 10               | decimal          | None                     | 10                | 6             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_CURRENCY     | ANALYSIS_DATE                 | 11               | datetime         | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | INDUSTRY_DESCRIPTION          | 1                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | CUSTOMER_COUNT                | 2                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | LOAN_COUNT                    | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | TOTAL_EXPOSURE_USD            | 4                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | AVG_BALANCE_PER_CUSTOMER_USD  | 5                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | AVG_BALANCE_PER_LOAN_USD      | 6                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | TOTAL_CREDIT_LIMIT_USD        | 7                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | UTILIZATION_PERCENTAGE        | 8                | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | AVG_INTEREST_RATE             | 9                | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | PORTFOLIO_PERCENTAGE          | 10               | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | RISK_CATEGORY                 | 11               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_INDUSTRY     | ANALYSIS_DATE                 | 12               | datetime         | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | ANALYSIS_ID                   | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | INTERNAL_RISK_RATING          | 3                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | CUSTOMER_COUNT                | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | LOAN_COUNT                    | 5                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | TOTAL_EXPOSURE_USD            | 6                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | AVG_BALANCE_PER_CUSTOMER_USD  | 7                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | AVG_BALANCE_PER_LOAN_USD      | 8                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | TOTAL_CREDIT_LIMIT_USD        | 9                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | UTILIZATION_PERCENTAGE        | 10               | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | AVG_INTEREST_RATE             | 11               | decimal          | None                     | 8                 | 4             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | PORTFOLIO_PERCENTAGE          | 12               | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | RISK_CATEGORY                 | 13               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | RISK_WEIGHT                   | 14               | decimal          | None                     | 5                 | 3             | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | EXPECTED_LOSS_RATE            | 15               | decimal          | None                     | 6                 | 4             | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | RISK_ADJUSTED_EXPOSURE        | 16               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | PRICING_ADEQUACY              | 17               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_EXPOSURE_BY_RISK_RATING  | CREATED_BY                    | 18               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | ANALYSIS_ID                   | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | MATURITY_TIMEFRAME            | 3                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | LOAN_COUNT                    | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | TOTAL_BALANCE_USD             | 5                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | PERCENTAGE_OF_PORTFOLIO       | 6                | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | AVG_INTEREST_RATE             | 7                | decimal          | None                     | 5                 | 2             | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | RISK_CONCENTRATION            | 8                | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | MATURITY_RISK_LEVEL           | 9                | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | REFINANCING_LIKELIHOOD        | 10               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | ACTION_REQUIRED               | 11               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_MATURITY_ANALYSIS        | CREATED_BY                    | 12               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_PRODUCT_KEY              | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | OBLIGATION_NUMBER             | 2                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | CA_NUMBER                     | 3                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | CA_CUSTOMER_ID                | 4                | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | CA_CURRENCY_CODE              | 5                | nvarchar         | 3                        | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PORTFOLIO_ID                  | 6                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PORTFOLIO_DESCRIPTION         | 7                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_STATUS_CODE              | 8                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_STATUS_DESCRIPTION       | 9                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ACCOUNTING_METHOD_CODE        | 10               | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ACCOUNTING_METHOD_DESCRIPTION | 11               | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_CURRENCY_CODE            | 12               | nvarchar         | 3                        | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_CURRENCY_DESCRIPTION     | 13               | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ACCOUNT_STRUCTURE_CODE        | 14               | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ACCOUNT_STRUCTURE_DESC        | 15               | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | BOOKING_UNIT_CODE             | 16               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | BOOKING_UNIT_DESCRIPTION      | 17               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | EFFECTIVE_DATE                | 18               | date             | None                     | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LEGAL_MATURITY_DATE           | 19               | date             | None                     | None              | None          | NO         
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | INT_RATE_MATURITY_DATE        | 20               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PURPOSE_CODE                  | 21               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PURPOSE_DESCRIPTION           | 22               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PRODUCT_TYPE_CODE             | 23               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | PRODUCT_TYPE_DESCRIPTION      | 24               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_TYPE_CODE                | 25               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | LOAN_TYPE_DESCRIPTION         | 26               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ORIGINATION_DATE              | 27               | date             | None                     | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | ORIGINAL_AMOUNT               | 28               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | COLLATERAL_CODE               | 29               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_LOAN_PRODUCT_DIMENSION        | COLLATERAL_DESCRIPTION        | 30               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_MONTH_DIMENSION               | MONTH_ID                      | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_MONTH_DIMENSION               | MONTH_DESCRIPTION             | 2                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | MONTH_TIMESPAN                | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_MONTH_DIMENSION               | PERIOD_END_DATE               | 4                | date             | None                     | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | QUARTER_ID                    | 5                | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | QUARTER_DESCRIPTION           | 6                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | QUARTER_TIMESPAN              | 7                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_MONTH_DIMENSION               | QUARTER_END_DATE              | 8                | date             | None                     | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | YEAR_ID                       | 9                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_MONTH_DIMENSION               | YEAR_DESCRIPTION              | 10               | nvarchar         | 10                       | None              | None          | NO         
+dbo          | FIS_MONTH_DIMENSION               | YEAR_TIMESPAN                 | 11               | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_MONTH_DIMENSION               | YEAR_END_DATE                 | 12               | date             | None                     | None              | None          | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | ANALYSIS_ID                   | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | BUSINESS_UNIT                 | 3                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | NPL_COUNT                     | 4                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | TOTAL_NPL_BALANCE_USD         | 5                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | TOTAL_PORTFOLIO_BALANCE_USD   | 6                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | NPL_RATIO_PERCENTAGE          | 7                | decimal          | None                     | 5                 | 2             | NO         
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | AVG_DAYS_PAST_DUE             | 8                | decimal          | None                     | 8                 | 2             | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | PROVISION_AMOUNT_USD          | 9                | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | CHARGE_OFF_AMOUNT_USD         | 10               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | RECOVERY_AMOUNT_USD           | 11               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | NET_LOSS_AMOUNT_USD           | 12               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | NPL_SEVERITY                  | 13               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | RISK_RATING_IMPACT            | 14               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_NPL_ANALYSIS_BY_BUSINESS_UNIT | CREATED_BY                    | 15               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | DETAIL_ID                     | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | CUSTOMER_NAME                 | 3                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | LOAN_NUMBER                   | 4                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | FACILITY_ID                   | 5                | nvarchar         | 50                       | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | PRODUCT_TYPE                  | 6                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | RELATIONSHIP_MANAGER          | 7                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | BUSINESS_UNIT                 | 8                | nvarchar         | 100                      | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | LOAN_BALANCE_USD              | 9                | decimal          | None                     | 18                | 2             | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | DAYS_PAST_DUE                 | 10               | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | NPL_STATUS                    | 11               | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | RISK_RATING                   | 12               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | LAST_PAYMENT_DATE             | 13               | date             | None                     | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | NEXT_PAYMENT_DUE              | 14               | date             | None                     | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | INDUSTRY_SECTOR               | 15               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | GEOGRAPHIC_REGION             | 16               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | COLLATERAL_VALUE_USD          | 17               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | PROVISION_RATE                | 18               | decimal          | None                     | 5                 | 2             | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | PROVISION_AMOUNT_USD          | 19               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | WORKOUT_STATUS                | 20               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_NPL_DETAIL_ANALYSIS           | CREATED_BY                    | 21               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OWNER_KEY                     | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_OWNER_DIMENSION               | OWNER_ID                      | 2                | nvarchar         | 20                       | None              | None          | NO         
+dbo          | FIS_OWNER_DIMENSION               | OWNER_NAME                    | 3                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_OWNER_DIMENSION               | OWNER_NAME_2                  | 4                | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OWNER_NAME_3                  | 5                | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OWNER_SHORT_NAME              | 6                | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OFFICER_RISK_RATING_CODE      | 7                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OFFICER_RISK_RATING_DESC      | 8                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OWNER_TYPE_CODE               | 9                | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | OWNER_TYPE_DESC               | 10               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | PRIMARY_INDUSTRY_CODE         | 11               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | PRIMARY_INDUSTRY_DESC         | 12               | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | INDUSTRY_GROUP_CODE           | 13               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | INDUSTRY_GROUP_NAME           | 14               | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | STATE                         | 15               | nvarchar         | 5                        | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | POSTAL_ZIP_CD                 | 16               | nvarchar         | 20                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | COUNTRY_CD                    | 17               | nvarchar         | 3                        | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | LOCATION_CD                   | 18               | nvarchar         | 10                       | None              | None          | YES        
+dbo          | FIS_OWNER_DIMENSION               | ALT_OWNER_NUMBER              | 19               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | ANALYSIS_ID                   | 1                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | ANALYSIS_DATE                 | 2                | datetime2        | None                     | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | COUNTERPARTY_RANK             | 3                | int              | None                     | 10                | 0             | NO         
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | CUSTOMER_NAME                 | 4                | nvarchar         | 255                      | None              | None          | NO         
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | ENTITY_TYPE                   | 5                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | RISK_RATING                   | 6                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | INDUSTRY                      | 7                | nvarchar         | 255                      | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | COUNTRY                       | 8                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | RELATIONSHIP_MANAGER          | 9                | nvarchar         | 100                      | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | LOAN_COUNT                    | 10               | int              | None                     | 10                | 0             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | TOTAL_EXPOSURE_USD            | 11               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | TOTAL_CREDIT_LIMIT_USD        | 12               | decimal          | None                     | 18                | 2             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | UTILIZATION_PERCENTAGE        | 13               | decimal          | None                     | 5                 | 2             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | AVG_INTEREST_RATE             | 14               | decimal          | None                     | 8                 | 4             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | PORTFOLIO_PERCENTAGE          | 15               | decimal          | None                     | 5                 | 2             | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | CONCENTRATION_RISK            | 16               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | RELATIONSHIP_DEPTH            | 17               | nvarchar         | 50                       | None              | None          | YES        
+dbo          | FIS_TOP_COUNTERPARTIES_ANALYSIS   | CREATED_BY                    | 18               | nvarchar         | 100                      | None              | None          | YES        
+SalesLT      | ProductCategory                   | ProductCategoryID             | 1                | int              | None                     | 10                | 0             | NO         
+SalesLT      | ProductCategory                   | ParentProductCategoryID       | 2                | int              | None                     | 10                | 0             | YES        
+SalesLT      | ProductCategory                   | Name                          | 3                | nvarchar         | 50                       | None              | None          | NO         
+SalesLT      | ProductCategory                   | rowguid                       | 4                | uniqueidentifier | None                     | None              | None          | NO         
+SalesLT      | ProductCategory                   | ModifiedDate                  | 5                | datetime         | None                     | None              | None          | NO         
+SalesLT      | vGetAllCategories                 | ParentProductCategoryName     | 1                | nvarchar         | 50                       | None              | None          | NO         
+SalesLT      | vGetAllCategories                 | ProductCategoryName           | 2                | nvarchar         | 50                       | None              | None          | YES        
+SalesLT      | vGetAllCategories                 | ProductCategoryID             | 3                | int              | None                     | 10                | 0             | YES        
+sys          | database_firewall_rules           | id                            | 1                | int              | None                     | 10                | 0             | NO         
+sys          | database_firewall_rules           | name                          | 2                | nvarchar         | 128                      | None              | None          | NO         
+sys          | database_firewall_rules           | start_ip_address              | 3                | varchar          | 45                       | None              | None          | NO         
+sys          | database_firewall_rules           | end_ip_address                | 4                | varchar          | 45                       | None              | None          | NO         
+sys          | database_firewall_rules           | create_date                   | 5                | datetime         | None                     | None              | None          | NO         
+sys          | database_firewall_rules           | modify_date                   | 6                | datetime         | None                     | None              | None          | NO         
+
+========== GENERATED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'INFORMATION_SCHEMA.COLUMNS',
+        'INFORMATION_SCHEMA.COLUMNS'[TABLE_CATALOG] = "db"
+    ),
+    "TableName",   'INFORMATION_SCHEMA.COLUMNS'[TABLE_NAME],
+    "ColumnName",  'INFORMATION_SCHEMA.COLUMNS'[COLUMN_NAME]
+)
+
+========== FORMATTED DAX ==========
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'INFORMATION_SCHEMA.COLUMNS',
+        'INFORMATION_SCHEMA.COLUMNS'[TABLE_CATALOG] = "db"
+    ),
+    "TableName",   'INFORMATION_SCHEMA.COLUMNS'[TABLE_NAME],
+    "ColumnName",  'INFORMATION_SCHEMA.COLUMNS'[COLUMN_NAME]
+)
+
+========== DAX EXECUTION WARNING ==========
+[WARN] Skipping DAX execution: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (4, 9) Cannot find table '<oii>INFORMATION_SCHEMA.COLUMNS</oii>'."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803779"}}]}}}
+
+========== RUN DURATION ==========
+Run duration: 64.85 seconds
