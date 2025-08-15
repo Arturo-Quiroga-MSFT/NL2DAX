@@ -1,0 +1,54 @@
+{
+  "execution_id": "unified_20250815_145814",
+  "query": "What is the average loan amount?",
+  "timestamp": "2025-08-15T14:58:14.660143",
+  "sql_result": {
+    "success": false,
+    "query": "-- SQL generation failed: Error code: 400 - {'error': {'message': \"Unsupported value: 'temperature' does not support 0.1 with this model. Only the default (1) value is supported.\", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}",
+    "error": "No results.  Previous SQL was not a query.",
+    "execution_time": 1.193835,
+    "timestamp": "2025-08-15T14:58:30.289927"
+  },
+  "dax_result": {
+    "success": true,
+    "query": "SELECT 'DAX query could not be translated' as error_message",
+    "columns": [
+      "error_message"
+    ],
+    "data": [
+      {
+        "error_message": "DAX query could not be translated"
+      }
+    ],
+    "row_count": 1,
+    "execution_time": 0.139985,
+    "timestamp": "2025-08-15T14:58:31.484049",
+    "original_dax": "// DAX generation failed: Error code: 400 - {'error': {'message': \"Unsupported value: 'temperature' does not support 0.1 with this model. Only the default (1) value is supported.\", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}",
+    "translated_sql": "SELECT 'DAX query could not be translated' as error_message",
+    "query_type": "DAX-to-SQL"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "SQL query failed: No results.  Previous SQL was not a query."
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 13.83089828491211,
+    "sql_generation": 1.061830759048462,
+    "dax_generation": 0.7368130683898926,
+    "sql_execution": 1.1940178871154785,
+    "dax_execution": 0.2776801586151123,
+    "comparison": 5.602836608886719e-05,
+    "total_time": 17.101961135864258
+  },
+  "errors": []
+}

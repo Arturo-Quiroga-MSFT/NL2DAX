@@ -1,0 +1,54 @@
+{
+  "execution_id": "unified_20250815_145230",
+  "query": "Show me all active customers",
+  "timestamp": "2025-08-15T14:52:30.386720",
+  "sql_result": {
+    "success": false,
+    "query": "-- SQL generation failed: Error code: 400 - {'error': {'code': 'BadRequest', 'message': 'Model o4-mini is enabled only for api versions 2024-12-01-preview and later'}}",
+    "error": "No results.  Previous SQL was not a query.",
+    "execution_time": 1.21623,
+    "timestamp": "2025-08-15T14:52:48.226622"
+  },
+  "dax_result": {
+    "success": true,
+    "query": "SELECT 'DAX query could not be translated' as error_message",
+    "columns": [
+      "error_message"
+    ],
+    "data": [
+      {
+        "error_message": "DAX query could not be translated"
+      }
+    ],
+    "row_count": 1,
+    "execution_time": 0.138429,
+    "timestamp": "2025-08-15T14:52:49.443390",
+    "original_dax": "// DAX generation failed: Error code: 400 - {'error': {'code': 'BadRequest', 'message': 'Model o4-mini is enabled only for api versions 2024-12-01-preview and later'}}",
+    "translated_sql": "SELECT 'DAX query could not be translated' as error_message",
+    "query_type": "DAX-to-SQL"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "SQL query failed: No results.  Previous SQL was not a query."
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 15.581679821014404,
+    "sql_generation": 1.5263280868530273,
+    "dax_generation": 0.7315120697021484,
+    "sql_execution": 1.2163729667663574,
+    "dax_execution": 0.27878689765930176,
+    "comparison": 3.0040740966796875e-05,
+    "total_time": 19.336260080337524
+  },
+  "errors": []
+}

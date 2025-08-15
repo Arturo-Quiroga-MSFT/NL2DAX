@@ -81,7 +81,7 @@ class UnifiedNL2SQLDAXPipeline:
         
         # Check cache first
         if self.enable_caching:
-            cached_result = self.query_cache.get(natural_language_query)
+            cached_result = self.query_cache.get(natural_language_query, "unified")
             if cached_result:
                 print("⚡ Using cached result")
                 return cached_result
@@ -113,6 +113,16 @@ class UnifiedNL2SQLDAXPipeline:
             print(f"✅ SQL generated ({result['performance']['sql_generation']:.2f}s)")
             print(f"SQL: {sql_query}")
             
+            # Store the generated SQL query in result
+            result["generated_sql"] = sql_query
+            
+            # Validate SQL query
+            if not sql_query or sql_query.strip() == "" or sql_query.startswith("-- SQL generation failed"):
+                result["errors"].append("SQL generation failed: Empty or invalid query generated")
+                print("❌ SQL generation failed: Empty query")
+                sql_query = "-- SQL generation failed"
+                result["generated_sql"] = sql_query
+            
             # Step 3: Generate DAX query
             print("\\n⚡ Generating DAX query...")
             dax_start = time.time()
@@ -121,32 +131,54 @@ class UnifiedNL2SQLDAXPipeline:
             print(f"✅ DAX generated ({result['performance']['dax_generation']:.2f}s)")
             print(f"DAX: {dax_query}")
             
+            # Store the generated DAX query in result
+            result["generated_dax"] = dax_query
+            
+            # Validate DAX query
+            if not dax_query or dax_query.strip() == "" or dax_query.startswith("// DAX generation failed"):
+                result["errors"].append("DAX generation failed: Empty or invalid query generated")
+                print("❌ DAX generation failed: Empty query")
+                dax_query = "// DAX generation failed"
+                result["generated_dax"] = dax_query
+            
             # Step 4: Execute SQL query
             print("\\n🗄️  Executing SQL query against Azure SQL DB...")
             sql_exec_start = time.time()
             try:
-                sql_result = self.sql_executor.execute_sql(sql_query)
-                result["sql_result"] = sql_result
-                result["performance"]["sql_execution"] = time.time() - sql_exec_start
-                print(f"✅ SQL executed successfully ({result['performance']['sql_execution']:.2f}s)")
-                print(f"SQL returned {len(sql_result.get('data', []))} rows")
+                if sql_query and not sql_query.startswith("--"):
+                    sql_result = self.sql_executor.execute_sql(sql_query)
+                    result["sql_result"] = sql_result
+                    result["performance"]["sql_execution"] = time.time() - sql_exec_start
+                    print(f"✅ SQL executed successfully ({result['performance']['sql_execution']:.2f}s)")
+                    print(f"SQL returned {len(sql_result.get('data', []))} rows")
+                else:
+                    print("❌ Skipping SQL execution due to generation failure")
+                    result["sql_result"] = {"success": False, "error": "SQL generation failed", "data": [], "columns": []}
+                    result["performance"]["sql_execution"] = 0
             except Exception as e:
                 result["errors"].append(f"SQL execution error: {str(e)}")
                 print(f"❌ SQL execution failed: {str(e)}")
+                result["sql_result"] = {"success": False, "error": str(e), "data": [], "columns": []}
             
             # Step 5: Execute DAX query (simulated against SQL DB structure)
             print("\\n📈 Executing DAX query against Azure SQL DB...")
             dax_exec_start = time.time()
             try:
-                # Note: This will use a DAX-to-SQL translator for execution against SQL DB
-                dax_result = self.sql_executor.execute_dax_as_sql(dax_query, schema_info)
-                result["dax_result"] = dax_result
-                result["performance"]["dax_execution"] = time.time() - dax_exec_start
-                print(f"✅ DAX executed successfully ({result['performance']['dax_execution']:.2f}s)")
-                print(f"DAX returned {len(dax_result.get('data', []))} rows")
+                if dax_query and not dax_query.startswith("//"):
+                    # Note: This will use a DAX-to-SQL translator for execution against SQL DB
+                    dax_result = self.sql_executor.execute_dax_as_sql(dax_query, schema_info)
+                    result["dax_result"] = dax_result
+                    result["performance"]["dax_execution"] = time.time() - dax_exec_start
+                    print(f"✅ DAX executed successfully ({result['performance']['dax_execution']:.2f}s)")
+                    print(f"DAX returned {len(dax_result.get('data', []))} rows")
+                else:
+                    print("❌ Skipping DAX execution due to generation failure")
+                    result["dax_result"] = {"success": False, "error": "DAX generation failed", "data": [], "columns": []}
+                    result["performance"]["dax_execution"] = 0
             except Exception as e:
                 result["errors"].append(f"DAX execution error: {str(e)}")
                 print(f"❌ DAX execution failed: {str(e)}")
+                result["dax_result"] = {"success": False, "error": str(e), "data": [], "columns": []}
             
             # Step 6: Compare results if both succeeded
             if self.compare_results and result["sql_result"] and result["dax_result"]:
@@ -170,7 +202,7 @@ class UnifiedNL2SQLDAXPipeline:
             
             # Cache successful results
             if self.enable_caching and not result["errors"]:
-                self.query_cache.set(natural_language_query, result)
+                self.query_cache.set(natural_language_query, "unified", result)
             
             # Save results if enabled
             if self.save_results:

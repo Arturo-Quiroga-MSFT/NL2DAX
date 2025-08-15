@@ -1,0 +1,54 @@
+{
+  "execution_id": "unified_20250815_145538",
+  "query": "What is the average loan amount?",
+  "timestamp": "2025-08-15T14:55:38.040125",
+  "sql_result": {
+    "success": false,
+    "query": "-- SQL generation failed: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}",
+    "error": "No results.  Previous SQL was not a query.",
+    "execution_time": 1.266891,
+    "timestamp": "2025-08-15T14:55:39.615235"
+  },
+  "dax_result": {
+    "success": true,
+    "query": "SELECT 'DAX query could not be translated' as error_message",
+    "columns": [
+      "error_message"
+    ],
+    "data": [
+      {
+        "error_message": "DAX query could not be translated"
+      }
+    ],
+    "row_count": 1,
+    "execution_time": 0.14408,
+    "timestamp": "2025-08-15T14:55:40.882351",
+    "original_dax": "// DAX generation failed: Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}",
+    "translated_sql": "SELECT 'DAX query could not be translated' as error_message",
+    "query_type": "DAX-to-SQL"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "SQL query failed: No results.  Previous SQL was not a query."
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 5.9604644775390625e-06,
+    "sql_generation": 0.8102719783782959,
+    "dax_generation": 0.7647531032562256,
+    "sql_execution": 1.266977071762085,
+    "dax_execution": 0.28632664680480957,
+    "comparison": 2.574920654296875e-05,
+    "total_time": 3.1290342807769775
+  },
+  "errors": []
+}

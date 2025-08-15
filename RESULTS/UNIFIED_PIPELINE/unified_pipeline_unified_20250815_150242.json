@@ -1,0 +1,50 @@
+{
+  "execution_id": "unified_20250815_150242",
+  "query": "What is the average loan amount?",
+  "timestamp": "2025-08-15T15:02:42.394942",
+  "sql_result": {
+    "success": true,
+    "query": "SELECT AVG([ORIGINAL_AMOUNT]) AS [AverageLoanAmount]\nFROM [dbo].[FIS_CL_DETAIL_FACT]\nWHERE [ORIGINAL_AMOUNT] IS NOT NULL;",
+    "columns": [
+      "AverageLoanAmount"
+    ],
+    "data": [
+      {
+        "AverageLoanAmount": "3050000.000000"
+      }
+    ],
+    "row_count": 1,
+    "execution_time": 1.425228,
+    "timestamp": "2025-08-15T15:03:26.190650"
+  },
+  "dax_result": {
+    "success": false,
+    "query": "",
+    "error": "Could not translate DAX query to SQL",
+    "timestamp": "2025-08-15T15:03:27.754192"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "DAX query failed: Could not translate DAX query to SQL"
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 13.038204908370972,
+    "sql_generation": 9.307768106460571,
+    "dax_generation": 21.44866108894348,
+    "sql_execution": 1.563493013381958,
+    "dax_execution": 0.00011515617370605469,
+    "comparison": 2.8848648071289062e-05,
+    "total_time": 45.359626054763794
+  },
+  "errors": []
+}

@@ -1,0 +1,66 @@
+{
+  "execution_id": "unified_20250815_154758",
+  "query": "List top 10 customers by balance",
+  "timestamp": "2025-08-15T15:47:58.177840",
+  "sql_result": {
+    "success": true,
+    "query": "SELECT TOP 10\n    [c].[CUSTOMER_NAME],\n    SUM([f].[CURRENT_PRINCIPAL_BALANCE]) AS [TotalBalance]\nFROM [dbo].[FIS_CL_DETAIL_FACT] AS [f]\nINNER JOIN [dbo].[FIS_CUSTOMER_DIMENSION] AS [c]\n    ON [f].[CUSTOMER_KEY] = [c].[CUSTOMER_KEY]\nGROUP BY [c].[CUSTOMER_NAME]\nORDER BY [TotalBalance] DESC;",
+    "columns": [
+      "CUSTOMER_NAME",
+      "TotalBalance"
+    ],
+    "data": [
+      {
+        "CUSTOMER_NAME": "Desert Manufacturing LLC",
+        "TotalBalance": "3750000.00"
+      },
+      {
+        "CUSTOMER_NAME": "Southwest Energy Partners",
+        "TotalBalance": "2625000.00"
+      },
+      {
+        "CUSTOMER_NAME": "Palm Investors Inc.",
+        "TotalBalance": "1875000.00"
+      },
+      {
+        "CUSTOMER_NAME": "Pacific Technology Solutions",
+        "TotalBalance": "800000.00"
+      }
+    ],
+    "row_count": 4,
+    "execution_time": 1.073409,
+    "timestamp": "2025-08-15T15:48:53.700470"
+  },
+  "dax_result": {
+    "success": false,
+    "query": "EVALUATE\nTOPN(\n    10,\n    SUMMARIZE(\n        FIS_CL_DETAIL_FACT,\n        FIS_CL_DETAIL_FACT[CUSTOMER_KEY],\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],\n        \"TotalBalance\", SUM(FIS_CL_DETAIL_FACT[TOTAL_BALANCE])\n    ),\n    [TotalBalance],\n    DESC\n)",
+    "error": "Could not translate DAX query to SQL",
+    "timestamp": "2025-08-15T15:48:54.907798"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "DAX query failed: Could not translate DAX query to SQL"
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 14.048094034194946,
+    "sql_generation": 12.1405189037323,
+    "dax_generation": 29.333590030670166,
+    "sql_execution": 1.2071709632873535,
+    "dax_execution": 0.00015497207641601562,
+    "comparison": 1.0967254638671875e-05,
+    "total_time": 56.73013973236084
+  },
+  "errors": [],
+  "generated_sql": "SELECT TOP 10\n    [c].[CUSTOMER_NAME],\n    SUM([f].[CURRENT_PRINCIPAL_BALANCE]) AS [TotalBalance]\nFROM [dbo].[FIS_CL_DETAIL_FACT] AS [f]\nINNER JOIN [dbo].[FIS_CUSTOMER_DIMENSION] AS [c]\n    ON [f].[CUSTOMER_KEY] = [c].[CUSTOMER_KEY]\nGROUP BY [c].[CUSTOMER_NAME]\nORDER BY [TotalBalance] DESC;",
+  "generated_dax": "EVALUATE\nTOPN(\n    10,\n    SUMMARIZE(\n        FIS_CL_DETAIL_FACT,\n        FIS_CL_DETAIL_FACT[CUSTOMER_KEY],\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],\n        \"TotalBalance\", SUM(FIS_CL_DETAIL_FACT[TOTAL_BALANCE])\n    ),\n    [TotalBalance],\n    DESC\n)"
+}

@@ -1,0 +1,47 @@
+{
+  "execution_id": "unified_20250815_151707",
+  "query": "show me the customers with the lowest risk ratings",
+  "timestamp": "2025-08-15T15:17:07.410604",
+  "sql_result": {
+    "success": false,
+    "query": "",
+    "error": "('HY090', '[HY090] [unixODBC][Driver Manager]Invalid string or buffer length (0) (SQLExecDirectW)')",
+    "execution_time": 0.856552,
+    "timestamp": "2025-08-15T15:17:56.387383"
+  },
+  "dax_result": {
+    "success": false,
+    "query": "SELECT * FROM ",
+    "error": "('42000', \"[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Incorrect syntax near 'FROM'. (102) (SQLExecDirectW)\")",
+    "execution_time": 0.252017,
+    "timestamp": "2025-08-15T15:17:57.245081",
+    "original_dax": "",
+    "translated_sql": "SELECT * FROM ",
+    "query_type": "DAX-to-SQL"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "SQL query failed: ('HY090', '[HY090] [unixODBC][Driver Manager]Invalid string or buffer length (0) (SQLExecDirectW)')",
+      "DAX query failed: ('42000', \"[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Incorrect syntax near 'FROM'. (102) (SQLExecDirectW)\")"
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 13.883563041687012,
+    "sql_generation": 17.915156841278076,
+    "dax_generation": 17.1775119304657,
+    "sql_execution": 0.8567321300506592,
+    "dax_execution": 0.25287413597106934,
+    "comparison": 1.0013580322265625e-05,
+    "total_time": 50.086939096450806
+  },
+  "errors": []
+}
