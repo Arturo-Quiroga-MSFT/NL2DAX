@@ -1,0 +1,211 @@
+/*
+DAX Queries for FIS_CUSTOMER_DIMENSION Table
+============================================
+
+This file contains various DAX queries to explore and analyze the
+customer dimension table in your Power BI semantic model.
+
+Generated: August 15, 2025
+Purpose: Explore customer data in Power BI semantic model for NL2DAX pipeline
+*/
+
+-- ====================================================================
+-- QUERY 1: Show all customer data (first 10 rows)
+-- ====================================================================
+-- Use this to see the structure and sample data of the customer table
+
+EVALUATE
+TOPN(10, FIS_CUSTOMER_DIMENSION)
+
+/*
+-- ====================================================================
+-- QUERY 2: Show specific customer columns (first 20 rows)
+-- ====================================================================
+-- Use this to see key customer information in a cleaner format
+
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(20, FIS_CUSTOMER_DIMENSION),
+    "Customer Key", FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],
+    "Customer Name", FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],
+    "Customer Type", FIS_CUSTOMER_DIMENSION[CUSTOMER_TYPE],
+    "Country", FIS_CUSTOMER_DIMENSION[COUNTRY],
+    "Industry", FIS_CUSTOMER_DIMENSION[INDUSTRY],
+    "Risk Rating", FIS_CUSTOMER_DIMENSION[RISK_RATING],
+    "Business Unit", FIS_CUSTOMER_DIMENSION[BUSINESS_UNIT]
+)
+*/
+
+/*
+-- ====================================================================
+-- QUERY 3: Customer summary statistics
+-- ====================================================================
+-- Use this to get an overview of your customer data
+
+EVALUATE
+UNION(
+    ROW("Metric", "Total Customers", "Count", COUNTROWS(FIS_CUSTOMER_DIMENSION)),
+    ROW("Metric", "Unique Countries", "Count", DISTINCTCOUNT(FIS_CUSTOMER_DIMENSION[COUNTRY])),
+    ROW("Metric", "Unique Industries", "Count", DISTINCTCOUNT(FIS_CUSTOMER_DIMENSION[INDUSTRY])),
+    ROW("Metric", "Unique Customer Types", "Count", DISTINCTCOUNT(FIS_CUSTOMER_DIMENSION[CUSTOMER_TYPE])),
+    ROW("Metric", "Unique Risk Ratings", "Count", DISTINCTCOUNT(FIS_CUSTOMER_DIMENSION[RISK_RATING]))
+)
+*/
+
+/*
+-- ====================================================================
+-- QUERY 4: Customer count by country
+-- ====================================================================
+-- Use this to see geographic distribution of customers
+
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE(
+        FIS_CUSTOMER_DIMENSION,
+        FIS_CUSTOMER_DIMENSION[COUNTRY]
+    ),
+    "Customer Count", COUNTROWS(
+        FILTER(
+            FIS_CUSTOMER_DIMENSION,
+            FIS_CUSTOMER_DIMENSION[COUNTRY] = EARLIER(FIS_CUSTOMER_DIMENSION[COUNTRY])
+        )
+    )
+)
+ORDER BY [Customer Count] DESC
+*/
+
+/*
+-- ====================================================================
+-- QUERY 5: Customer count by industry
+-- ====================================================================
+-- Use this to see industry distribution of customers
+
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE(
+        FIS_CUSTOMER_DIMENSION,
+        FIS_CUSTOMER_DIMENSION[INDUSTRY]
+    ),
+    "Customer Count", COUNTROWS(
+        FILTER(
+            FIS_CUSTOMER_DIMENSION,
+            FIS_CUSTOMER_DIMENSION[INDUSTRY] = EARLIER(FIS_CUSTOMER_DIMENSION[INDUSTRY])
+        )
+    )
+)
+ORDER BY [Customer Count] DESC
+*/
+
+/*
+-- ====================================================================
+-- QUERY 6: Customer count by risk rating
+-- ====================================================================
+-- Use this to see risk profile distribution
+
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE(
+        FIS_CUSTOMER_DIMENSION,
+        FIS_CUSTOMER_DIMENSION[RISK_RATING]
+    ),
+    "Customer Count", COUNTROWS(
+        FILTER(
+            FIS_CUSTOMER_DIMENSION,
+            FIS_CUSTOMER_DIMENSION[RISK_RATING] = EARLIER(FIS_CUSTOMER_DIMENSION[RISK_RATING])
+        )
+    )
+)
+ORDER BY [Customer Count] DESC
+*/
+
+/*
+-- ====================================================================
+-- QUERY 7: Search for specific customers
+-- ====================================================================
+-- Use this to find customers by name (replace "ACME" with search term)
+
+EVALUATE
+FILTER(
+    FIS_CUSTOMER_DIMENSION,
+    SEARCH("ACME", FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME], 1, 0) > 0
+)
+*/
+
+/*
+-- ====================================================================
+-- QUERY 8: Customers in specific country
+-- ====================================================================
+-- Use this to see customers from a specific country (replace "United States")
+
+EVALUATE
+FILTER(
+    FIS_CUSTOMER_DIMENSION,
+    FIS_CUSTOMER_DIMENSION[COUNTRY] = "United States"
+)
+*/
+
+/*
+-- ====================================================================
+-- QUERY 9: High-risk customers
+-- ====================================================================
+-- Use this to see customers with high risk ratings
+
+EVALUATE
+FILTER(
+    FIS_CUSTOMER_DIMENSION,
+    FIS_CUSTOMER_DIMENSION[RISK_RATING] IN {"High", "Very High", "Critical"}
+)
+*/
+
+/*
+-- ====================================================================
+-- QUERY 10: Customer table schema/structure
+-- ====================================================================
+-- Use this to see all column names and sample values
+
+EVALUATE
+UNION(
+    ROW("Column", "CUSTOMER_KEY", "Sample Value", FORMAT(TOPN(1, FIS_CUSTOMER_DIMENSION)[CUSTOMER_KEY], "0")),
+    ROW("Column", "CUSTOMER_NAME", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[CUSTOMER_NAME]),
+    ROW("Column", "CUSTOMER_TYPE", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[CUSTOMER_TYPE]),
+    ROW("Column", "COUNTRY", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[COUNTRY]),
+    ROW("Column", "INDUSTRY", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[INDUSTRY]),
+    ROW("Column", "RISK_RATING", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[RISK_RATING]),
+    ROW("Column", "BUSINESS_UNIT", "Sample Value", TOPN(1, FIS_CUSTOMER_DIMENSION)[BUSINESS_UNIT])
+)
+*/
+
+/*
+USAGE INSTRUCTIONS:
+==================
+
+1. COPY any query above (uncomment it first by removing /* and */)
+2. PASTE into Power BI Desktop, DAX Studio, or your DAX execution environment
+3. EXECUTE to see the results
+4. MODIFY search terms, countries, or other filters as needed
+
+QUERY RECOMMENDATIONS:
+=====================
+
+🔍 START WITH: Query 1 (first 10 rows) to see the table structure
+📊 OVERVIEW: Query 3 (summary statistics) to understand data volume
+🌍 GEOGRAPHY: Query 4 (by country) to see geographic distribution  
+🏭 INDUSTRY: Query 5 (by industry) to see sector breakdown
+⚠️  RISK: Query 6 (by risk rating) to see risk profile
+🔎 SEARCH: Query 7 or 8 to find specific customers
+📋 SCHEMA: Query 10 to see all available columns
+
+EXPECTED RESULTS:
+================
+
+If your customer dimension is properly loaded:
+✅ Query 1 will show actual customer records
+✅ Query 3 will show meaningful counts (not zero)
+✅ Query 4-6 will show distribution breakdowns
+✅ Query 7-9 will return filtered results based on criteria
+
+If there are issues:
+❌ "Table 'FIS_CUSTOMER_DIMENSION' doesn't exist" = Table not in semantic model
+❌ Empty results = No data loaded or incorrect table name
+❌ Column errors = Column names don't match what's in your table
+*/

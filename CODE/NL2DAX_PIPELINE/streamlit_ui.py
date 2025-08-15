@@ -40,7 +40,7 @@ from dax_generator import generate_dax
 from dax_formatter import format_and_validate_dax
 from query_executor import execute_dax_query
 from sql_executor import execute_sql_query
-from schema_reader import get_schema_metadata
+from schema_reader import get_schema_metadata, get_sql_database_schema_context
 from query_cache import get_cache
 from report_generator import PipelineReportGenerator
 
@@ -60,22 +60,41 @@ from langchain.prompts import ChatPromptTemplate
 # Load environment variables
 load_dotenv()
 
+# Initialize schema cache - load once and reuse throughout the session
+@st.cache_data
+def get_cached_schema_metadata():
+    """Get comprehensive schema metadata with Streamlit caching"""
+    return get_schema_metadata()
+
+@st.cache_data  
+def get_cached_sql_schema_context():
+    """Get SQL database schema context with Streamlit caching"""
+    return get_sql_database_schema_context()
+
 # Initialize Azure OpenAI LLM for intent parsing and SQL generation
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-12-01-preview",
+    api_version="2025-04-01-preview",
     azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "o4-mini")
     # Note: o4-mini reasoning model only supports default temperature (1)
 )
 
 def parse_intent_entities(user_input):
     """Parse natural language into structured intent and entities"""
+    
+    # Get cached schema for context
+    schema_context = get_cached_sql_schema_context()
+    
     prompt = ChatPromptTemplate.from_template(
         """
         You are an expert in translating natural language to database queries for a Financial Risk Management system.
         
-        IMPORTANT DATABASE SCHEMA CONTEXT:
+        EXACT DATABASE SCHEMA CONTEXT:
+        {schema}
+        
+        IMPORTANT GUIDELINES:
+        - Use ONLY the exact table and column names from the schema above
         - Main customer table: FIS_CUSTOMER_DIMENSION (NOT "customers")
         - Credit arrangements: FIS_CA_DETAIL_FACT 
         - Commercial loans: FIS_CL_DETAIL_FACT
@@ -85,7 +104,7 @@ def parse_intent_entities(user_input):
         - For numeric risk analysis, use PROBABILITY_OF_DEFAULT (decimal values)
         - LIMIT_AMOUNT and EXPOSURE_AT_DEFAULT are numeric currency fields
         
-        Extract the intent and entities from the following user input, using the correct table names above:
+        Extract the intent and entities from the following user input, using the correct table names from the schema:
         {input}
         
         Return ONLY a valid JSON object with intent and entities. Example format:
@@ -103,7 +122,7 @@ def parse_intent_entities(user_input):
         """
     )
     chain = prompt | llm
-    result = chain.invoke({"input": user_input})
+    result = chain.invoke({"input": user_input, "schema": schema_context})
     
     # Try to parse as JSON, fallback to raw text if parsing fails
     try:
@@ -409,6 +428,19 @@ def main():
                 if st.button(f"🕒 {query[:50]}...", key=f"history_{i}", use_container_width=True):
                     st.session_state.last_query = query
                     st.rerun()
+        
+        # Database Schema Information
+        st.header("🗃️ Database Schema")
+        with st.expander("Available Tables"):
+            schema_metadata = get_cached_schema_metadata()
+            for table_name, table_info in schema_metadata.get('tables', {}).items():
+                st.subheader(table_name)
+                if 'columns' in table_info:
+                    for col in table_info['columns']:
+                        col_name = col.get('COLUMN_NAME', 'Unknown')
+                        col_type = col.get('DATA_TYPE', 'Unknown')
+                        st.text(f"  • {col_name} ({col_type})")
+                st.divider()
     
     # Main query interface
     user_query = st.text_area(

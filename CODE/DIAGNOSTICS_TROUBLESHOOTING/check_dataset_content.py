@@ -8,8 +8,10 @@ import os
 import requests
 import msal
 import json
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from dotenv import load_dotenv
+import urllib.parse
 
 load_dotenv()
 
@@ -21,9 +23,14 @@ class DatasetContentChecker:
         self.client_id = os.getenv("PBI_CLIENT_ID")
         self.client_secret = os.getenv("PBI_CLIENT_SECRET")
         self.workspace_id = os.getenv("POWERBI_WORKSPACE_ID")
-        self.dataset_id = os.getenv("POWERBI_DATASET_ID", "fc4d80c8-090e-4441-8336-217490bde820")
+        # Try both possible environment variable names for dataset ID
+        self.dataset_id = os.getenv("PBI_DATASET_ID") or os.getenv("POWERBI_DATASET_ID")
         self.token = None
         self.base_url = "https://api.powerbi.com/v1.0/myorg"
+        
+        # Validate that we have a dataset ID
+        if not self.dataset_id:
+            raise ValueError("No dataset ID found. Please set PBI_DATASET_ID or POWERBI_DATASET_ID in your .env file")
         
     def get_token(self):
         """Get Azure AD token"""
@@ -221,6 +228,186 @@ class DatasetContentChecker:
         except Exception as e:
             print(f"❌ Refresh trigger error: {e}")
             return False
+    
+    def check_fabric_tables_via_xmla(self):
+        """Check tables using XMLA/TMSL for Fabric datasets"""
+        print("🏗️  FABRIC DATASET TABLES CHECK (via XMLA)")
+        print("-" * 40)
+        
+        try:
+            # Convert PowerBI XMLA endpoint to HTTP endpoint
+            xmla_endpoint = os.getenv("PBI_XMLA_ENDPOINT", "powerbi://api.powerbi.com/v1.0/myorg/FIS")
+            dataset_name = os.getenv("PBI_DATASET_NAME", "FIS-SEMANTIC-MODEL")
+            
+            # Convert powerbi:// to https:// endpoint for HTTP XMLA
+            if xmla_endpoint.startswith("powerbi://"):
+                http_xmla = xmla_endpoint.replace("powerbi://", "https://").replace("/v1.0/myorg", "/xmla")
+            else:
+                http_xmla = xmla_endpoint
+            
+            print(f"XMLA Endpoint: {xmla_endpoint}")
+            print(f"HTTP XMLA: {http_xmla}")
+            print(f"Dataset Name: {dataset_name}")
+            
+            # XMLA SOAP request to discover tables using DMVs
+            dmv_query = f"""<?xml version="1.0" encoding="UTF-8"?>
+            <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+              <Body>
+                <Execute xmlns="urn:schemas-microsoft-com:xml-analysis">
+                  <Command>
+                    <Statement>
+                    SELECT 
+                        [TABLE_NAME] as TableName,
+                        [TABLE_TYPE] as TableType,
+                        [DESCRIPTION] as Description
+                    FROM $SYSTEM.TMSCHEMA_TABLES
+                    ORDER BY [TABLE_NAME]
+                    </Statement>
+                  </Command>
+                  <Properties>
+                    <PropertyList>
+                      <Catalog>{dataset_name}</Catalog>
+                      <Format>Tabular</Format>
+                    </PropertyList>
+                  </Properties>
+                </Execute>
+              </Body>
+            </Envelope>"""
+            
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "text/xml; charset=utf-8",
+                "SOAPAction": "urn:schemas-microsoft-com:xml-analysis:Execute"
+            }
+            
+            print("📡 Sending XMLA DMV query...")
+            response = requests.post(http_xmla, data=dmv_query, headers=headers, timeout=30)
+            
+            print(f"XMLA Response Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                print("✅ XMLA query successful!")
+                print("Raw response (first 1000 chars):")
+                print(response.text[:1000])
+                
+                # Parse XML response
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Look for table data in the response
+                    tables_found = []
+                    
+                    # Navigate through XML to find table names
+                    for elem in root.iter():
+                        if elem.text and isinstance(elem.text, str):
+                            text = elem.text.strip()
+                            # Look for table-like names (avoid system metadata)
+                            if text and not text.startswith('$') and not text.startswith('TMSCHEMA'):
+                                if any(keyword in text.upper() for keyword in ['TABLE', 'FACT', 'DIM', 'CUSTOMER', 'SALES']):
+                                    tables_found.append(text)
+                    
+                    if tables_found:
+                        print(f"✅ Found {len(tables_found)} potential tables:")
+                        for i, table in enumerate(set(tables_found), 1):
+                            print(f"   {i}. {table}")
+                        return True
+                    else:
+                        print("⚠️  No recognizable table names found in XMLA response")
+                        return False
+                        
+                except ET.ParseError as e:
+                    print(f"❌ XML parsing error: {e}")
+                    return False
+                    
+            else:
+                print(f"❌ XMLA query failed: {response.status_code}")
+                print("Response content:")
+                print(response.text[:500])
+                return False
+                
+        except Exception as e:
+            print(f"❌ XMLA table discovery error: {e}")
+            return False
+    
+    def check_fabric_tables_via_rest_api(self):
+        """Try Fabric-specific REST APIs for table discovery"""
+        print("🏭 FABRIC REST API TABLES CHECK")
+        print("-" * 40)
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            
+            # Get Fabric item details
+            fabric_item_url = f"https://api.fabric.microsoft.com/v1/workspaces/{self.workspace_id}/items/{self.dataset_id}"
+            print(f"Getting Fabric item details: {fabric_item_url}")
+            
+            response = requests.get(fabric_item_url, headers=headers, timeout=30)
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                item_details = response.json()
+                print("✅ Fabric item details:")
+                print(f"   Name: {item_details.get('displayName', 'Unknown')}")
+                print(f"   Type: {item_details.get('type', 'Unknown')}")
+                print(f"   Description: {item_details.get('description', 'No description')}")
+                
+                # Try to execute a simple DAX query to list tables
+                print("\n🔍 Attempting DAX query to discover tables...")
+                
+                # Use Power BI executeQueries endpoint with a table discovery query
+                execute_url = f"{self.base_url}/groups/{self.workspace_id}/datasets/{self.dataset_id}/executeQueries"
+                
+                # Simple queries to try to discover table names
+                discovery_queries = [
+                    "EVALUATE INFO.TABLES()",
+                    "EVALUATE SUMMARIZE(INFO.TABLES(), INFO.TABLES()[Name])",
+                    "EVALUATE DISTINCT(INFO.TABLES()[Name])"
+                ]
+                
+                for i, query in enumerate(discovery_queries, 1):
+                    print(f"\n   Trying query {i}: {query[:50]}...")
+                    
+                    query_body = {
+                        "queries": [{
+                            "query": query
+                        }],
+                        "serializerSettings": {
+                            "includeNulls": False
+                        }
+                    }
+                    
+                    query_response = requests.post(execute_url, headers=headers, json=query_body, timeout=30)
+                    print(f"   Query Status: {query_response.status_code}")
+                    
+                    if query_response.status_code == 200:
+                        result = query_response.json()
+                        print("   ✅ Query successful!")
+                        
+                        # Extract table information from results
+                        if 'results' in result and result['results']:
+                            query_result = result['results'][0]
+                            if 'tables' in query_result and query_result['tables']:
+                                table_data = query_result['tables'][0]
+                                if 'rows' in table_data:
+                                    print(f"   Found {len(table_data['rows'])} table entries:")
+                                    for row in table_data['rows'][:10]:  # Show first 10
+                                        print(f"     - {row}")
+                                    return True
+                        
+                        print("   Query returned data but no recognizable table structure")
+                        
+                    else:
+                        print(f"   ❌ Query failed: {query_response.text[:200]}")
+                
+                return False
+                
+            else:
+                print(f"❌ Cannot access Fabric item: {query_response.text[:200]}")
+                return False
+            
+        except Exception as e:
+            print(f"❌ Fabric REST API error: {e}")
+            return False
 
 def main():
     """Main dataset content checking function"""
@@ -232,7 +419,15 @@ def main():
     print("🎯 Root Cause: 'DAX queries work only on databases which have at least one tables'")
     print()
     
-    checker = DatasetContentChecker()
+    try:
+        checker = DatasetContentChecker()
+    except ValueError as e:
+        print(f"❌ Configuration Error: {e}")
+        return 1
+    
+    print(f"🆔 Using Dataset ID: {checker.dataset_id}")
+    print(f"🏢 Workspace ID: {checker.workspace_id}")
+    print()
     
     if not checker.get_token():
         print("❌ Cannot proceed without token")
@@ -241,12 +436,27 @@ def main():
     print("✅ Authentication successful")
     print()
     
-    # Check what's in the dataset
+    # Check what's in the dataset using standard APIs
     has_tables = checker.check_dataset_tables()
     print()
     
     has_datasources = checker.check_dataset_datasources()
     print()
+    
+    # If standard API failed, try Fabric-specific methods
+    fabric_tables_found = False
+    if not has_tables:
+        print("🔍 Standard API failed - trying Fabric-specific methods...")
+        print()
+        
+        # Try XMLA approach
+        fabric_tables_found = checker.check_fabric_tables_via_xmla()
+        print()
+        
+        # Try Fabric REST APIs
+        if not fabric_tables_found:
+            fabric_rest_success = checker.check_fabric_tables_via_rest_api()
+            print()
     
     has_refreshes = checker.check_dataset_refresh_history()
     print()
@@ -255,7 +465,7 @@ def main():
     print("📊 ANALYSIS & RECOMMENDATIONS")
     print("=" * 40)
     
-    if has_tables:
+    if has_tables or fabric_tables_found:
         print("✅ Dataset has tables - the issue is elsewhere")
         print("   Need to investigate other causes of the DAX error")
     else:

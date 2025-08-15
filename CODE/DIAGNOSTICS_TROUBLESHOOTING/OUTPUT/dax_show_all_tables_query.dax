@@ -1,0 +1,164 @@
+/*
+DAX Query to Show All Tables in Power BI Semantic Model
+======================================================
+
+This DAX query will return a list of all tables available in the current
+Power BI semantic model/dataset. Useful for verifying table availability
+and schema exploration.
+
+Generated: August 15, 2025
+Purpose: Verify tables in Power BI semantic model for NL2DAX pipeline
+*/
+
+-- METHOD 1: Using EVALUATE with UNION to list all tables
+-- This approach manually lists each table with metadata
+
+EVALUATE
+UNION(
+    ROW(
+        "TableName", "FIS_CA_DETAIL_FACT",
+        "TableType", "Fact Table",
+        "Description", "Credit Arrangements Detail Fact"
+    ),
+    ROW(
+        "TableName", "FIS_CL_DETAIL_FACT", 
+        "TableType", "Fact Table",
+        "Description", "Commercial Loans Detail Fact"
+    ),
+    ROW(
+        "TableName", "FIS_CUSTOMER_DIMENSION",
+        "TableType", "Dimension Table", 
+        "Description", "Customer Master Data"
+    ),
+    ROW(
+        "TableName", "FIS_CA_PRODUCT_DIMENSION",
+        "TableType", "Dimension Table",
+        "Description", "Credit Arrangement Products"
+    ),
+    ROW(
+        "TableName", "FIS_CURRENCY_DIMENSION",
+        "TableType", "Dimension Table",
+        "Description", "Currency Reference Data"
+    ),
+    ROW(
+        "TableName", "FIS_INVESTOR_DIMENSION", 
+        "TableType", "Dimension Table",
+        "Description", "Investor Master Data"
+    ),
+    ROW(
+        "TableName", "FIS_LIMIT_DIMENSION",
+        "TableType", "Dimension Table",
+        "Description", "Limit Configuration Data"
+    ),
+    ROW(
+        "TableName", "FIS_LOAN_PRODUCT_DIMENSION",
+        "TableType", "Dimension Table", 
+        "Description", "Loan Product Master Data"
+    ),
+    ROW(
+        "TableName", "FIS_MONTH_DIMENSION",
+        "TableType", "Dimension Table",
+        "Description", "Time/Date Dimension"
+    ),
+    ROW(
+        "TableName", "FIS_OWNER_DIMENSION",
+        "TableType", "Dimension Table",
+        "Description", "Owner Master Data"
+    )
+)
+
+/*
+ALTERNATIVE METHOD 2: Show contents of FIS_CUSTOMER_DIMENSION table
+==================================================================
+This query shows the actual data in the customer dimension table
+*/
+
+-- Show all customers (use with caution if table is large)
+-- EVALUATE
+-- FIS_CUSTOMER_DIMENSION
+
+-- Show first 10 customers
+-- EVALUATE
+-- TOPN(10, FIS_CUSTOMER_DIMENSION)
+
+-- Show customers with specific columns only
+-- EVALUATE
+-- SELECTCOLUMNS(
+--     TOPN(20, FIS_CUSTOMER_DIMENSION),
+--     "Customer Key", FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],
+--     "Customer Name", FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],
+--     "Customer Type", FIS_CUSTOMER_DIMENSION[CUSTOMER_TYPE],
+--     "Country", FIS_CUSTOMER_DIMENSION[COUNTRY],
+--     "Industry", FIS_CUSTOMER_DIMENSION[INDUSTRY]
+-- )
+
+-- Show customer count by country
+-- EVALUATE
+-- SUMMARIZE(
+--     FIS_CUSTOMER_DIMENSION,
+--     FIS_CUSTOMER_DIMENSION[COUNTRY],
+--     "Customer Count", COUNTROWS(FIS_CUSTOMER_DIMENSION)
+-- )
+
+-- Show customer count by industry
+-- EVALUATE
+-- SUMMARIZE(
+--     FIS_CUSTOMER_DIMENSION,
+--     FIS_CUSTOMER_DIMENSION[INDUSTRY],
+--     "Customer Count", COUNTROWS(FIS_CUSTOMER_DIMENSION)
+-- )
+
+/*
+ALTERNATIVE METHOD 3: Count rows in each table
+=============================================
+This shows table names with row counts
+*/
+
+-- EVALUATE
+-- UNION(
+--     ROW("TableName", "FIS_CA_DETAIL_FACT", "RowCount", COUNTROWS(FIS_CA_DETAIL_FACT)),
+--     ROW("TableName", "FIS_CL_DETAIL_FACT", "RowCount", COUNTROWS(FIS_CL_DETAIL_FACT)),
+--     ROW("TableName", "FIS_CUSTOMER_DIMENSION", "RowCount", COUNTROWS(FIS_CUSTOMER_DIMENSION)),
+--     ROW("TableName", "FIS_CA_PRODUCT_DIMENSION", "RowCount", COUNTROWS(FIS_CA_PRODUCT_DIMENSION)),
+--     ROW("TableName", "FIS_CURRENCY_DIMENSION", "RowCount", COUNTROWS(FIS_CURRENCY_DIMENSION)),
+--     ROW("TableName", "FIS_INVESTOR_DIMENSION", "RowCount", COUNTROWS(FIS_INVESTOR_DIMENSION)),
+--     ROW("TableName", "FIS_LIMIT_DIMENSION", "RowCount", COUNTROWS(FIS_LIMIT_DIMENSION)),
+--     ROW("TableName", "FIS_LOAN_PRODUCT_DIMENSION", "RowCount", COUNTROWS(FIS_LOAN_PRODUCT_DIMENSION)),
+--     ROW("TableName", "FIS_MONTH_DIMENSION", "RowCount", COUNTROWS(FIS_MONTH_DIMENSION)),
+--     ROW("TableName", "FIS_OWNER_DIMENSION", "RowCount", COUNTROWS(FIS_OWNER_DIMENSION))
+-- )
+
+/*
+USAGE NOTES:
+============
+
+1. Copy the EVALUATE UNION query above (METHOD 1) into Power BI Desktop
+   or your DAX query execution environment
+
+2. This will return a table with columns:
+   - TableName: Name of each table
+   - TableType: Whether it's a Fact or Dimension table  
+   - Description: Brief description of the table purpose
+
+3. If you get errors for specific tables, it means those tables are not
+   available in your current semantic model
+
+4. To test row counts, uncomment METHOD 3 instead
+
+5. For browsing specific table contents, use:
+   EVALUATE TOPN(10, [TableName])
+
+EXPECTED OUTPUT:
+===============
+TableName                    | TableType        | Description
+FIS_CA_DETAIL_FACT          | Fact Table       | Credit Arrangements Detail Fact
+FIS_CL_DETAIL_FACT          | Fact Table       | Commercial Loans Detail Fact  
+FIS_CUSTOMER_DIMENSION      | Dimension Table  | Customer Master Data
+FIS_CA_PRODUCT_DIMENSION    | Dimension Table  | Credit Arrangement Products
+FIS_CURRENCY_DIMENSION      | Dimension Table  | Currency Reference Data
+FIS_INVESTOR_DIMENSION      | Dimension Table  | Investor Master Data
+FIS_LIMIT_DIMENSION         | Dimension Table  | Limit Configuration Data
+FIS_LOAN_PRODUCT_DIMENSION  | Dimension Table  | Loan Product Master Data
+FIS_MONTH_DIMENSION         | Dimension Table  | Time/Date Dimension
+FIS_OWNER_DIMENSION         | Dimension Table  | Owner Master Data
+*/
