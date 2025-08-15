@@ -41,6 +41,13 @@ from dax_formatter import format_and_validate_dax
 from query_executor import execute_dax_query
 from sql_executor import execute_sql_query
 from schema_reader import get_schema_metadata
+from query_cache import get_cache
+from report_generator import PipelineReportGenerator
+
+# Import the existing SQL generation function from main.py
+import sys
+sys.path.append(str(current_dir))
+from main import generate_sql
 
 # We'll implement our own wrappers for the main.py functionality
 import subprocess
@@ -66,14 +73,19 @@ def parse_intent_entities(user_input):
     """Parse natural language into structured intent and entities"""
     prompt = ChatPromptTemplate.from_template(
         """
-        You are an expert in translating natural language to database queries. 
+        You are an expert in translating natural language to database queries for a Financial Risk Management system.
         
-        IMPORTANT DATA TYPE CONTEXT:
+        IMPORTANT DATABASE SCHEMA CONTEXT:
+        - Main customer table: FIS_CUSTOMER_DIMENSION (NOT "customers")
+        - Credit arrangements: FIS_CA_DETAIL_FACT 
+        - Commercial loans: FIS_CL_DETAIL_FACT
+        - Key customer fields: CUSTOMER_KEY, CUSTOMER_NAME, CUSTOMER_TYPE_DESCRIPTION, RISK_RATING_CODE
+        - Credit amount fields: LIMIT_AMOUNT, EXPOSURE_AT_DEFAULT, PRINCIPAL_BALANCE
         - RISK_RATING_CODE is a text field with values like "A+", "A", "A-", "B+", "B", "B-", "C+", etc.
         - For numeric risk analysis, use PROBABILITY_OF_DEFAULT (decimal values)
         - LIMIT_AMOUNT and EXPOSURE_AT_DEFAULT are numeric currency fields
         
-        Extract the intent and entities from the following user input, keeping in mind the data types above:
+        Extract the intent and entities from the following user input, using the correct table names above:
         {input}
         
         Return ONLY a valid JSON object with intent and entities. Example format:
@@ -81,8 +93,8 @@ def parse_intent_entities(user_input):
             "intent": "show_top_customers",
             "entities": {{
                 "limit": 5,
-                "table": "customers",
-                "sort_field": "total_exposure",
+                "table": "FIS_CUSTOMER_DIMENSION",
+                "sort_field": "LIMIT_AMOUNT",
                 "sort_order": "desc"
             }}
         }}
@@ -108,40 +120,28 @@ def parse_intent_entities(user_input):
             "parse_error": "Failed to parse LLM response as JSON"
         }
 
-def generate_sql_from_intent(intent_entities):
-    """Generate SQL query from intent and entities"""
-    from schema_reader import get_schema_metadata
+def validate_sql_syntax(sql_query):
+    """Basic SQL syntax validation"""
+    if not sql_query or len(sql_query.strip()) < 10:
+        return "SQL query appears to be empty or too short"
     
-    # Get database schema context
-    schema_metadata = get_schema_metadata()
+    # Check for balanced parentheses
+    open_count = sql_query.count('(')
+    close_count = sql_query.count(')')
     
-    sql_prompt = ChatPromptTemplate.from_template(
-        """
-        You are an expert SQL developer. Based on the intent and entities, generate a T-SQL query.
-        
-        IMPORTANT GUIDELINES:
-        1. RISK_RATING_CODE is a text field (A+, A, A-, B+, B, etc.) - use COUNT(), GROUP BY, or string operations
-        2. For numeric analysis, use PROBABILITY_OF_DEFAULT, LIMIT_AMOUNT, EXPOSURE_AT_DEFAULT
-        3. Do not use AVG(), SUM(), or math functions on text fields like RISK_RATING_CODE
-        4. Use appropriate data types for aggregations
-        
-        Database Schema:
-        {schema}
-        
-        Intent and Entities:
-        {intent_entities}
-        
-        Generate a valid T-SQL query that respects data types and fulfills the user's request.
-        Return ONLY the SQL query without explanations or code blocks.
-        """
-    )
+    if open_count != close_count:
+        return f"Unbalanced parentheses: {open_count} open, {close_count} close"
     
-    chain = sql_prompt | llm
-    result = chain.invoke({
-        "schema": str(schema_metadata),
-        "intent_entities": intent_entities
-    })
-    return result.content
+    # Check for CTE syntax
+    if 'WITH' not in sql_query.upper() and any(cte_pattern in sql_query for cte_pattern in ['AS (', 'AS(']):
+        return "Query appears to use CTEs but missing WITH keyword"
+    
+    # Check for incomplete statements
+    sql_upper = sql_query.upper().strip()
+    if sql_upper.endswith(',') or sql_upper.endswith('('):
+        return "SQL query appears incomplete - ends with comma or open parenthesis"
+    
+    return "SQL query appears valid"
 
 def validate_dax_completeness(dax_query):
     """Validate that DAX query is complete and well-formed"""
@@ -253,7 +253,7 @@ def execute_pipeline(user_query):
         # Step 2: Generate and execute SQL
         with st.spinner("🔍 Generating SQL query..."):
             sql_start = time.time()
-            sql_raw = generate_sql_from_intent(results['intent_entities'])
+            sql_raw = generate_sql(results['intent_entities'])  # Use existing function from main.py
             
             if sql_raw:
                 # Extract SQL code from LLM output
@@ -271,6 +271,11 @@ def execute_pipeline(user_query):
                 # Sanitize quotes
                 sql_sanitized = sql_code.replace(''', "'").replace(''', "'").replace('"', '"').replace('"', '"')
                 results['sql_query'] = sql_sanitized
+                
+                # Validate SQL syntax
+                sql_validation = validate_sql_syntax(sql_sanitized)
+                if "appears valid" not in sql_validation:
+                    results['errors'].append(f"SQL Validation Warning: {sql_validation}")
                 
                 # Execute SQL
                 try:
@@ -330,6 +335,43 @@ def execute_pipeline(user_query):
                     results['errors'].append(f"DAX Execution Error: {str(exec_error)}")
             
             results['dax_time'] = time.time() - dax_start
+        
+        # Step 4: Generate comprehensive report
+        with st.spinner("📝 Generating execution report..."):
+            try:
+                cache = get_cache()
+                cache_stats = cache.get_stats_for_report()
+                
+                report_generator = PipelineReportGenerator()
+                
+                # Prepare execution data for report
+                execution_data = {
+                    'user_query': user_query,
+                    'intent_entities': results['intent_entities'],
+                    'sql_query': results['sql_query'],
+                    'dax_query': results['dax_query'],
+                    'sql_results': results['sql_results'],
+                    'dax_results': results['dax_results'],
+                    'sql_execution_time': results['sql_time'],
+                    'dax_execution_time': results['dax_time'],
+                    'total_execution_time': time.time() - sql_start,
+                    'errors': results['errors'],
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+                # Generate and save report
+                report_path = report_generator.generate_report(
+                    user_query=user_query,
+                    execution_results=execution_data,
+                    cache_stats=cache_stats
+                )
+                
+                results['report_path'] = report_path
+                report_filename = Path(report_path).name
+                st.info(f"📄 Execution report saved: {report_filename}")
+                
+            except Exception as report_error:
+                results['errors'].append(f"Report Generation Warning: {str(report_error)}")
             
     except Exception as e:
         results['errors'].append(f"Pipeline Error: {str(e)}")
@@ -421,7 +463,7 @@ def main():
                 )
                 
                 # Results tabs
-                tab1, tab2, tab3 = st.tabs(["📊 Results Comparison", "🔍 Query Details", "📈 Analysis"])
+                tab1, tab2, tab3, tab4 = st.tabs(["📊 Results Comparison", "🔍 Query Details", "📈 Analysis", "📄 Execution Report"])
                 
                 with tab1:
                     col1, col2 = st.columns(2)
@@ -518,6 +560,30 @@ def main():
                                     st.plotly_chart(fig, use_container_width=True)
                     else:
                         st.info("No data available for analysis")
+                
+                with tab4:
+                    # Display execution report
+                    st.subheader("📄 Pipeline Execution Report")
+                    
+                    if 'report_path' in results and results['report_path']:
+                        try:
+                            with open(results['report_path'], 'r', encoding='utf-8') as f:
+                                report_content = f.read()
+                            
+                            # Display report content
+                            st.markdown(report_content)
+                            
+                            # Download button for report
+                            st.download_button(
+                                label="📥 Download Execution Report (MD)",
+                                data=report_content,
+                                file_name=f"execution_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+                                mime="text/markdown"
+                            )
+                        except Exception as e:
+                            st.error(f"Could not load report: {str(e)}")
+                    else:
+                        st.info("No execution report available")
 
 if __name__ == "__main__":
     main()

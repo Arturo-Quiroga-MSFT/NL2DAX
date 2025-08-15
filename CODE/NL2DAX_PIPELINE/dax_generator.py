@@ -50,10 +50,14 @@ from pathlib import Path  # Modern path handling for file operations
 # Project-specific imports
 from dotenv import load_dotenv              # Securely load environment variables from .env file
 from schema_reader import get_schema_metadata  # Database schema reading and caching functionality
+from query_cache import QueryCache          # Query caching for improved performance
 
 # Load environment variables from .env file for secure configuration management
 # This ensures sensitive credentials like API keys are not hardcoded in the source code
 load_dotenv()
+
+# Initialize query cache for LLM response caching
+cache = QueryCache()
 
 # Azure OpenAI configuration from environment variables
 # These settings control which Azure OpenAI service and model deployment to use
@@ -227,94 +231,83 @@ dax_prompt = ChatPromptTemplate.from_template(
 
 def generate_dax(intent_entities):
     """
-    Generate a DAX query from structured intent and entities using Azure OpenAI.
-    
-    This function takes structured intent and entity information (typically extracted
-    from natural language queries) and uses Azure OpenAI's language model to generate
-    syntactically correct DAX expressions that can be executed against Power BI
-    semantic models or Analysis Services tabular models.
-    
-    The generation process follows these steps:
-    1. Retrieve current database schema metadata for context
-    2. Combine schema with intent/entities in a structured prompt
-    3. Use Azure OpenAI to transform the prompt into valid DAX
-    4. Apply DAX best practices and syntax rules during generation
-    5. Return executable DAX expression ready for query execution
+    Generate a DAX query from the provided intent and entities structure
     
     Args:
-        intent_entities (str): Structured description of query intent and identified entities.
-                              This typically includes:
-                              - Query type (aggregation, filtering, grouping, etc.)
-                              - Target tables and columns
-                              - Filter conditions and values
-                              - Grouping requirements
-                              - Sort order specifications
+        intent_entities: Dictionary or string containing intent and entity information
     
     Returns:
-        str: Valid DAX expression that can be executed against a Power BI semantic model
-             or Analysis Services tabular model. The DAX follows best practices including:
-             - Proper table and column references with single quotes
-             - EVALUATE statements for table expressions
-             - SELECTCOLUMNS for column selection and aliasing
-             - FILTER functions for row-level filtering
-             - Proper string quoting and syntax
-    
-    Example:
-        >>> intent = "Find top 5 customers by total sales amount"
-        >>> dax_query = generate_dax(intent)
-        >>> print(dax_query)
-        EVALUATE
-        TOPN(
-            5,
-            SELECTCOLUMNS(
-                'Customers',
-                "CustomerName", 'Customers'[CustomerName],
-                "TotalSales", CALCULATE(SUM('Sales'[Amount]))
-            ),
-            [TotalSales], DESC
-        )
-    
-    Schema Integration:
-        - Automatically loads current database schema for context-aware generation
-        - Uses table and column names from actual database structure
-        - Incorporates relationship information for proper join operations
-        - Ensures generated DAX references valid database objects
-    
-    LLM Configuration:
-        - Uses Azure OpenAI GPT models for advanced natural language understanding
-        - Applies carefully engineered prompts with DAX best practices
-        - Leverages schema context for accurate table/column references
-        - Implements DAX syntax rules and Power BI semantic model patterns
-    
-    Error Handling:
-        - Returns best-effort DAX even if schema loading fails
-        - Gracefully handles Azure OpenAI API errors and timeouts
-        - Provides meaningful error messages for debugging
+        String containing the generated DAX query
     """
-    # Try to get cached DAX response first  
-    from query_cache import get_cache
-    cache = get_cache()
     
+    # Use cache to avoid redundant LLM calls for identical intent/entity combinations
     cached_response = cache.get(intent_entities, "dax")
     if cached_response:
+        print("[DEBUG] Using cached DAX response")
         return cached_response
     
-    # If not cached, generate DAX with LLM
-    # Get Power BI specific schema context for schema-aware DAX generation
-    schema = get_powerbi_schema_context()
+    # Get database schema metadata for context-aware DAX generation
+    metadata = get_schema_metadata()
+    schema_context = get_powerbi_schema_context()
     
-    # Create LangChain chain combining prompt template with Azure OpenAI LLM
-    # This chain handles the transformation from structured intent to DAX expression
-    chain = dax_prompt | llm
+    # Create the DAX generation prompt with comprehensive context
+    prompt = ChatPromptTemplate.from_template(
+        """You are an expert DAX (Data Analysis Expressions) query generator for Power BI semantic models.
+        
+        POWER BI SEMANTIC MODEL CONTEXT:
+        {schema_context}
+        
+        INTENT AND ENTITIES:
+        {intent_entities}
+        
+        CRITICAL DAX SYNTAX RULES:
+        - All table references MUST use single quotes: 'TableName'[ColumnName]
+        - Use EVALUATE to make the query executable
+        - Use TOPN() for ranking/limits, NEVER use ORDER BY (not supported in DAX)
+        - For aggregations use CALCULATE(), SUM(), COUNT(), etc.
+        - Use FILTER() for row-level filtering
+        - Use RELATED() to access columns from related tables
+        - Always validate column names against the schema above
+        - String comparisons use double quotes: [Column] = "Value"
+        
+        CRITICAL DATA TYPE RULES:
+        - NEVER use AVERAGE(), SUM(), MIN(), MAX() on text/string columns
+        - Text columns (like CUSTOMER_TYPE_DESCRIPTION, COUNTRY_DESCRIPTION) can only be used for:
+          * Grouping (in SUMMARIZECOLUMNS)
+          * Filtering (in FILTER conditions)
+          * Display (in ROW or calculated columns)
+        - Numeric aggregations (AVERAGE, SUM) only work on amount/numeric columns like:
+          * LIMIT_AMOUNT, PRINCIPAL_AMOUNT_DUE, AVAILABLE_AMOUNT
+          * COMMITMENT_AMOUNT, ORIGINAL_LIMIT_AMOUNT
+        - For analysis by type/category, use DISTINCTCOUNT() or COUNT() to count occurrences
+        - For comprehensive analysis, combine text grouping with numeric aggregations of appropriate columns
+        
+        Generate a complete, executable DAX query that answers the user's intent.
+        Return ONLY the DAX query, no explanations or formatting."""
+    )
     
-    # Invoke the chain with schema context and intent/entities to generate DAX
-    # The LLM uses both the database schema and query intent to create valid DAX
-    result = chain.invoke({"schema": schema, "intent_entities": intent_entities})
+    # Configure Azure OpenAI for DAX generation
+    llm = AzureChatOpenAI(
+        deployment_name="o4-mini",
+        model_name="o4-mini",
+        azure_endpoint=ENDPOINT,
+        api_key=API_KEY,
+        api_version="2024-12-01-preview",
+        temperature=1
+    )
     
-    # Cache the DAX response
+    # Create the processing chain
+    chain = prompt | llm
+    
+    # Generate the DAX query
+    result = chain.invoke({
+        "schema_context": schema_context,
+        "intent_entities": str(intent_entities)
+    })
+    
+    # Cache the result for future use
     cache.set(intent_entities, result.content, "dax")
     
-    # Return the generated DAX content from the LLM response
     return result.content
 
 

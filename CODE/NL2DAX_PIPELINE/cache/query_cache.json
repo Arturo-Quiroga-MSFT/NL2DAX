@@ -1,0 +1,16 @@
+{
+  "9622380825e41fa36ce0b8b43bab031b": {
+    "query": {
+      "intent": "show_top_customers",
+      "entities": {
+        "limit": 5,
+        "table": "FIS_CA_DETAIL_FACT",
+        "sort_field": "SUM(LIMIT_AMOUNT)",
+        "sort_order": "desc"
+      }
+    },
+    "response": "EVALUATE\nTOPN(\n    5,\n    SUMMARIZECOLUMNS(\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n        \"TotalLimitAmount\", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])\n    ),\n    [TotalLimitAmount], DESC\n)",
+    "timestamp": 1755274715.955329,
+    "cache_type": "dax"
+  }
+}
