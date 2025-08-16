@@ -12,5 +12,93 @@
     "response": "EVALUATE\nTOPN(\n    5,\n    SUMMARIZECOLUMNS(\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n        \"TotalLimitAmount\", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]))\n    ),\n    [TotalLimitAmount], DESC\n)",
     "timestamp": 1755276122.9129999,
     "cache_type": "dax"
+  },
+  "0c08fb5ca0e8339b3e94bb382ab1c39f": {
+    "query": {
+      "intent": "average_risk_by_customer_type",
+      "entities": {
+        "metric": "PROBABILITY_OF_DEFAULT",
+        "aggregation": "AVG",
+        "group_by": "CUSTOMER_TYPE_DESCRIPTION",
+        "fact_table": "FIS_CA_DETAIL_FACT",
+        "dimension_table": "FIS_CUSTOMER_DIMENSION",
+        "join_on": "CUSTOMER_KEY"
+      }
+    },
+    "response": "EVALUATE\nSUMMARIZECOLUMNS(\n    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION],\n    \"Average Probability of Default\", CALCULATE(AVERAGE('FIS_CA_DETAIL_FACT'[PROBABILITY_OF_DEFAULT]))\n)",
+    "timestamp": 1755289608.061274,
+    "cache_type": "dax"
+  },
+  "635f1aae2f3fab8b56e92f679aff7253": {
+    "query": {
+      "intent": "show_top_customers",
+      "entities": {
+        "limit": 10,
+        "table": "FIS_CA_DETAIL_FACT",
+        "sort_field": "EXPOSURE_AT_DEFAULT",
+        "sort_order": "desc"
+      }
+    },
+    "response": "EVALUATE\nTOPN(\n    10,\n    SUMMARIZECOLUMNS(\n        'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY],\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n        \"TotalExposure\", SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT])\n    ),\n    [TotalExposure], DESC\n)",
+    "timestamp": 1755290889.9979131,
+    "cache_type": "dax"
+  },
+  "888a1c28548191b967de217bab0287fa": {
+    "query": {
+      "intent": "get_customers_by_location",
+      "entities": {
+        "table": "FIS_CUSTOMER_DIMENSION",
+        "filter_field": "COUNTRY_DESCRIPTION",
+        "filter_value": "United States"
+      }
+    },
+    "response": "EVALUATE\nFILTER(\n    'FIS_CUSTOMER_DIMENSION',\n    'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION] = \"United States\"\n)",
+    "timestamp": 1755291002.3059719,
+    "cache_type": "dax"
+  },
+  "f551182270450a4ec171dbc60ee8af6a": {
+    "query": {
+      "intent": "filter_customers_by_country",
+      "entities": {
+        "table": "FIS_CUSTOMER_DIMENSION",
+        "field": "COUNTRY_CODE",
+        "operator": "!=",
+        "value": "US"
+      }
+    },
+    "response": "EVALUATE\nFILTER(\n    'FIS_CUSTOMER_DIMENSION',\n    'FIS_CUSTOMER_DIMENSION'[COUNTRY_CODE] <> \"US\"\n)",
+    "timestamp": 1755291096.4491599,
+    "cache_type": "dax"
+  },
+  "39b190de4494b3859372d6243b3ee3f5": {
+    "query": {
+      "intent": "show_large_borrowers",
+      "entities": {
+        "limit": 5,
+        "table": "FIS_CL_DETAIL_FACT",
+        "filter_field": "PRINCIPAL_BALANCE",
+        "filter_operator": ">=",
+        "filter_value": 1000000,
+        "currency_field": "LOAN_CURRENCY_CODE",
+        "currency_value": "USD",
+        "sort_field": "PRINCIPAL_BALANCE",
+        "sort_order": "desc"
+      }
+    },
+    "response": "EVALUATE\nTOPN(\n    5,\n    SUMMARIZECOLUMNS(\n        'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY],\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n        'FIS_CL_DETAIL_FACT'[PRINCIPAL_BALANCE],\n        'FIS_CL_DETAIL_FACT'[LOAN_CURRENCY_CODE],\n        FILTER(\n            'FIS_CL_DETAIL_FACT',\n            'FIS_CL_DETAIL_FACT'[PRINCIPAL_BALANCE] >= 1000000\n            && 'FIS_CL_DETAIL_FACT'[LOAN_CURRENCY_CODE] = \"USD\"\n        )\n    ),\n    'FIS_CL_DETAIL_FACT'[PRINCIPAL_BALANCE], DESC\n)",
+    "timestamp": 1755291368.230978,
+    "cache_type": "dax"
+  },
+  "1f6162e243f03af6a08a27bf51536e82": {
+    "query": "Intent: retrieve_records\n\nEntities:\n- entity_type: borrower\n- borrower_category: large\n- loan_status: outstanding\n- threshold_amount: 1000000\n- threshold_currency: USD\n- result_limit: 5",
+    "response": "EVALUATE\nSELECTCOLUMNS(\n    TOPN(\n        5,\n        FILTER(\n            'FIS_CL_DETAIL_FACT',\n            'FIS_CL_DETAIL_FACT'[LOAN_STATUS] = \"Outstanding\"\n            && 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE] > 1000000\n            && RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION]) = \"Large\"\n            && RELATED('FIS_LOAN_PRODUCT_DIMENSION'[LOAN_CURRENCY_CODE]) = \"USD\"\n        ),\n        'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE], DESC\n    ),\n    \"Customer\", RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),\n    \"LoanDetailKey\", 'FIS_CL_DETAIL_FACT'[CL_DETAIL_KEY],\n    \"TotalBalance\", 'FIS_CL_DETAIL_FACT'[TOTAL_BALANCE],\n    \"Currency\", RELATED('FIS_LOAN_PRODUCT_DIMENSION'[LOAN_CURRENCY_CODE]),\n    \"LoanStatus\", 'FIS_CL_DETAIL_FACT'[LOAN_STATUS]\n)",
+    "timestamp": 1755349946.928133,
+    "cache_type": "dax"
+  },
+  "1f49cf4098ef2b2158abe40805bb7a57": {
+    "query": "Here’s a possible intent/entities extraction in JSON:\n\n{\n  \"intent\": \"get_top_records\",\n  \"entities\": {\n    \"entity_type\": \"customer\",\n    \"metric\": \"total_balance\",\n    \"top_n\": 3,\n    \"sort_order\": \"descending\"\n  }\n}",
+    "response": "EVALUATE\nTOPN(\n    3,\n    ADDCOLUMNS(\n        SUMMARIZE(\n            'FIS_CL_DETAIL_FACT',\n            'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY],\n            \"TotalBalance\", CALCULATE(SUM('FIS_CL_DETAIL_FACT'[TOTAL_BALANCE]))\n        ),\n        \"CustomerName\", LOOKUPVALUE(\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY], 'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY]\n        )\n    ),\n    [TotalBalance], DESC\n)",
+    "timestamp": 1755350004.6343958,
+    "cache_type": "dax"
   }
 }

@@ -156,47 +156,57 @@ dax_prompt = ChatPromptTemplate.from_template(
     """
     You are an expert in DAX and Power BI. Given the following database schema and the intent/entities, generate a valid DAX expression for querying a database.
     
-    IMPORTANT DAX RULES:
+    CRITICAL DAX RULES FOR CROSS-TABLE QUERIES:
     1. Always use EVALUATE for table expressions
-    2. When filtering and selecting columns from a table, use SELECTCOLUMNS with FILTER
-    3. Column references must use single quotes around table names: 'TableName'[ColumnName]
-    4. String values in filters must use double quotes: "value"
-    5. For detailed row data, use table functions like FILTER, SELECTCOLUMNS, ADDCOLUMNS
-    6. Always specify explicit column names in SELECTCOLUMNS
-    7. Use VALUES() function when you need distinct values from a column
-    8. For top/ranking queries, use TOPN(N, Table, SortColumn, DESC/ASC) - NEVER add ORDER BY after TOPN
-    9. TOPN handles sorting internally - syntax: TOPN(count, table, orderBy_expression, order)
-    10. For aggregation queries with grouping, avoid RELATED() as relationships may not exist.
-       Use ADDCOLUMNS to create calculated columns with LOOKUPVALUE, then group:
-       EVALUATE
-       SUMMARIZE(
-           ADDCOLUMNS(
-               'FactTable',
-               "GroupByColumn",
-               LOOKUPVALUE('DimensionTable'[GroupByColumn], 'DimensionTable'[PrimaryKey], 'FactTable'[ForeignKey])
-           ),
-           [GroupByColumn],
-           "AggregateAlias", SUM('FactTable'[MeasureColumn])
-       )
-       Example for customer types:
-       EVALUATE
-       SUMMARIZE(
-           ADDCOLUMNS(
-               'FIS_CA_DETAIL_FACT',
-               "CustomerType",
-               LOOKUPVALUE('FIS_CUSTOMER_DIMENSION'[CUSTOMER_TYPE_DESCRIPTION], 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY], 'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY])
-           ),
-           [CustomerType],
-           "Total Amount", SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])
-       )
-    11. When using CALCULATE with grouping, ensure proper filter context is maintained
-    12. For simple row listings, this pattern works well:
-       EVALUATE 
-       SELECTCOLUMNS(
-           FILTER('TableName', condition),
-           "Column1Alias", 'TableName'[Column1],
-           "Column2Alias", 'TableName'[Column2]
-       )
+    2. NEVER use SUMMARIZECOLUMNS with columns from multiple tables - this causes cartesian products!
+    3. For detail rows with lookup columns, use SELECTCOLUMNS + RELATED or ADDCOLUMNS + LOOKUPVALUE
+    4. Column references must use single quotes around table names: 'TableName'[ColumnName]
+    5. String values in filters must use double quotes: "value"
+    
+    APPROVED CROSS-TABLE PATTERNS:
+    
+    Pattern A - Detail rows with lookups (RECOMMENDED):
+    EVALUATE
+    TOPN(
+        N,
+        SELECTCOLUMNS(
+            FILTER('FactTable', condition),
+            "Column1", 'FactTable'[Column1],
+            "LookupColumn", RELATED('DimensionTable'[Column])
+        ),
+        'FactTable'[SortColumn], DESC
+    )
+    
+    Pattern B - Explicit relationship with LOOKUPVALUE:
+    EVALUATE
+    TOPN(
+        N,
+        ADDCOLUMNS(
+            FILTER('FactTable', condition),
+            "LookupColumn", 
+            LOOKUPVALUE('DimensionTable'[Column], 'DimensionTable'[Key], 'FactTable'[ForeignKey])
+        ),
+        'FactTable'[SortColumn], DESC
+    )
+    
+    Pattern C - Aggregated results with grouping:
+    EVALUATE
+    TOPN(
+        N,
+        SUMMARIZE(
+            FILTER('FactTable', condition),
+            'FactTable'[GroupByColumn],
+            "LookupColumn", 
+            LOOKUPVALUE('DimensionTable'[Column], 'DimensionTable'[Key], 'FactTable'[ForeignKey]),
+            "AggregateValue", SUM('FactTable'[MeasureColumn])
+        ),
+        [AggregateValue], DESC
+    )
+    
+    6. For top/ranking queries, use TOPN(N, Table, SortColumn, DESC/ASC) - NEVER add ORDER BY after TOPN
+    7. TOPN handles sorting internally - syntax: TOPN(count, table, orderBy_expression, order)
+    8. Use VALUES() function when you need distinct values from a column
+    9. When using CALCULATE with grouping, ensure proper filter context is maintained
     
     Schema:
     {schema}
@@ -266,7 +276,13 @@ def generate_dax(intent_entities):
         - Use TOPN() for ranking/limits, NEVER use ORDER BY (not supported in DAX)
         - For aggregations use CALCULATE(), SUM(), COUNT(), etc.
         - Use FILTER() for row-level filtering
-        - Use RELATED() to access columns from related tables
+        
+        CROSS-TABLE RELATIONSHIP RULES (CRITICAL):
+        - NEVER use SUMMARIZECOLUMNS with columns from multiple tables (causes cartesian products)
+        - For cross-table queries, use SELECTCOLUMNS + RELATED() OR ADDCOLUMNS + LOOKUPVALUE()
+        - Example: SELECTCOLUMNS(FILTER('FactTable', condition), "Col1", 'FactTable'[Col1], "LookupCol", RELATED('DimTable'[Col]))
+        - Alternative: ADDCOLUMNS(FILTER('FactTable', condition), "LookupCol", LOOKUPVALUE('DimTable'[Col], 'DimTable'[Key], 'FactTable'[ForeignKey]))
+        
         - Always validate column names against the schema above
         - String comparisons use double quotes: [Column] = "Value"
         

@@ -1,0 +1,8 @@
+{
+  "2d34c2eaf534725b03af27e1bbad6da0": {
+    "query": "Intent: Retrieve a list of borrowers\n\nEntities:\n{\n  \"entity\": \"borrowers\",\n  \"classification\": \"large\",               # defined as outstanding loans ≥ $1 000 000\n  \"filters\": [\n    {\n      \"field\": \"outstanding_loans\",\n      \"operator\": \">=\",\n      \"value\": 1000000,\n      \"unit\": \"USD\"\n    }\n  ],\n  \"sort\": {\n    \"field\": \"outstanding_loans\",\n    \"order\": \"desc\"\n  },\n  \"limit\": 5\n}",
+    "response": "EVALUATE\nTOPN(\n    5,\n    FILTER(\n        ADDCOLUMNS(\n            SUMMARIZE(\n                'FIS_CL_DETAIL_FACT',\n                'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY]\n            ),\n            \"CustomerName\", LOOKUPVALUE(\n                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n                'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY]\n            ),\n            \"OutstandingLoans\", CALCULATE(\n                SUM('FIS_CL_DETAIL_FACT'[PRINCIPAL_BALANCE])\n            )\n        ),\n        [OutstandingLoans] >= 1000000\n    ),\n    [OutstandingLoans], DESC\n)",
+    "timestamp": 1755363274.637662,
+    "cache_type": "dax"
+  }
+}

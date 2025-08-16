@@ -1,0 +1,71 @@
+{
+  "execution_id": "unified_20250815_160804",
+  "query": "List top 10 customers by balance",
+  "timestamp": "2025-08-15T16:08:04.067840",
+  "sql_result": {
+    "success": true,
+    "query": "SELECT TOP 10\n    cd.[CUSTOMER_ID],\n    cd.[CUSTOMER_NAME],\n    SUM(cf.[TOTAL_BALANCE]) AS [TotalBalance]\nFROM dbo.[FIS_CL_DETAIL_FACT] AS cf\nINNER JOIN dbo.[FIS_CUSTOMER_DIMENSION] AS cd\n    ON cf.[CUSTOMER_KEY] = cd.[CUSTOMER_KEY]\nGROUP BY\n    cd.[CUSTOMER_ID],\n    cd.[CUSTOMER_NAME]\nORDER BY\n    SUM(cf.[TOTAL_BALANCE]) DESC;",
+    "columns": [
+      "CUSTOMER_ID",
+      "CUSTOMER_NAME",
+      "TotalBalance"
+    ],
+    "data": [
+      {
+        "CUSTOMER_ID": "CUST001",
+        "CUSTOMER_NAME": "Desert Manufacturing LLC",
+        "TotalBalance": "3780000.00"
+      },
+      {
+        "CUSTOMER_ID": "CUST003",
+        "CUSTOMER_NAME": "Southwest Energy Partners",
+        "TotalBalance": "2649000.00"
+      },
+      {
+        "CUSTOMER_ID": "CUST002",
+        "CUSTOMER_NAME": "Palm Investors Inc.",
+        "TotalBalance": "1892000.00"
+      },
+      {
+        "CUSTOMER_ID": "CUST004",
+        "CUSTOMER_NAME": "Pacific Technology Solutions",
+        "TotalBalance": "817000.00"
+      }
+    ],
+    "row_count": 4,
+    "execution_time": 1.067548,
+    "timestamp": "2025-08-15T16:08:49.590900"
+  },
+  "dax_result": {
+    "success": false,
+    "query": "EVALUATE\nTOPN(\n    10,\n    SUMMARIZE(\n        FIS_CUSTOMER_DIMENSION,\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],\n        \"Balance\", CALCULATE(SUM(FIS_CL_DETAIL_FACT[TOTAL_BALANCE]))\n    ),\n    [Balance], DESC\n)",
+    "error": "Could not translate DAX query to SQL",
+    "timestamp": "2025-08-15T16:08:50.800192"
+  },
+  "comparison": {
+    "matches": false,
+    "row_count_match": false,
+    "column_count_match": false,
+    "data_match": false,
+    "sql_rows": 0,
+    "dax_rows": 0,
+    "sql_columns": 0,
+    "dax_columns": 0,
+    "differences": [
+      "DAX query failed: Could not translate DAX query to SQL"
+    ],
+    "summary": "Cannot compare - one or both queries failed"
+  },
+  "performance": {
+    "schema_analysis": 15.388103246688843,
+    "sql_generation": 12.849076986312866,
+    "dax_generation": 17.285440921783447,
+    "sql_execution": 1.2085952758789062,
+    "dax_execution": 0.0006601810455322266,
+    "comparison": 1.71661376953125e-05,
+    "total_time": 46.73275876045227
+  },
+  "errors": [],
+  "generated_sql": "SELECT TOP 10\n    cd.[CUSTOMER_ID],\n    cd.[CUSTOMER_NAME],\n    SUM(cf.[TOTAL_BALANCE]) AS [TotalBalance]\nFROM dbo.[FIS_CL_DETAIL_FACT] AS cf\nINNER JOIN dbo.[FIS_CUSTOMER_DIMENSION] AS cd\n    ON cf.[CUSTOMER_KEY] = cd.[CUSTOMER_KEY]\nGROUP BY\n    cd.[CUSTOMER_ID],\n    cd.[CUSTOMER_NAME]\nORDER BY\n    SUM(cf.[TOTAL_BALANCE]) DESC;",
+  "generated_dax": "EVALUATE\nTOPN(\n    10,\n    SUMMARIZE(\n        FIS_CUSTOMER_DIMENSION,\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY],\n        FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME],\n        \"Balance\", CALCULATE(SUM(FIS_CL_DETAIL_FACT[TOTAL_BALANCE]))\n    ),\n    [Balance], DESC\n)"
+}
