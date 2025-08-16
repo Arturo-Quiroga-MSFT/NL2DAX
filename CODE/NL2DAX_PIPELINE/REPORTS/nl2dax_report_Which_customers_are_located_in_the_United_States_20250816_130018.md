@@ -1,0 +1,145 @@
+# 📊 NL2DAX Pipeline Execution Report
+
+**Generated:** August 16, 2025 at 01:00:18 PM
+**Query:** Which customers are located in the United States?
+
+---
+
+## 📋 Executive Summary
+
+| Metric | Value |
+|--------|--------|
+| **SQL Execution** | ✅ Success |
+| **DAX Execution** | ✅ Success |
+| **SQL Rows Returned** | 7 |
+| **DAX Rows Returned** | 7 |
+| **Total Execution Time** | 0.00s |
+| **Errors Encountered** | 0 |
+
+## 🔍 Query Analysis
+
+**Original Query:** `Which customers are located in the United States?`
+
+| Attribute | Value |
+|-----------|--------|
+| **Character Count** | 49 |
+| **Word Count** | 8 |
+| **Detected Features** | Basic query |
+
+## 🧠 Intent & Entity Extraction
+
+### Extracted Intent and Entities
+
+```json
+{
+  "intent": "show_customers_by_country",
+  "entities": {
+    "table": "FIS_CUSTOMER_DIMENSION",
+    "country_description": "United States"
+  }
+}
+```
+
+## 🚀 Cache Performance
+
+| Cache Type | Hits | Misses | Hit Rate |
+|------------|------|--------|----------|
+| **Intent Parsing** | 0 | 0 | N/A% |
+| **SQL Generation** | 0 | 0 | N/A% |
+| **DAX Generation** | 0 | 0 | N/A% |
+
+## 🗄️ SQL Generation & Execution
+
+### Generated SQL Query
+
+```sql
+SELECT 
+    CUSTOMER_KEY,
+    CUSTOMER_ID,
+    CUSTOMER_NAME,
+    CUSTOMER_SHORT_NAME,
+    CUSTOMER_TYPE_CODE,
+    CUSTOMER_TYPE_DESCRIPTION,
+    RISK_RATING_CODE,
+    RISK_RATING_DESCRIPTION,
+    COUNTRY_CODE,
+    COUNTRY_DESCRIPTION,
+    STATE_CODE,
+    STATE_DESCRIPTION,
+    CITY,
+    INDUSTRY_CODE,
+    INDUSTRY_DESCRIPTION,
+    POSTAL_CODE,
+    RELATIONSHIP_MANAGER,
+    CUSTOMER_STATUS,
+    ESTABLISHED_DATE
+FROM FIS_CUSTOMER_DIMENSION
+WHERE COUNTRY_DESCRIPTION = 'United States'
+ORDER BY CUSTOMER_NAME;
+```
+
+### SQL Execution Results
+
+**Rows Returned:** 7
+**Execution Time:** 0.00 seconds
+
+**SQL Results (First 5 Rows)**
+
+| CUSTOMER_KEY | CUSTOMER_ID | CUSTOMER_NAME | CUSTOMER_SHORT_NAME | CUSTOMER_TYPE_CODE | CUSTOMER_TYPE_DESCRIPTION | RISK_RATING_CODE | RISK_RATING_DESCRIPTION | COUNTRY_CODE | COUNTRY_DESCRIPTION | STATE_CODE | STATE_DESCRIPTION | CITY | INDUSTRY_CODE | INDUSTRY_DESCRIPTION | POSTAL_CODE | RELATIONSHIP_MANAGER | CUSTOMER_STATUS | ESTABLISHED_DATE |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1002 | CUST005 | Atlantic Biomedical Corporation | Atlantic Bio | CORP | Corporation | A- | Strong Credit Quality | US | United States | FL | Florida | Miami | 2800 | Pharmaceutical and Medical Devices | 33101 | Jennifer Martinez | Active | 2017-06-14 |
+| 1 | CUST001 | Desert Manufacturing LLC | Desert Mfg | CORP | Corporation | B+ | Good Credit Quality | US | United States | NY | New York | New York | 3100 | Manufacturing - Industrial Equipment | 10001 | Sarah Johnson | Active | 2018-03-15 |
+| 1003 | CUST006 | Mountain Capital Advisors LLC | Mountain Cap | LLC | Limited Liability Company | B+ | Good Credit Quality | US | United States | CO | Colorado | Denver | 5200 | Financial Services and Investment Management | 80202 | Robert Thompson | Active | 2021-03-08 |
+| 1004 | CUST007 | Northwest Retail Enterprises Inc. | NW Retail | CORP | Corporation | B | Satisfactory Credit Quality | US | United States | WA | Washington | Seattle | 4400 | Retail and Consumer Goods | 98101 | Amanda Foster | Active | 2016-12-02 |
+| 4 | CUST004 | Pacific Technology Solutions | Pac Tech | CORP | Corporation | A | Excellent Credit Quality | US | United States | CA | California | Los Angeles | 5400 | Technology Services | 90001 | David Kim | Active | 2019-11-08 |
+
+## ⚡ DAX Generation & Execution
+
+### Generated DAX Query
+
+```dax
+EVALUATE
+SELECTCOLUMNS(
+    FILTER(
+        'FIS_CUSTOMER_DIMENSION',
+        'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION] = "United States"
+        ),
+    "CustomerKey", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+    "CustomerID", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],
+    "CustomerName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],
+    "CustomerShortName", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_SHORT_NAME]
+    )
+```
+
+### DAX Execution Results
+
+**Rows Returned:** 7
+**Execution Time:** 0.00 seconds
+
+**DAX Results (First 5 Rows)**
+
+| [CustomerKey] | [CustomerID] | [CustomerName] | [CustomerShortName] |
+| --- | --- | --- | --- |
+| 1 | CUST001 | Desert Manufacturing LLC | Desert Mfg |
+| 2 | CUST002 | Palm Investors Inc. | Palm Invest |
+| 3 | CUST003 | Southwest Energy Partners | SW Energy |
+| 4 | CUST004 | Pacific Technology Solutions | Pac Tech |
+| 1002 | CUST005 | Atlantic Biomedical Corporation | Atlantic Bio |
+
+## ⏱️ Performance Metrics
+
+| Operation | Time (seconds) | Percentage |
+|-----------|----------------|------------|
+| **SQL Generation & Execution** | 0.00s | 0.0% |
+| **DAX Generation & Execution** | 0.00s | 0.0% |
+| **Total Pipeline Time** | 0.00s | 100% |
+
+## 💡 Recommendations
+
+- Pipeline executed successfully with no specific recommendations
+
+---
+
+*Report generated by NL2DAX Pipeline v1.0*
+
+*Generated on August 16, 2025 at 01:00:18 PM*
