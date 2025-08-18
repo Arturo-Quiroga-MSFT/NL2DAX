@@ -1,0 +1,57 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+📊 GENERIC SCHEMA
+• Analyzing all 1 discovered tables
+• Total Tables: 1
+• Fact Tables: 1 (None)
+• Dimension Tables: 0 (None)
+• Business Areas: 
+• Schema Complexity: Low
+
+Suggested Query Patterns:
+
+
+========== NATURAL LANGUAGE QUERY ==========
+cd /Users/arturoquiroga/GITHUB/NL2DAX && source .venv/bin/activate && cd UNIVERSAL_NL2DAX_SYSTEM && echo "Show me top 5 customers by total exposure" | python interfaces/main_universal.py
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Simple
+• Business Intent: cd /Users/arturoquiroga/GITHUB/NL2DAX && source .venv/bin/activate && cd UNIVERSAL_NL2DAX_SYSTEM && echo "Show me top 5 customers by total exposure" | python interfaces/main_universal.py
+• Schema Focus: All Tables
+
+
+========== GENERATED SQL QUERY ==========
+SELECT f.name AS customer_name, SUM(COALESCE(f.value,0)) AS total_exposure
+FROM sample_table f
+GROUP BY f.name
+ORDER BY total_exposure DESC
+LIMIT 5;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+TOPN(
+    5,
+    ADDCOLUMNS(
+        SUMMARIZE(
+            'sample_table',
+            'sample_table'[name]
+        ),
+        "TotalExposure", CALCULATE(SUM('sample_table'[value]))
+    ),
+    [TotalExposure], DESC
+)
+
+========== SQL EXECUTION ERROR ==========
+Error: SQL execution failed: ('42000', "[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Incorrect syntax near 'LIMIT'. (102) (SQLExecDirectW)")
+
+========== DAX EXECUTION INFO ==========
+Note: DAX execution failed: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Failed to open the MSOLAP connection."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"0"}}]}}}
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 25.70 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

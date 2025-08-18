@@ -1,0 +1,94 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, currency, financial, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show me top 5 customers by total exposure
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show me top 5 customers by total exposure
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT TOP 5
+  c.CUSTOMER_ID,
+  c.CUSTOMER_NAME,
+  SUM(t.EXPOSURE) AS TOTAL_EXPOSURE
+FROM (
+  SELECT CUSTOMER_KEY, COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+  FROM FIS_CA_DETAIL_FACT
+  UNION ALL
+  SELECT CUSTOMER_KEY, COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+  FROM FIS_CL_DETAIL_FACT
+) t
+JOIN FIS_CUSTOMER_DIMENSION c
+  ON t.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY
+  c.CUSTOMER_ID,
+  c.CUSTOMER_NAME
+ORDER BY
+  TOTAL_EXPOSURE DESC;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+SELECTCOLUMNS(
+    TOPN(
+        5,
+        ADDCOLUMNS(
+            SUMMARIZE(
+                'FIS_CA_DETAIL_FACT',
+                RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME])
+            ),
+            "CustomerName", RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+            "TotalExposure", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]))
+        ),
+        [TotalExposure], DESC
+    ),
+    "Customer", [CustomerName],
+    "TotalExposure", [TotalExposure]
+)
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 5 rows in 1.155s
+CUSTOMER_ID | CUSTOMER_NAME                       | TOTAL_EXPOSURE
+------------+-------------------------------------+---------------
+CUST008     | Bayern Automotive Technologies GmbH | 95000000.00   
+CUST007     | Northwest Retail Enterprises Inc.   | 45000000.00   
+CUST001     | Desert Manufacturing LLC            | 7500000.00    
+CUST003     | Southwest Energy Partners           | 7150000.00    
+CUST002     | Palm Investors Inc.                 | 6150000.00    
+
+========== DAX EXECUTION INFO ==========
+Note: DAX execution failed: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (8, 17) Function SUMMARIZE expects a column name as argument number 2."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803848"}}]}}}
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 114.61 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

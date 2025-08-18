@@ -1,0 +1,110 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, financial, currency, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show me top 5 customers by total exposure including both CA and CL facilities
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show me top 5 customers by total exposure including both CA and CL facilities
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT TOP 5
+  cust.CUSTOMER_KEY,
+  cust.CUSTOMER_ID,
+  cust.CUSTOMER_NAME,
+  SUM(sub.EXPOSURE) AS TOTAL_EXPOSURE
+FROM (
+  SELECT
+    CUSTOMER_KEY,
+    COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+  FROM FIS_CA_DETAIL_FACT
+  UNION ALL
+  SELECT
+    CUSTOMER_KEY,
+    COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+  FROM FIS_CL_DETAIL_FACT
+) sub
+JOIN FIS_CUSTOMER_DIMENSION cust
+  ON cust.CUSTOMER_KEY = sub.CUSTOMER_KEY
+GROUP BY
+  cust.CUSTOMER_KEY,
+  cust.CUSTOMER_ID,
+  cust.CUSTOMER_NAME
+ORDER BY
+  TOTAL_EXPOSURE DESC;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+TOPN(
+    5,
+    ADDCOLUMNS(
+        SUMMARIZE(
+            'FIS_CUSTOMER_DIMENSION',
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+        ),
+        "TotalExposure",
+            CALCULATE( SUM( 'FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT] ) )
+          + CALCULATE( SUM( 'FIS_CL_DETAIL_FACT'[EXPOSURE_AT_DEFAULT] ) )
+    ),
+    [TotalExposure], DESC
+)
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 5 rows in 1.862s
+CUSTOMER_KEY | CUSTOMER_ID | CUSTOMER_NAME                       | TOTAL_EXPOSURE
+-------------+-------------+-------------------------------------+---------------
+1005         | CUST008     | Bayern Automotive Technologies GmbH | 95000000.00   
+1004         | CUST007     | Northwest Retail Enterprises Inc.   | 45000000.00   
+1            | CUST001     | Desert Manufacturing LLC            | 7500000.00    
+3            | CUST003     | Southwest Energy Partners           | 7150000.00    
+2            | CUST002     | Palm Investors Inc.                 | 6150000.00    
+
+========== DAX EXECUTION RESULTS ==========
+✅ DAX executed successfully: 10 rows in 1.471s
+FIS_CUSTOMER_DIMENSION[CUSTOMER_KEY] | FIS_CUSTOMER_DIMENSION[CUSTOMER_NAME] | [TotalExposure]
+-------------------------------------+---------------------------------------+----------------
+1005                                 | Bayern Automotive Technologies GmbH   | 17300000.0     
+1007                                 | Southern Mining Consortium Ltd        | 17300000.0     
+1006                                 | Asia Pacific Electronics Pte Ltd      | 17300000.0     
+1002                                 | Atlantic Biomedical Corporation       | 17300000.0     
+1004                                 | Northwest Retail Enterprises Inc.     | 17300000.0     
+1003                                 | Mountain Capital Advisors LLC         | 17300000.0     
+1                                    | Desert Manufacturing LLC              | 17300000.0     
+2                                    | Palm Investors Inc.                   | 17300000.0     
+3                                    | Southwest Energy Partners             | 17300000.0     
+4                                    | Pacific Technology Solutions          | 17300000.0     
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 47.51 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

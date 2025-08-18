@@ -1,0 +1,43 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+📊 GENERIC SCHEMA
+• Analyzing all 1 discovered tables
+• Total Tables: 1
+• Fact Tables: 1 (None)
+• Dimension Tables: 0 (None)
+• Business Areas: 
+• Schema Complexity: Low
+
+Suggested Query Patterns:
+
+
+========== NATURAL LANGUAGE QUERY ==========
+show top 5 counterparties
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Simple
+• Business Intent: show top 5 counterparties
+• Schema Focus: All Tables
+• Notes: DAX generation failed: DAXQueryValidator.validate_dax_query() takes 2 positional arguments but 3 were given
+
+
+========== GENERATED SQL QUERY ==========
+SELECT
+  COALESCE(f.name, 'Unknown') AS counterparty,
+  SUM(COALESCE(f.value, 0)) AS total_value
+FROM sample_table f
+GROUP BY f.name
+ORDER BY total_value DESC
+LIMIT 5;
+
+========== SQL EXECUTION ERROR ==========
+Error: SQL execution failed: ('42000', "[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Incorrect syntax near 'LIMIT'. (102) (SQLExecDirectW)")
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 89.90 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

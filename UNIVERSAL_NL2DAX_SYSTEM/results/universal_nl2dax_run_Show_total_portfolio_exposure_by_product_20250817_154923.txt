@@ -1,0 +1,95 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, currency, financial, customer, risk, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show total portfolio exposure by product type
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show total portfolio exposure by product type
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT x.PRODUCT_TYPE, SUM(x.EXPOSURE) AS TOTAL_EXPOSURE  
+FROM (  
+  SELECT p.CA_PRODUCT_TYPE_DESC AS PRODUCT_TYPE, COALESCE(f.EXPOSURE_AT_DEFAULT,0) AS EXPOSURE  
+  FROM FIS_CA_DETAIL_FACT f  
+  JOIN FIS_CA_PRODUCT_DIMENSION p  
+    ON f.CA_PRODUCT_KEY = p.CA_PRODUCT_KEY  
+  UNION ALL  
+  SELECT lp.PRODUCT_TYPE_DESCRIPTION AS PRODUCT_TYPE, COALESCE(f2.EXPOSURE_AT_DEFAULT,0) AS EXPOSURE  
+  FROM FIS_CL_DETAIL_FACT f2  
+  JOIN FIS_LOAN_PRODUCT_DIMENSION lp  
+    ON f2.LOAN_PRODUCT_KEY = lp.LOAN_PRODUCT_KEY  
+) x  
+GROUP BY x.PRODUCT_TYPE  
+ORDER BY TOTAL_EXPOSURE DESC;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE(
+        UNION(
+            SELECTCOLUMNS(
+                'FIS_CA_DETAIL_FACT',
+                "ProductType", RELATED('FIS_CA_PRODUCT_DIMENSION'[CA_PRODUCT_TYPE_DESC]),
+                "Exposure", 'FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]
+            ),
+            SELECTCOLUMNS(
+                'FIS_CL_DETAIL_FACT',
+                "ProductType", RELATED('FIS_LOAN_PRODUCT_DIMENSION'[PRODUCT_TYPE_DESCRIPTION]),
+                "Exposure", 'FIS_CL_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]
+            )
+        ),
+        [ProductType]
+    ),
+    "Total Exposure", CALCULATE(SUM([Exposure]))
+)
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 8 rows in 1.097s
+PRODUCT_TYPE                        | TOTAL_EXPOSURE
+------------------------------------+---------------
+Working Capital Line                | 97625000.00   
+Trade Finance and Letters of Credit | 48200000.00   
+Revolving Credit Facility           | 6150000.00    
+SECURED LOANS                       | 5625000.00    
+Term Loan Facility                  | 3675000.00    
+Equipment Finance Line              | 2700000.00    
+UNSECURED LOANS                     | 2625000.00    
+TECHNOLOGY LOANS                    | 800000.00     
+
+========== DAX EXECUTION INFO ==========
+Note: DAX execution failed: name 'AdomdConnection' is not defined
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 79.05 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

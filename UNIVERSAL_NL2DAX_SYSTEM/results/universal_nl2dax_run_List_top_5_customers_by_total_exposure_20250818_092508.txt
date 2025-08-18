@@ -1,0 +1,78 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, financial, currency, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+List top 5 customers by total exposure
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: List top 5 customers by total exposure
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+• Notes: DAX generation failed: unbalanced parenthesis at position 20
+
+
+========== GENERATED SQL QUERY ==========
+WITH combined_exposures AS (
+    SELECT TOP 5
+        CUSTOMER_KEY,
+        COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+    FROM FIS_CA_DETAIL_FACT
+    UNION ALL
+    SELECT
+        CUSTOMER_KEY,
+        COALESCE(EXPOSURE_AT_DEFAULT, 0) AS EXPOSURE
+    FROM FIS_CL_DETAIL_FACT
+)
+SELECT
+    d.CUSTOMER_ID,
+    d.CUSTOMER_NAME,
+    SUM(e.EXPOSURE) AS TOTAL_EXPOSURE
+FROM combined_exposures e
+JOIN FIS_CUSTOMER_DIMENSION d
+  ON e.CUSTOMER_KEY = d.CUSTOMER_KEY
+GROUP BY
+    d.CUSTOMER_ID,
+    d.CUSTOMER_NAME
+ORDER BY
+    TOTAL_EXPOSURE DESC
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 5 rows in 2.741s
+CUSTOMER_ID | CUSTOMER_NAME                  | TOTAL_EXPOSURE
+------------+--------------------------------+---------------
+CUST001     | Desert Manufacturing LLC       | 7500000.00    
+CUST003     | Southwest Energy Partners      | 5250000.00    
+CUST002     | Palm Investors Inc.            | 3750000.00    
+CUST010     | Southern Mining Consortium Ltd | 3200000.00    
+CUST004     | Pacific Technology Solutions   | 1600000.00    
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 34.73 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

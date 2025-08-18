@@ -1,0 +1,110 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, currency, financial, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+cd /Users/arturoquiroga/GITHUB/NL2DAX && source .venv/bin/activate && cd UNIVERSAL_NL2DAX_SYSTEM && python interfaces/main_universal.py
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: cd /Users/arturoquiroga/GITHUB/NL2DAX && source .venv/bin/activate && cd UNIVERSAL_NL2DAX_SYSTEM && python interfaces/main_universal.py
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT
+  m.YEAR_ID,
+  m.MONTH_DESCRIPTION,
+  f.MONTH_ID,
+  m.PERIOD_END_DATE,
+  c.CUSTOMER_ID,
+  c.CUSTOMER_NAME,
+  p.CA_NUMBER AS PRODUCT_NUMBER,
+  COALESCE(f.CA_CURRENCY_CODE, p.CA_CURRENCY_CODE) AS CURRENCY_CODE,
+  COALESCE(SUM(f.LIMIT_AMOUNT), 0) AS TOTAL_LIMIT_AMOUNT,
+  COALESCE(SUM(f.LIMIT_USED), 0) AS TOTAL_LIMIT_USED,
+  COALESCE(SUM(f.LIMIT_AVAILABLE), 0) AS TOTAL_LIMIT_AVAILABLE,
+  COALESCE(AVG(f.PROBABILITY_OF_DEFAULT), 0) AS AVERAGE_PD,
+  COALESCE(AVG(f.LOSS_GIVEN_DEFAULT), 0) AS AVERAGE_LGD,
+  COALESCE(SUM(f.EXPOSURE_AT_DEFAULT), 0) AS TOTAL_EAD,
+  inv.INVESTOR_NAME,
+  o.OWNER_NAME
+FROM FIS_CA_DETAIL_FACT f
+JOIN FIS_MONTH_DIMENSION m
+  ON f.MONTH_ID = m.MONTH_ID
+LEFT JOIN FIS_CUSTOMER_DIMENSION c
+  ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+LEFT JOIN FIS_CA_PRODUCT_DIMENSION p
+  ON f.CA_PRODUCT_KEY = p.CA_PRODUCT_KEY
+LEFT JOIN FIS_INVESTOR_DIMENSION inv
+  ON f.INVESTOR_KEY = inv.INVESTOR_KEY
+LEFT JOIN FIS_OWNER_DIMENSION o
+  ON f.OWNER_KEY = o.OWNER_KEY
+LEFT JOIN FIS_CURRENCY_DIMENSION cur
+  ON f.CA_CURRENCY_CODE = cur.FROM_CURRENCY_CODE
+LEFT JOIN FIS_LIMIT_DIMENSION lim
+  ON f.LIMIT_KEY = lim.LIMIT_KEY
+WHERE m.YEAR_ID = '2023'
+GROUP BY
+  m.YEAR_ID,
+  m.MONTH_DESCRIPTION,
+  f.MONTH_ID,
+  m.PERIOD_END_DATE,
+  c.CUSTOMER_ID,
+  c.CUSTOMER_NAME,
+  p.CA_NUMBER,
+  COALESCE(f.CA_CURRENCY_CODE, p.CA_CURRENCY_CODE),
+  inv.INVESTOR_NAME,
+  o.OWNER_NAME
+ORDER BY
+  m.YEAR_ID,
+  f.MONTH_ID,
+  c.CUSTOMER_NAME,
+  p.CA_NUMBER;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+ADDCOLUMNS(
+    SUMMARIZE(
+        'FIS_CA_DETAIL_FACT',
+        RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+        RELATED('FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]),
+        RELATED('FIS_MONTH_DIMENSION'[MONTH_DESCRIPTION])
+    ),
+    "TotalLimitAmount", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT])),
+    "TotalPrincipalAmountDue", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[PRINCIPAL_AMOUNT_DUE])),
+    "TotalExposureAtDefault", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]))
+)
+
+========== DAX EXECUTION INFO ==========
+Note: DAX execution failed: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Failed to open the MSOLAP connection."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"0"}}]}}}
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 77.62 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

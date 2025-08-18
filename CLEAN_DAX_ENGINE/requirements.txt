@@ -1,0 +1,3 @@
+# Requirements for Clean DAX Engine
+python-dotenv>=1.0.0
+dataclasses>=0.6; python_version<'3.7'

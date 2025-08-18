@@ -1,0 +1,61 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION... if dimension_tables else 'None')
+• Business Areas: time, product, currency, financial, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show me all customers by country
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show me all customers by country
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT
+  COALESCE(d.COUNTRY_CODE, 'Unknown') AS COUNTRY_CODE,
+  COALESCE(d.COUNTRY_DESCRIPTION, 'Unknown') AS COUNTRY_DESCRIPTION,
+  d.CUSTOMER_ID,
+  COALESCE(d.CUSTOMER_NAME, 'Unknown') AS CUSTOMER_NAME,
+  COALESCE(d.CUSTOMER_STATUS, 'Unknown') AS CUSTOMER_STATUS,
+  COALESCE(d.RELATIONSHIP_MANAGER, 'Unknown') AS RELATIONSHIP_MANAGER
+FROM FIS_CUSTOMER_DIMENSION d
+ORDER BY COUNTRY_DESCRIPTION, CUSTOMER_NAME;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+SELECTCOLUMNS(
+    'FIS_CUSTOMER_DIMENSION',
+    "Country", 'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    "Customer", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+)
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 71.08 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

@@ -1,0 +1,79 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, financial, currency, customer, risk, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+List top 5 customers by risk rating with exposure details
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: List top 5 customers by risk rating with exposure details
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT TOP 5
+    cm.CUSTOMER_ID,
+    cm.CUSTOMER_NAME,
+    cm.RISK_RATING_CODE,
+    cm.RISK_RATING_DESCRIPTION,
+    SUM(COALESCE(cl.EXPOSURE_AT_DEFAULT, 0)) AS TOTAL_EXPOSURE_AT_DEFAULT,
+    SUM(COALESCE(cl.CURRENT_PRINCIPAL_BALANCE, 0)) AS TOTAL_CURRENT_PRINCIPAL_BALANCE,
+    AVG(COALESCE(cl.PROBABILITY_OF_DEFAULT, 0)) AS AVG_PROBABILITY_OF_DEFAULT
+FROM
+    FIS_CL_DETAIL_FACT cl
+    INNER JOIN FIS_CUSTOMER_DIMENSION cm
+        ON cl.CUSTOMER_KEY = cm.CUSTOMER_KEY
+GROUP BY
+    cm.CUSTOMER_ID,
+    cm.CUSTOMER_NAME,
+    cm.RISK_RATING_CODE,
+    cm.RISK_RATING_DESCRIPTION
+ORDER BY
+    AVG(COALESCE(cl.PROBABILITY_OF_DEFAULT, 0)) DESC;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+TOPN(
+    5,
+    ADDCOLUMNS(
+        SUMMARIZE(
+            'FIS_CA_DETAIL_FACT',
+            'FIS_CA_DETAIL_FACT'[CUSTOMER_KEY]
+        ),
+        "CustomerName", RELATED('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]),
+        "RiskRating", RELATED('FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE]),
+        "TotalExposureAtDefault", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]))
+    ),
+    [RiskRating], DESC
+)
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 54.76 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

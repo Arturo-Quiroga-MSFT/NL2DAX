@@ -1,18 +1,4 @@
 {
-  "79a6352b07072d2ab7ea9fb73dcc4544": {
-    "query": {
-      "intent": "show_top_customers",
-      "entities": {
-        "limit": 5,
-        "table": "FIS_CA_DETAIL_FACT",
-        "sort_field": "LIMIT_AMOUNT",
-        "sort_order": "desc"
-      }
-    },
-    "response": "EVALUATE\nTOPN(\n    5,\n    SUMMARIZECOLUMNS(\n        'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n        \"TotalLimitAmount\", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[LIMIT_AMOUNT]))\n    ),\n    [TotalLimitAmount], DESC\n)",
-    "timestamp": 1755276122.9129999,
-    "cache_type": "dax"
-  },
   "0c08fb5ca0e8339b3e94bb382ab1c39f": {
     "query": {
       "intent": "average_risk_by_customer_type",
@@ -123,6 +109,38 @@
     "query": "```json\n{\n  \"intent\": \"get_customers\",\n  \"entities\": {\n    \"group_by\": \"country\"\n  }\n}\n```",
     "response": "EVALUATE\nSUMMARIZECOLUMNS(\n    'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],\n    \"Customer Count\", DISTINCTCOUNT('FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY])\n)",
     "timestamp": 1755365055.18151,
+    "cache_type": "dax"
+  },
+  "1ea4409e8ed2bd5d51723a5308dfa99b": {
+    "query": {
+      "intent": "compare_regional_exposure",
+      "entities": {
+        "fact_table": "FIS_CA_DETAIL_FACT",
+        "dimension_table": "FIS_CUSTOMER_DIMENSION",
+        "join_key": "CUSTOMER_KEY",
+        "measure_field": "EXPOSURE_AT_DEFAULT",
+        "region_field": "COUNTRY_DESCRIPTION",
+        "regions": [
+          "North America",
+          "South America"
+        ]
+      }
+    },
+    "response": "EVALUATE\nSUMMARIZE(\n    FILTER(\n        'FIS_CA_DETAIL_FACT',\n        RELATED('FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]) = \"North America\"\n        || RELATED('FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]) = \"South America\"\n    ),\n    RELATED('FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION]),\n    \"TotalExposureAtDefault\", CALCULATE(SUM('FIS_CA_DETAIL_FACT'[EXPOSURE_AT_DEFAULT]))\n)",
+    "timestamp": 1755367299.8032792,
+    "cache_type": "dax"
+  },
+  "6a478c202fb43d9756b8f9a0120c56bc": {
+    "query": {
+      "intent": "list_customers_with_highest_risk_ratings",
+      "entities": {
+        "table": "FIS_CUSTOMER_DIMENSION",
+        "sort_field": "RISK_RATING_CODE",
+        "sort_order": "desc"
+      }
+    },
+    "response": "EVALUATE\nSELECTCOLUMNS(\n    TOPN(\n        10,\n        'FIS_CUSTOMER_DIMENSION',\n        'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE], DESC\n    ),\n    \"CustomerKey\", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n    \"CustomerID\", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_ID],\n    \"CustomerName\", 'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n    \"RiskRatingCode\", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_CODE],\n    \"RiskRatingDescription\", 'FIS_CUSTOMER_DIMENSION'[RISK_RATING_DESCRIPTION]\n)",
+    "timestamp": 1755367965.9893298,
     "cache_type": "dax"
   }
 }

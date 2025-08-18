@@ -1,0 +1,72 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+• Total Tables: 21
+• Fact Tables: 4
+• Dimension Tables: 11
+• Business Areas: time, financial, risk, currency, product, customer, geography, organization
+• Schema Complexity: High
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show me all customers by country
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show me all customers by country
+
+
+========== GENERATED SQL QUERY ==========
+SELECT COALESCE(d.COUNTRY_CODE,'Unknown') AS COUNTRY_CODE,
+       COALESCE(d.COUNTRY_DESCRIPTION,'Unknown') AS COUNTRY_DESCRIPTION,
+       COUNT(*) AS CUSTOMER_COUNT
+FROM FIS_CUSTOMER_DIMENSION d
+GROUP BY COALESCE(d.COUNTRY_CODE,'Unknown'),
+         COALESCE(d.COUNTRY_DESCRIPTION,'Unknown')
+ORDER BY CUSTOMER_COUNT DESC;
+
+========== SQL QUERY RESULTS ==========
+COUNTRY_CODE | COUNTRY_DESCRIPTION | CUSTOMER_COUNT
+-------------+---------------------+---------------
+US           | United States       | 7             
+AR           | Argentina           | 1             
+BR           | Brazil              | 1             
+CA           | Canada              | 1             
+CO           | Colombia            | 1             
+DE           | Germany             | 1             
+MX           | Mexico              | 1             
+SG           | Singapore           | 1             
+ZA           | South Africa        | 1             
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+SUMMARIZE(
+    'FIS_CUSTOMER_DIMENSION',
+    'FIS_CUSTOMER_DIMENSION'[COUNTRY_DESCRIPTION],
+    'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME]
+)
+
+========== DAX EXECUTION ERROR ==========
+[ERROR] DAX execution failed: DAX over HTTP/XMLA failed. Check PBI_* env vars, XMLA endpoint, dataset name, and permissions. Root error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Failed to open the MSOLAP connection."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"0"}}]}}}
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 5735.88 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

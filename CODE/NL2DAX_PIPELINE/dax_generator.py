@@ -193,12 +193,14 @@ dax_prompt = ChatPromptTemplate.from_template(
     EVALUATE
     TOPN(
         N,
-        SUMMARIZE(
-            FILTER('FactTable', condition),
-            'FactTable'[GroupByColumn],
+        ADDCOLUMNS(
+            SUMMARIZE(
+                FILTER('FactTable', condition),
+                'FactTable'[GroupByColumn]
+            ),
             "LookupColumn", 
             LOOKUPVALUE('DimensionTable'[Column], 'DimensionTable'[Key], 'FactTable'[ForeignKey]),
-            "AggregateValue", SUM('FactTable'[MeasureColumn])
+            "AggregateValue", CALCULATE(SUM('FactTable'[MeasureColumn]))
         ),
         [AggregateValue], DESC
     )
@@ -224,6 +226,14 @@ dax_prompt = ChatPromptTemplate.from_template(
       EVALUATE SELECTCOLUMNS(TOPN(5, 'Customers', 'Customers'[Sales], DESC), ...)
     - WRONG: ORDER BY, ORDERBY function
     - RIGHT: TOPN function with DESC/ASC parameter
+    
+    CRITICAL SUMMARIZE SYNTAX RULES:
+    - SUMMARIZE function syntax: SUMMARIZE(table, column1, column2, ...)
+    - NEVER add calculated columns directly in SUMMARIZE parameters
+    - For calculated columns with SUMMARIZE, use ADDCOLUMNS wrapper:
+      ADDCOLUMNS(SUMMARIZE(table, groupColumn), "CalcCol", expression)
+    - WRONG: SUMMARIZE(table, column, "Name", expression)
+    - RIGHT: ADDCOLUMNS(SUMMARIZE(table, column), "Name", expression)
     
     CRITICAL REQUIREMENTS:
     - The query MUST be complete and syntactically correct
