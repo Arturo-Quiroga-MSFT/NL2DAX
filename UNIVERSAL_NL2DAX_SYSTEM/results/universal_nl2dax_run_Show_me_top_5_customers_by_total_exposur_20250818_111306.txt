@@ -1,0 +1,76 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, financial, currency, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+Show me top 5 customers by total exposure
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: Show me top 5 customers by total exposure
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT TOP 5 
+    c.CUSTOMER_ID AS CustomerID,
+    COALESCE(c.CUSTOMER_NAME, 'Unknown') AS CustomerName,
+    SUM(COALESCE(f.EXPOSURE_AT_DEFAULT, 0)) AS TotalExposure
+FROM FIS_CA_DETAIL_FACT f
+INNER JOIN FIS_CUSTOMER_DIMENSION c
+    ON f.CUSTOMER_KEY = c.CUSTOMER_KEY
+GROUP BY 
+    c.CUSTOMER_ID,
+    c.CUSTOMER_NAME
+ORDER BY 
+    TotalExposure DESC
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+TOPN(
+    10,
+    VALUES('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME])
+)
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 5 rows in 1.596s
+CustomerID | CustomerName                        | TotalExposure
+-----------+-------------------------------------+--------------
+CUST008    | Bayern Automotive Technologies GmbH | 95000000.00  
+CUST007    | Northwest Retail Enterprises Inc.   | 45000000.00  
+CUST003    | Southwest Energy Partners           | 4525000.00   
+CUST002    | Palm Investors Inc.                 | 4275000.00   
+CUST001    | Desert Manufacturing LLC            | 3750000.00   
+
+========== ENHANCED DAX EXECUTION ERROR ==========
+Error: Clean DAX Engine not available
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 14.80 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

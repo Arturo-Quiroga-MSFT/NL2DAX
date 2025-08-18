@@ -1,0 +1,97 @@
+
+========== DISCOVERED SCHEMA ANALYSIS ==========
+Database Schema Discovery:
+⭐ STAR SCHEMA DETECTED
+• Filtered to 10 star schema tables from original discovery
+• Total Tables: 10
+• Fact Tables: 2 (FIS_CA_DETAIL_FACT, FIS_CL_DETAIL_FACT)
+• Dimension Tables: 8 (FIS_CA_PRODUCT_DIMENSION, FIS_CURRENCY_DIMENSION, FIS_CUSTOMER_DIMENSION...)
+• Business Areas: time, product, currency, financial, risk, customer, organization, geography
+• Schema Complexity: Medium
+
+Suggested Query Patterns:
+• Fact-Dimension Analysis: Join fact tables with dimensions for detailed analysis
+• Customer Analysis: Analyze customer demographics, risk, and financial metrics
+• Geographic Analysis: Portfolio distribution by country/region
+• Currency Exposure: Multi-currency portfolio analysis
+• Risk Analysis: Portfolio risk metrics and exposure analysis
+
+========== AI-GENERATED QUERY SUGGESTIONS ==========
+Based on schema analysis, here are some suggested queries:
+1. Show me all customers by country (Complexity: simple)
+2. List customers with highest risk ratings (Complexity: medium)
+3. Compare exposure by currency and country (Complexity: medium)
+4. Show total portfolio exposure by product type (Complexity: simple)
+
+
+========== NATURAL LANGUAGE QUERY ==========
+show me all customers from the US
+
+========== UNIVERSAL QUERY GENERATION ==========
+Query Generation Results:
+• Analysis Type: custom
+• Query Complexity: Medium
+• Business Intent: show me all customers from the US
+• Schema Focus: Star Schema (FACT/DIMENSION only)
+
+
+========== GENERATED SQL QUERY ==========
+SELECT 
+    CUSTOMER_KEY                      AS CustomerKey,
+    CUSTOMER_ID                       AS CustomerID,
+    CUSTOMER_NAME                     AS CustomerName,
+    COALESCE(CUSTOMER_SHORT_NAME, '') AS CustomerShortName,
+    CUSTOMER_TYPE_CODE                AS CustomerTypeCode,
+    CUSTOMER_TYPE_DESCRIPTION         AS CustomerTypeDescription,
+    INDUSTRY_CODE                     AS IndustryCode,
+    INDUSTRY_DESCRIPTION              AS IndustryDescription,
+    COUNTRY_CODE                      AS CountryCode,
+    COUNTRY_DESCRIPTION               AS CountryDescription,
+    COALESCE(STATE_CODE, '')          AS StateCode,
+    COALESCE(STATE_DESCRIPTION, '')   AS StateDescription,
+    COALESCE(CITY, '')                AS City,
+    COALESCE(POSTAL_CODE, '')         AS PostalCode,
+    RISK_RATING_CODE                  AS RiskRatingCode,
+    RISK_RATING_DESCRIPTION           AS RiskRatingDescription,
+    CUSTOMER_STATUS                   AS CustomerStatus,
+    ESTABLISHED_DATE                  AS EstablishedDate,
+    RELATIONSHIP_MANAGER              AS RelationshipManager
+FROM FIS_CUSTOMER_DIMENSION
+WHERE COUNTRY_CODE = 'US'
+ORDER BY CUSTOMER_NAME;
+
+========== GENERATED DAX QUERY ==========
+EVALUATE
+TOPN(
+    10,
+    ADDCOLUMNS(
+        SUMMARIZE(
+            'FIS_CUSTOMER_DIMENSION',
+            'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY]
+        ),
+        "CustomerName", CALCULATE(VALUES('FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME])),
+        "TotalAmount", CALCULATE(SUM(Unknown[Amount]))
+    ),
+    [TotalAmount], DESC
+)
+
+========== SQL EXECUTION RESULTS ==========
+✅ SQL executed successfully: 7 rows in 1.565s
+CustomerKey | CustomerID | CustomerName                      | CustomerShortName | CustomerTypeCode | CustomerTypeDescription   | IndustryCode | IndustryDescription                          | CountryCode | CountryDescription | StateCode | StateDescription | City        | PostalCode | RiskRatingCode | RiskRatingDescription       | CustomerStatus | EstablishedDate | RelationshipManager
+------------+------------+-----------------------------------+-------------------+------------------+---------------------------+--------------+----------------------------------------------+-------------+--------------------+-----------+------------------+-------------+------------+----------------+-----------------------------+----------------+-----------------+--------------------
+1002        | CUST005    | Atlantic Biomedical Corporation   | Atlantic Bio      | CORP             | Corporation               | 2800         | Pharmaceutical and Medical Devices           | US          | United States      | FL        | Florida          | Miami       | 33101      | A-             | Strong Credit Quality       | Active         | 2017-06-14      | Jennifer Martinez  
+1           | CUST001    | Desert Manufacturing LLC          | Desert Mfg        | CORP             | Corporation               | 3100         | Manufacturing - Industrial Equipment         | US          | United States      | NY        | New York         | New York    | 10001      | B+             | Good Credit Quality         | Active         | 2018-03-15      | Sarah Johnson      
+1003        | CUST006    | Mountain Capital Advisors LLC     | Mountain Cap      | LLC              | Limited Liability Company | 5200         | Financial Services and Investment Management | US          | United States      | CO        | Colorado         | Denver      | 80202      | B+             | Good Credit Quality         | Active         | 2021-03-08      | Robert Thompson    
+1004        | CUST007    | Northwest Retail Enterprises Inc. | NW Retail         | CORP             | Corporation               | 4400         | Retail and Consumer Goods                    | US          | United States      | WA        | Washington       | Seattle     | 98101      | B              | Satisfactory Credit Quality | Active         | 2016-12-02      | Amanda Foster      
+4           | CUST004    | Pacific Technology Solutions      | Pac Tech          | CORP             | Corporation               | 5400         | Technology Services                          | US          | United States      | CA        | California       | Los Angeles | 90001      | A              | Excellent Credit Quality    | Active         | 2019-11-08      | David Kim          
+2           | CUST002    | Palm Investors Inc.               | Palm Invest       | CORP             | Corporation               | 6200         | Real Estate Investment                       | US          | United States      | TX        | Texas            | Dallas      | 75201      | A-             | Strong Credit Quality       | Active         | 2015-09-22      | Michael Chen       
+3           | CUST003    | Southwest Energy Partners         | SW Energy         | LLC              | Limited Liability Company | 2100         | Oil and Gas Exploration                      | US          | United States      | AZ        | Arizona          | Phoenix     | 85001      | B              | Satisfactory Credit Quality | Active         | 2020-01-10      | Lisa Rodriguez     
+
+========== ENHANCED DAX EXECUTION ERROR ==========
+Error: Power BI Execute Queries API failed with HTTP 400. Error details: {"error":{"code":"DatasetExecuteQueriesError","pbi.error":{"code":"DatasetExecuteQueriesError","parameters":{},"details":[{"code":"DetailsMessage","detail":{"type":1,"value":"Query (10, 38) Cannot find table '<oii>Unknown</oii>'."}},{"code":"AnalysisServicesErrorCode","detail":{"type":1,"value":"3241803779"}}]}}}
+
+========== PERFORMANCE METRICS ==========
+Pipeline Duration: 19.10 seconds
+Database Schema: Automatically discovered and analyzed
+Query Generation: AI-powered, database-agnostic
+Adaptability: Works with any SQL database or Power BI model

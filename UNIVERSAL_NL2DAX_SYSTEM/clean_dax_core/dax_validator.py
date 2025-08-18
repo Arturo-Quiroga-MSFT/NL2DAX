@@ -2,14 +2,12 @@
 Clean DAX Validator - Comprehensive DAX validation
 """
 import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from schema_manager import SchemaManager
+if TYPE_CHECKING:
+    from schema_manager import SchemaManager
 
 class ValidationSeverity(Enum):
     """Validation issue severity levels"""
@@ -44,7 +42,7 @@ class ValidationResult:
 class CleanDAXValidator:
     """Clean DAX validator with comprehensive checks"""
     
-    def __init__(self, schema_manager: SchemaManager):
+    def __init__(self, schema_manager: Any = None):
         self.schema_manager = schema_manager
     
     def validate(self, dax_query: str) -> ValidationResult:

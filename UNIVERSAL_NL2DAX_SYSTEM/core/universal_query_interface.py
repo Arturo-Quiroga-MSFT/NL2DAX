@@ -32,6 +32,7 @@ from enum import Enum
 from .schema_agnostic_analyzer import SchemaAgnosticAnalyzer, TableType, ColumnType
 from .generic_sql_generator import GenericSQLGenerator
 from .generic_dax_generator import GenericDAXGenerator
+from .enhanced_dax_generator import EnhancedDAXGenerator, EnhancedDAXResult
 
 class QueryType(Enum):
     """Type of query to generate"""
@@ -59,6 +60,13 @@ class QueryResult:
     business_intent: Optional[str] = None
     execution_notes: Optional[str] = None
     estimated_complexity: Optional[str] = None
+    
+    # Enhanced DAX results
+    enhanced_dax_result: Optional[EnhancedDAXResult] = None
+    dax_execution_success: bool = False
+    dax_execution_data: List[Dict[str, Any]] = None
+    dax_pattern_used: Optional[str] = None
+    dax_confidence_score: float = 0.0
 
 class UniversalQueryInterface:
     """Unified interface for database-agnostic query generation"""
@@ -68,6 +76,16 @@ class UniversalQueryInterface:
         self.schema_analyzer = SchemaAgnosticAnalyzer()
         self.sql_generator = GenericSQLGenerator()
         self.dax_generator = GenericDAXGenerator()
+        
+        # Initialize Enhanced DAX Generator
+        try:
+            self.enhanced_dax_generator = EnhancedDAXGenerator()
+            self.use_enhanced_dax = True
+            print("[INFO] Universal Query Interface initialized with Enhanced DAX Generator")
+        except Exception as e:
+            print(f"[WARNING] Enhanced DAX Generator not available: {e}")
+            self.enhanced_dax_generator = None
+            self.use_enhanced_dax = False
         
         # Cache for schema analysis
         self._schema_cache = None
@@ -141,13 +159,40 @@ class UniversalQueryInterface:
         # Generate DAX if requested
         if query_type in [QueryType.DAX, QueryType.BOTH]:
             try:
-                # Format schema for Power BI context
-                model_context = self._format_schema_for_powerbi(schema_analysis)
-                result.dax_query = self.dax_generator.generate_dax_for_analysis(
-                    model_context,
-                    business_intent,
-                    analysis_type.value
-                )
+                if self.use_enhanced_dax and self.enhanced_dax_generator:
+                    # Use Enhanced DAX Generator with Clean DAX Engine capabilities
+                    print("[INFO] Using Enhanced DAX Generator for improved results")
+                    enhanced_result = self.enhanced_dax_generator.generate_dax(
+                        business_intent=business_intent,
+                        schema_info=schema_analysis,
+                        analysis_type=analysis_type.value,
+                        limit=10,
+                        execute=True
+                    )
+                    
+                    result.dax_query = enhanced_result.dax_query
+                    result.enhanced_dax_result = enhanced_result
+                    result.dax_execution_success = enhanced_result.execution_success
+                    result.dax_execution_data = enhanced_result.data
+                    result.dax_pattern_used = enhanced_result.pattern_used
+                    result.dax_confidence_score = enhanced_result.confidence_score
+                    
+                    if not enhanced_result.success:
+                        error_msg = f"Enhanced DAX generation failed: {enhanced_result.error_message}"
+                        if result.execution_notes:
+                            result.execution_notes += f"; {error_msg}"
+                        else:
+                            result.execution_notes = error_msg
+                else:
+                    # Fallback to original DAX generator
+                    print("[INFO] Using original DAX generator (Enhanced DAX not available)")
+                    model_context = self._format_schema_for_powerbi(schema_analysis)
+                    result.dax_query = self.dax_generator.generate_dax_for_analysis(
+                        model_context,
+                        business_intent,
+                        analysis_type.value
+                    )
+                    
             except Exception as e:
                 dax_error = f"DAX generation failed: {str(e)}"
                 if result.execution_notes:

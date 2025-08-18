@@ -48,6 +48,64 @@ def colored_banner(title, color_code="94"):
     banner_text = f"\n{'='*10} {title} {'='*10}\n"
     return f"\033[{color_code}m{banner_text}\033[0m"
 
+def format_dax_results_as_table(data, max_width=80):
+    """Format DAX results as a readable ASCII table"""
+    if not data:
+        return "No data returned."
+    
+    # Get all columns from the first row
+    columns = list(data[0].keys())
+    
+    # Calculate column widths
+    col_widths = {}
+    for col in columns:
+        # Start with column name length
+        col_widths[col] = len(col)
+        
+        # Check data lengths
+        for row in data:
+            value = row.get(col, '')
+            if isinstance(value, (int, float)):
+                value_str = f"{value:,.0f}" if isinstance(value, (int, float)) and value > 1000 else str(value)
+            else:
+                value_str = str(value)
+            col_widths[col] = max(col_widths[col], len(value_str))
+        
+        # Apply maximum width limit
+        col_widths[col] = min(col_widths[col], max_width)
+    
+    # Build header
+    header_parts = []
+    separator_parts = []
+    for col in columns:
+        clean_col = col.replace('[', '').replace(']', '')  # Clean DAX column names
+        header_parts.append(clean_col.ljust(col_widths[col]))
+        separator_parts.append('-' * col_widths[col])
+    
+    result_lines = []
+    result_lines.append(' | '.join(header_parts))
+    result_lines.append('-+-'.join(separator_parts))
+    
+    # Build data rows
+    for row in data[:10]:  # Show first 10 rows
+        row_parts = []
+        for col in columns:
+            value = row.get(col, '')
+            if isinstance(value, (int, float)):
+                value_str = f"{value:,.0f}" if isinstance(value, (int, float)) and value > 1000 else str(value)
+            else:
+                value_str = str(value)
+            
+            # Truncate if too long
+            if len(value_str) > col_widths[col]:
+                value_str = value_str[:col_widths[col]-3] + '...'
+            
+            row_parts.append(value_str.ljust(col_widths[col]))
+        
+        result_lines.append(' | '.join(row_parts))
+    
+    return '\n'.join(result_lines)
+
 def plain_banner(title):
     """Plain banner for file output"""
     return f"\n{'='*10} {title} {'='*10}\n"
@@ -239,20 +297,57 @@ Suggested Query Patterns:
     # Execute DAX query
     if result.dax_query:
         print("\n📊 Executing DAX Query...")
-        dax_result = executor.execute_dax_query(result.dax_query, limit_rows=10)
-        print(f"   {executor.get_execution_summary(dax_result)}")
         
-        if dax_result.success and dax_result.data:
-            print(f"\n📋 DAX Results (showing {dax_result.row_count} rows):")
-            print(executor.format_results_as_table(dax_result))
+        # Check if we have enhanced DAX results
+        if hasattr(result, 'enhanced_dax_result') and result.enhanced_dax_result:
+            enhanced = result.enhanced_dax_result
+            print(f"   🚀 Enhanced DAX Engine Results:")
+            print(f"   • Pattern Used: {enhanced.pattern_used}")
+            print(f"   • Confidence Score: {enhanced.confidence_score:.2f}")
+            print(f"   • Execution Success: {'✅ YES' if enhanced.execution_success else '❌ NO'}")
             
-            output_lines.append(plain_banner("DAX EXECUTION RESULTS"))
-            output_lines.append(f"{executor.get_execution_summary(dax_result)}\n")
-            output_lines.append(f"{executor.format_results_as_table(dax_result)}\n")
-        elif not dax_result.success:
-            print(f"   ⚠️  DAX Note: {dax_result.error_message}")
-            output_lines.append(plain_banner("DAX EXECUTION INFO"))
-            output_lines.append(f"Note: {dax_result.error_message}\n")
+            if enhanced.execution_success and enhanced.data:
+                print(f"   • Rows Returned: {enhanced.row_count}")
+                print(f"   • Execution Time: {enhanced.execution_time:.3f}s")
+                
+                print(f"\n📋 Enhanced DAX Results (showing {len(enhanced.data)} rows):")
+                # Format the enhanced results as a proper table
+                if enhanced.data:
+                    dax_table = format_dax_results_as_table(enhanced.data)
+                    print(dax_table)
+                
+                output_lines.append(plain_banner("ENHANCED DAX EXECUTION RESULTS"))
+                output_lines.append(f"✅ Enhanced DAX executed successfully: {enhanced.row_count} rows in {enhanced.execution_time:.3f}s\n")
+                output_lines.append(f"Pattern Used: {enhanced.pattern_used} (Confidence: {enhanced.confidence_score:.2f})\n")
+                
+                dax_table = format_dax_results_as_table(enhanced.data)
+                output_lines.append(f"{dax_table}\n")
+                
+            elif not enhanced.execution_success:
+                print(f"   ❌ Enhanced DAX Error: {enhanced.error_message}")
+                output_lines.append(plain_banner("ENHANCED DAX EXECUTION ERROR"))
+                output_lines.append(f"Error: {enhanced.error_message}\n")
+                
+            if enhanced.validation_issues:
+                print(f"   ⚠️  Validation Issues ({len(enhanced.validation_issues)}):")
+                for issue in enhanced.validation_issues[:3]:  # Show first 3
+                    print(f"      • {issue}")
+        else:
+            # Fallback to original DAX execution
+            dax_result = executor.execute_dax_query(result.dax_query, limit_rows=10)
+            print(f"   {executor.get_execution_summary(dax_result)}")
+            
+            if dax_result.success and dax_result.data:
+                print(f"\n📋 DAX Results (showing {dax_result.row_count} rows):")
+                print(executor.format_results_as_table(dax_result))
+                
+                output_lines.append(plain_banner("DAX EXECUTION RESULTS"))
+                output_lines.append(f"{executor.get_execution_summary(dax_result)}\n")
+                output_lines.append(f"{executor.format_results_as_table(dax_result)}\n")
+            elif not dax_result.success:
+                print(f"   ⚠️  DAX Note: {dax_result.error_message}")
+                output_lines.append(plain_banner("DAX EXECUTION INFO"))
+                output_lines.append(f"Note: {dax_result.error_message}\n")
     
     # Show performance metrics
     end_time = time.time()
