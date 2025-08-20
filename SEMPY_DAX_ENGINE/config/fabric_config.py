@@ -11,6 +11,10 @@ from azure.identity import ClientSecretCredential, DefaultAzureCredential
 
 logger = logging.getLogger(__name__)
 
+# Compute repo root based on this file's location for .env default
+_THIS_DIR = os.path.dirname(__file__)
+_REPO_ROOT = os.path.abspath(os.path.join(_THIS_DIR, "..", ".."))
+
 @dataclass
 class FabricConfig:
     """Configuration for Fabric workspace and authentication"""
@@ -35,6 +39,8 @@ class FabricConfig:
             cls._load_env_file(env_file_path)
         elif os.path.exists('../.env'):
             cls._load_env_file('../.env')
+        elif os.path.exists(os.path.join(_REPO_ROOT, '.env')):
+            cls._load_env_file(os.path.join(_REPO_ROOT, '.env'))
         
         # Get required values from environment
         tenant_id = os.getenv('PBI_TENANT_ID') or os.getenv('TENANT_ID')

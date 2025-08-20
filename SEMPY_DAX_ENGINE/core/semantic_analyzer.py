@@ -23,6 +23,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 import pandas as pd
 import re
+import os
+
+try:
+    import yaml  # type: ignore
+    YAML_AVAILABLE = True
+except Exception:
+    YAML_AVAILABLE = False
 
 try:
     import sempy.fabric as fabric
@@ -31,6 +38,15 @@ try:
 except ImportError as e:
     logging.warning(f"SemPy not available: {e}")
     SEMPY_AVAILABLE = False
+
+# REST fallback imports
+try:
+    from ..config.fabric_config import FabricConfig
+    from .fabric_auth_provider import FabricApiClient, create_fabric_token_provider
+    FABRIC_REST_AVAILABLE = True
+except Exception as e:
+    logging.warning(f"Fabric REST fallback not fully available: {e}")
+    FABRIC_REST_AVAILABLE = False
 
 class DataTypeCategory(Enum):
     """Categories of data types for DAX generation"""
@@ -119,12 +135,9 @@ class SemanticAnalyzer:
     def __init__(self):
         """Initialize the semantic analyzer"""
         self.logger = logging.getLogger(__name__)
-        
+        # Allow initialization even if SemPy is unavailable; we'll use REST fallback.
         if not SEMPY_AVAILABLE:
-            raise ImportError(
-                "SemPy (semantic-link) is not available. "
-                "Install with: pip install semantic-link"
-            )
+            self.logger.warning("SemPy not available; will attempt REST DMV fallback for metadata.")
     
     def analyze_semantic_model(self, model_name: str, workspace_name: str) -> SemanticModelSchema:
         """
@@ -145,14 +158,28 @@ class SemanticAnalyzer:
                 workspace_name=workspace_name
             )
             
-            # Discover tables and columns
+            # Discover via SemPy first
             schema.tables = self._discover_tables(model_name, workspace_name)
-            
-            # Discover relationships
             schema.relationships = self._discover_relationships(model_name, workspace_name)
-            
-            # Discover measures
             schema.measures = self._discover_measures(model_name, workspace_name)
+
+            # If SemPy discovery failed (empty), try REST DMV fallback
+            if (not schema.tables or not schema.measures) and FABRIC_REST_AVAILABLE:
+                self.logger.info("SemPy metadata discovery incomplete; attempting REST DMV fallback...")
+                rest_meta = self._discover_metadata_via_rest(model_name, workspace_name)
+                if rest_meta:
+                    schema.tables = rest_meta.get('tables', schema.tables)
+                    schema.relationships = rest_meta.get('relationships', schema.relationships)
+                    schema.measures = rest_meta.get('measures', schema.measures)
+
+            # If still empty, try offline schema overrides (YAML/JSON) to allow progress without live metadata
+            if not schema.tables or not schema.measures:
+                overrides = self._load_schema_overrides()
+                if overrides:
+                    self.logger.info("Loaded schema overrides from configuration file.")
+                    schema.tables = overrides.get('tables', schema.tables)
+                    schema.relationships = overrides.get('relationships', schema.relationships)
+                    schema.measures = overrides.get('measures', schema.measures)
             
             # Perform business analysis
             schema.analysis_metadata = self._analyze_business_context(schema)
@@ -169,6 +196,113 @@ class SemanticAnalyzer:
         except Exception as e:
             self.logger.error(f"Failed to analyze semantic model: {e}")
             raise
+
+    def _load_schema_overrides(self) -> Optional[Dict[str, List[Any]]]:
+        """
+        Load schema overrides from configuration files to enable offline operation when
+        SemPy and REST DMV discovery are unavailable (e.g., missing XMLA permissions).
+
+        Looks for files in prioritized order:
+        - SEMPY_DAX_ENGINE/config/schema_overrides.yaml
+        - SEMPY_DAX_ENGINE/config/schema_overrides.json
+        - config/schema_overrides.yaml (repo root)
+        - config/schema_overrides.json (repo root)
+
+        Expected structure:
+        tables: [{ name, type, columns: [{ name, data_type }] }]
+        measures: [{ table_name, name, expression, data_type }]
+        relationships: [{ from_table, from_column, to_table, to_column, relationship_type, is_active, cross_filter_direction }]
+        """
+        try:
+            candidates = [
+                os.path.join(os.path.dirname(__file__), '..', 'config', 'schema_overrides.yaml'),
+                os.path.join(os.path.dirname(__file__), '..', 'config', 'schema_overrides.json'),
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'schema_overrides.yaml'),
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', 'schema_overrides.json'),
+            ]
+            candidates = [os.path.abspath(p) for p in candidates]
+
+            path = next((p for p in candidates if os.path.exists(p)), None)
+            if not path:
+                self.logger.info("No schema overrides file found.")
+                return None
+
+            self.logger.info(f"Loading schema overrides from: {path}")
+            data: Dict[str, Any] = {}
+            if path.endswith('.yaml') or path.endswith('.yml'):
+                if not YAML_AVAILABLE:
+                    self.logger.warning("PyYAML not installed; cannot read YAML overrides.")
+                    return None
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f) or {}
+            else:
+                import json
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = json.load(f) or {}
+
+            # Convert dicts into dataclass instances
+            tables: List[TableInfo] = []
+            for t in data.get('tables', []) or []:
+                cols = []
+                for c in t.get('columns', []) or []:
+                    dtype = str(c.get('data_type', ''))
+                    cols.append(ColumnInfo(
+                        name=str(c.get('name', '')),
+                        table_name=str(t.get('name', '')),
+                        data_type=dtype,
+                        data_category=self._categorize_data_type(dtype)
+                    ))
+                tables.append(TableInfo(
+                    name=str(t.get('name', '')),
+                    type=str(t.get('type', 'Table')),
+                    description=t.get('description'),
+                    row_count=t.get('row_count'),
+                    columns=cols
+                ))
+
+            measures: List[MeasureInfo] = []
+            for m in data.get('measures', []) or []:
+                measures.append(MeasureInfo(
+                    name=str(m.get('name', '')),
+                    table_name=str(m.get('table_name', '')),
+                    expression=str(m.get('expression', '')),
+                    data_type=str(m.get('data_type', '')),
+                    format_string=m.get('format_string'),
+                    description=m.get('description'),
+                    folder=m.get('folder'),
+                    is_hidden=bool(m.get('is_hidden', False))
+                ))
+
+            relationships: List[RelationshipInfo] = []
+            for r in data.get('relationships', []) or []:
+                rel_type = r.get('relationship_type', '1:*')
+                # Normalize relationship type
+                try:
+                    if rel_type in (RelationshipType.ONE_TO_MANY.value, RelationshipType.MANY_TO_ONE.value,
+                                    RelationshipType.ONE_TO_ONE.value, RelationshipType.MANY_TO_MANY.value):
+                        rt_enum = RelationshipType(rel_type)
+                    else:
+                        rt_enum = RelationshipType.ONE_TO_MANY
+                except Exception:
+                    rt_enum = RelationshipType.ONE_TO_MANY
+                relationships.append(RelationshipInfo(
+                    from_table=str(r.get('from_table', '')),
+                    from_column=str(r.get('from_column', '')),
+                    to_table=str(r.get('to_table', '')),
+                    to_column=str(r.get('to_column', '')),
+                    relationship_type=rt_enum,
+                    is_active=bool(r.get('is_active', True)),
+                    cross_filter_direction=str(r.get('cross_filter_direction', 'Single'))
+                ))
+
+            return {
+                'tables': tables,
+                'measures': measures,
+                'relationships': relationships,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to load schema overrides: {e}")
+            return None
     
     def _discover_tables(self, model_name: str, workspace_name: str) -> List[TableInfo]:
         """Discover tables and their columns"""
@@ -233,6 +367,169 @@ class SemanticAnalyzer:
             
         except Exception as e:
             self.logger.error(f"Failed to discover columns for table {table_name}: {e}")
+            return []
+
+    # ------------------------------
+    # REST DMV FALLBACK IMPLEMENTATION
+    # ------------------------------
+    def _discover_metadata_via_rest(self, model_name: str, workspace_name: str) -> Optional[Dict[str, Any]]:
+        """Discover tables, columns, measures, and relationships using Power BI Execute Queries (DMVs).
+        Returns dict with keys: tables, columns, measures, relationships (lists of dataclass instances).
+        """
+        try:
+            client, group_id, dataset_id = self._get_rest_client_and_ids(model_name, workspace_name)
+            if not client or not group_id or not dataset_id:
+                self.logger.warning("REST fallback: could not resolve client/group/dataset IDs.")
+                return None
+
+            # Query DMVs
+            tables_rows = self._dmv_query(client, dataset_id, group_id, "TMSCHEMA_TABLES")
+            columns_rows = self._dmv_query(client, dataset_id, group_id, "TMSCHEMA_COLUMNS")
+            measures_rows = self._dmv_query(client, dataset_id, group_id, "TMSCHEMA_MEASURES")
+            rel_rows = self._dmv_query(client, dataset_id, group_id, "TMSCHEMA_RELATIONSHIPS")
+
+            # Build lookup maps
+            table_by_id: Dict[int, Dict[str, Any]] = {}
+            for r in tables_rows:
+                # Expect keys like 'ID', 'Name', 'IsHidden', 'Type'
+                tid = r.get('ID') or r.get('Id') or r.get('TableID')
+                if tid is not None:
+                    table_by_id[int(tid)] = r
+
+            col_by_id: Dict[int, Dict[str, Any]] = {}
+            cols_by_table_id: Dict[int, List[Dict[str, Any]]] = {}
+            for r in columns_rows:
+                cid = r.get('ID') or r.get('Id') or r.get('ColumnID')
+                tid = r.get('TableID')
+                if cid is not None:
+                    col_by_id[int(cid)] = r
+                if tid is not None:
+                    cols_by_table_id.setdefault(int(tid), []).append(r)
+
+            # Tables
+            tables: List[TableInfo] = []
+            for tid, trow in table_by_id.items():
+                tname = trow.get('Name') or trow.get('Table') or f"Table_{tid}"
+                ttype = trow.get('Type', 'Table')
+                table = TableInfo(name=tname, type=str(ttype), columns=[])
+                # Attach columns if present
+                for crow in cols_by_table_id.get(tid, []):
+                    cname = crow.get('Name') or crow.get('Column') or f"Column_{crow.get('ID', '')}"
+                    dtype = crow.get('DataType') or crow.get('Type') or ''
+                    table.columns.append(ColumnInfo(
+                        name=str(cname),
+                        table_name=tname,
+                        data_type=str(dtype),
+                        data_category=self._categorize_data_type(str(dtype))
+                    ))
+                tables.append(table)
+
+            # Measures
+            measures: List[MeasureInfo] = []
+            for mrow in measures_rows:
+                mname = mrow.get('Name') or 'Measure'
+                mtable_id = mrow.get('TableID')
+                mexpr = mrow.get('Expression') or mrow.get('Definition') or ''
+                mdatatype = mrow.get('DataType') or ''
+                mtable_name = table_by_id.get(int(mtable_id), {}).get('Name') if mtable_id is not None else ''
+                measures.append(MeasureInfo(
+                    name=str(mname),
+                    table_name=str(mtable_name or ''),
+                    expression=str(mexpr),
+                    data_type=str(mdatatype)
+                ))
+
+            # Relationships (best-effort)
+            relationships: List[RelationshipInfo] = []
+            for r in rel_rows:
+                ftid = r.get('FromTableID')
+                fcid = r.get('FromColumnID')
+                ttid = r.get('ToTableID')
+                tcid = r.get('ToColumnID')
+                from_table = table_by_id.get(int(ftid), {}).get('Name') if ftid is not None else ''
+                to_table = table_by_id.get(int(ttid), {}).get('Name') if ttid is not None else ''
+                from_column = col_by_id.get(int(fcid), {}).get('Name') if fcid is not None else ''
+                to_column = col_by_id.get(int(tcid), {}).get('Name') if tcid is not None else ''
+                relationships.append(RelationshipInfo(
+                    from_table=str(from_table),
+                    from_column=str(from_column),
+                    to_table=str(to_table),
+                    to_column=str(to_column),
+                    relationship_type=self._parse_relationship_type(r.get('FromCardinality', ''), r.get('ToCardinality', '')),
+                    is_active=bool(r.get('IsActive', True)),
+                    cross_filter_direction=str(r.get('CrossFilterDirection', 'Single'))
+                ))
+
+            return {
+                'tables': tables,
+                'relationships': relationships,
+                'measures': measures,
+            }
+
+        except Exception as e:
+            self.logger.error(f"REST DMV fallback failed: {e}")
+            return None
+
+    def _get_rest_client_and_ids(self, model_name: str, workspace_name: str):
+        """Resolve REST client, group (workspace) ID, and dataset ID by names."""
+        try:
+            cfg = FabricConfig.from_env()
+            token_provider = create_fabric_token_provider(cfg)
+            client = FabricApiClient(token_provider)
+            # Find group id by workspace name
+            groups = client.list_groups()
+            group_id = None
+            for g in groups:
+                if str(g.get('name', '')).lower() == workspace_name.lower():
+                    group_id = g.get('id')
+                    break
+            if not group_id:
+                # Try configured workspace id
+                group_id = cfg.workspace_id
+
+            # Find dataset id by name within group
+            ds = client.list_datasets(group_id)
+            dataset_id = None
+            for d in ds:
+                if str(d.get('name', '')).lower() == model_name.lower():
+                    dataset_id = d.get('id')
+                    break
+            if not dataset_id:
+                # Fallback to configured dataset id
+                dataset_id = cfg.dataset_id
+
+            return client, group_id, dataset_id
+        except Exception as e:
+            self.logger.error(f"Failed to resolve REST client/IDs: {e}")
+            return None, None, None
+
+    def _dmv_query(self, client: 'FabricApiClient', dataset_id: str, group_id: str, dmv_name: str) -> List[Dict[str, Any]]:
+        """Execute a DMV query via executeQueries and return list of row dicts."""
+        dax = f"EVALUATE {dmv_name}"
+        resp = client.execute_dax(dataset_id, dax, group_id)
+        if not resp or 'error' in resp:
+            self.logger.warning(f"DMV query failed for {dmv_name}: {resp.get('error') if isinstance(resp, dict) else resp}")
+            return []
+        try:
+            results = resp.get('results', [])
+            if not results:
+                return []
+            tables = results[0].get('tables', [])
+            if not tables:
+                return []
+            rows = tables[0].get('rows', [])
+            # Expect list of dicts
+            if rows and isinstance(rows[0], dict):
+                return rows
+            # If rows are arrays, map using columns metadata
+            cols_meta = tables[0].get('columns', [])
+            col_names = [c.get('name') for c in cols_meta]
+            mapped = []
+            for arr in rows:
+                mapped.append({col_names[i]: arr[i] for i in range(min(len(arr), len(col_names)))})
+            return mapped
+        except Exception as e:
+            self.logger.error(f"Failed to parse DMV response for {dmv_name}: {e}")
             return []
     
     def _discover_relationships(self, model_name: str, workspace_name: str) -> List[RelationshipInfo]:

@@ -1,0 +1,37 @@
+# Example schema overrides for offline operation
+# Copy this file to schema_overrides.yaml and adjust to your model.
+
+# Minimal example matching a Sales model with a Date dimension
+
+tables:
+  - name: 'Date'
+    type: 'Table'
+    columns:
+      - name: 'Date'
+        data_type: 'date'
+      - name: 'Year'
+        data_type: 'int'
+      - name: 'Month'
+        data_type: 'string'
+  - name: 'Sales'
+    type: 'Table'
+    columns:
+      - name: 'Amount'
+        data_type: 'decimal'
+      - name: 'DateKey'
+        data_type: 'date'
+
+measures:
+  - table_name: 'Sales'
+    name: 'Total Sales'
+    expression: 'SUM(Sales[Amount])'
+    data_type: 'decimal'
+
+relationships:
+  - from_table: 'Date'
+    from_column: 'Date'
+    to_table: 'Sales'
+    to_column: 'DateKey'
+    relationship_type: '1:*'
+    is_active: true
+    cross_filter_direction: 'Single'
