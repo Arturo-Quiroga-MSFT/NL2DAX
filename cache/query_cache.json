@@ -4,5 +4,11 @@
     "response": "EVALUATE\nTOPN(\n    5,\n    FILTER(\n        ADDCOLUMNS(\n            SUMMARIZE(\n                'FIS_CL_DETAIL_FACT',\n                'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY]\n            ),\n            \"CustomerName\", LOOKUPVALUE(\n                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_NAME],\n                'FIS_CUSTOMER_DIMENSION'[CUSTOMER_KEY],\n                'FIS_CL_DETAIL_FACT'[CUSTOMER_KEY]\n            ),\n            \"OutstandingLoans\", CALCULATE(\n                SUM('FIS_CL_DETAIL_FACT'[PRINCIPAL_BALANCE])\n            )\n        ),\n        [OutstandingLoans] >= 1000000\n    ),\n    [OutstandingLoans], DESC\n)",
     "timestamp": 1755363274.637662,
     "cache_type": "dax"
+  },
+  "d094565a70f07c78694c0b7925bfe8db": {
+    "query": "Intent: query_database  \nEntities:  \n- entity: database  \n  value: \"DB\"",
+    "response": "Could you please clarify what specific information or measure you’d like to retrieve from the semantic model? For example:\n- Which fact table and measure (e.g. SUM of PRINCIPAL_BALANCE, COUNT of CA_DETAIL_KEY)\n- Any dimension attributes to filter or group by (e.g. CUSTOMER_TYPE_DESCRIPTION, MONTH_NAME)\n- Any filtering conditions (e.g. month = \"January\", CUSTOMER_NAME = \"XYZ\")",
+    "timestamp": 1756388580.298953,
+    "cache_type": "dax"
   }
 }
